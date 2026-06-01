@@ -1,0 +1,132 @@
+import { useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import {
+  LuSearch,
+  LuBell,
+  LuChevronDown,
+  LuLock,
+  LuMenu,
+  LuPanelLeftClose,
+  LuPanelLeft,
+} from 'react-icons/lu'
+
+interface HeaderProps {
+  sidebarOpen: boolean
+  onMenuToggle: () => void
+}
+
+export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
+  const [search, setSearch] = useState<string>('')
+  const navigate = useNavigate()
+  const location = useLocation()
+  const timeStr = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+
+  function handleLock() {
+    navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`)
+  }
+
+  return (
+    <header
+      className="sticky top-0 z-40 h-14 flex items-center justify-between px-4 gap-3"
+      style={{
+        background: 'var(--bg-main)',
+        borderBottom: '1px solid var(--border-default)',
+      }}
+    >
+      {/* Sidebar toggle */}
+      <button
+        onClick={onMenuToggle}
+        className="p-2 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+        style={{ color: 'var(--text-muted)' }}
+      >
+        <LuMenu size={18} className="desktop:hidden" />
+        {sidebarOpen
+          ? <LuPanelLeftClose size={18} className="hidden desktop:block" />
+          : <LuPanelLeft size={18} className="hidden desktop:block" />
+        }
+      </button>
+
+      {/* Search — desktop only */}
+      <div className="relative flex-1 max-w-md hidden desktop:block">
+        <LuSearch
+          size={14}
+          className="absolute left-3 top-1/2 -translate-y-1/2"
+          style={{ color: 'var(--text-muted)' }}
+        />
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search attractions, staff, reports..."
+          className="w-full rounded-lg pl-9 pr-4 py-2 text-sm outline-none transition-all focus:border-blue-500/50"
+          style={{
+            background: 'var(--bg-input)',
+            border: '1px solid var(--border-default)',
+            color: 'var(--text-3)',
+          }}
+        />
+        <kbd
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-xs px-1.5 py-0.5 rounded border"
+          style={{
+            color: 'var(--text-dim)',
+            background: 'var(--bg-second)',
+            borderColor: 'var(--border-default)',
+          }}
+        >
+          ⌘K
+        </kbd>
+      </div>
+
+      <div className="flex items-center gap-2 ml-auto">
+        {/* Live indicator — tablet+ */}
+        <div className="hidden tablet:flex items-center gap-2 text-xs" style={{ color: 'var(--text-4)' }}>
+          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          <span>Live</span>
+          <span className="font-mono" style={{ color: 'var(--text-3)' }}>
+            {timeStr}
+          </span>
+        </div>
+
+        <button
+          className="relative p-2 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+          style={{ color: 'var(--text-4)' }}
+        >
+          <LuBell size={16} />
+          <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full text-[9px] flex items-center justify-center text-white font-bold">
+            2
+          </span>
+        </button>
+
+        <button
+          onClick={handleLock}
+          title="Lock / Sign out"
+          className="p-2 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5 hover:text-red-400"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          <LuLock size={15} />
+        </button>
+
+        <button
+          className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5 border"
+          style={{ borderColor: 'var(--border-default)' }}
+        >
+          <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
+            O
+          </div>
+          <div className="text-left hidden tablet:block">
+            <p className="text-xs font-medium leading-none" style={{ color: 'var(--text-2)' }}>
+              Owner
+            </p>
+            <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              admin@park.io
+            </p>
+          </div>
+          <LuChevronDown
+            size={12}
+            className="ml-1 hidden tablet:block"
+            style={{ color: 'var(--text-muted)' }}
+          />
+        </button>
+      </div>
+    </header>
+  )
+}

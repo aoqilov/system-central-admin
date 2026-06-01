@@ -1,0 +1,102 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS Variables ─────────────────────────────────────────── */
+
+:root {
+  /* background */
+  --bg-main: #f8fafc;
+  --bg-second: #ffffff;
+  --bg-hover: #f1f5f9;
+  --bg-input: #ffffff;
+  --bg-tooltip: #ffffff;
+
+  /* text */
+  --text-default: #0f172a; /* primary — headings, values */
+  --text-2: #1e293b; /* body text                  */
+  --text-3: #334155; /* secondary text             */
+  --text-4: #475569; /* labels                     */
+  --text-muted: #64748b; /* hints, placeholders        */
+  --text-dim: #94a3b8; /* barely visible             */
+
+  /* border */
+  --border-default: #e2e8f0;
+  --border-2: #cbd5e1;
+  --border-input: #79b5ff85;
+
+  /* chart */
+  --chart-grid: #e2e8f0;
+  --chart-tick: #94a3b8;
+
+  /* scrollbar */
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #e2e8f0;
+  --scrollbar-thumb-hover: #cbd5e1;
+}
+
+/* Dark mode */
+.dark {
+  /* background */
+  --bg-main: #0d0f14;
+  --bg-second: #141720;
+  --bg-hover: #181c27;
+  --bg-input: #0d0f14;
+  --bg-tooltip: #1e2130;
+
+  /* text */
+  --text-default: #f1f5f9; /* primary — headings, values */
+  --text-2: #e2e8f0; /* body text                  */
+  --text-3: #cbd5e1; /* secondary text             */
+  --text-4: #94a3b8; /* labels                     */
+  --text-muted: #64748b; /* hints, placeholders        */
+  --text-dim: #475569; /* barely visible             */
+
+  /* border */
+  --border-default: #1e2130;
+  --border-2: #2a2f45;
+  --border-input: #1e3a5f;
+
+  /* chart */
+  --chart-grid: #1e2130;
+  --chart-tick: #64748b;
+
+  /* scrollbar */
+  --scrollbar-track: #141720;
+  --scrollbar-thumb: #1e2130;
+  --scrollbar-thumb-hover: #2a2f45;
+}
+
+/* ─── Base ──────────────────────────────────────────────────── */
+@layer base {
+  * {
+    box-sizing: border-box;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.15s ease;
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-default);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+}

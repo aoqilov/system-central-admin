@@ -1,0 +1,172 @@
+import { NavLink } from 'react-router-dom'
+import type { IconType } from 'react-icons'
+import {
+  LuLayoutDashboard,
+  LuActivity,
+  LuUsers,
+  LuFerrisWheel,
+  LuChartBar,
+  LuSettings,
+  LuLifeBuoy,
+  LuX,
+  LuCircleCheck,
+  LuClock,
+} from 'react-icons/lu'
+
+interface NavItemDef {
+  label: string
+  icon: IconType
+  to: string
+}
+
+const navItems: NavItemDef[] = [
+  { label: 'Dashboard', icon: LuLayoutDashboard, to: '/' },
+  { label: 'Live Monitor', icon: LuActivity, to: '/live-monitor' },
+  { label: 'Employees', icon: LuUsers, to: '/employees' },
+  { label: 'Attractions', icon: LuFerrisWheel, to: '/attractions' },
+  { label: 'Reports', icon: LuChartBar, to: '/reports' },
+]
+
+const systemItems: NavItemDef[] = [
+  { label: 'Settings', icon: LuSettings, to: '/settings' },
+  { label: 'Support', icon: LuLifeBuoy, to: '/support' },
+]
+
+function NavItem({ item, onNavClick }: { item: NavItemDef; onNavClick: () => void }) {
+  return (
+    <NavLink
+      to={item.to}
+      end={item.to === '/'}
+      onClick={onNavClick}
+      className={({ isActive }) =>
+        `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group
+        ${
+          isActive
+            ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
+            : 'border border-transparent hover:bg-black/5 dark:hover:bg-white/5'
+        }`
+      }
+      style={({ isActive }) => ({ color: isActive ? undefined : 'var(--text-4)' })}
+    >
+      {({ isActive }) => (
+        <>
+          <item.icon
+            size={16}
+            style={{ color: isActive ? undefined : 'var(--text-muted)' }}
+            className={isActive ? 'text-blue-400' : 'group-hover:text-slate-300'}
+          />
+          {item.label}
+        </>
+      )}
+    </NavLink>
+  )
+}
+
+function SidebarContent({ onClose, onNavClick }: { onClose: () => void; onNavClick: () => void }) {
+  return (
+    <div
+      className="w-56 h-full flex flex-col"
+      style={{ background: 'var(--bg-main)', borderRight: '1px solid var(--border-default)' }}
+    >
+      {/* Logo + close */}
+      <div
+        className="flex items-center gap-2.5 px-4 py-5 border-b shrink-0"
+        style={{ borderColor: 'var(--border-default)' }}
+      >
+        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+          <span className="text-white font-bold text-sm">P</span>
+        </div>
+        <div className="flex-1">
+          <p className="font-semibold text-sm leading-none" style={{ color: 'var(--text-default)' }}>
+            ParkOps
+          </p>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+            Control Center
+          </p>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-1 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          <LuX size={16} />
+        </button>
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <p
+          className="text-xs font-medium uppercase tracking-wider px-3 mb-2"
+          style={{ color: 'var(--text-dim)' }}
+        >
+          Main
+        </p>
+        {navItems.map(item => (
+          <NavItem key={item.to} item={item} onNavClick={onNavClick} />
+        ))}
+
+        <p
+          className="text-xs font-medium uppercase tracking-wider px-3 mt-5 mb-2 pt-4"
+          style={{ borderTop: '1px solid var(--border-default)', color: 'var(--text-dim)' }}
+        >
+          System
+        </p>
+        {systemItems.map(item => (
+          <NavItem key={item.to} item={item} onNavClick={onNavClick} />
+        ))}
+      </nav>
+
+      {/* Status bar — sidebar ichida */}
+      <div
+        className="px-4 py-3 flex flex-col gap-1 shrink-0"
+        style={{ borderTop: '1px solid var(--border-default)' }}
+      >
+        <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-4)' }}>
+          <LuCircleCheck size={12} className="text-green-400 shrink-0" />
+          <span>All systems normal</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
+          <LuClock size={12} className="shrink-0" />
+          <div>
+            <p className="font-medium leading-none" style={{ color: 'var(--text-3)' }}>
+              Park is open
+            </p>
+            <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              09:00 — 22:00 today
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface SidebarProps {
+  open: boolean
+  onClose: () => void
+  onNavClick: () => void
+}
+
+export default function Sidebar({ open, onClose, onNavClick }: SidebarProps) {
+  return (
+    <>
+      {/* Desktop: sticky flex child — joy egallaydi */}
+      <aside
+        className={`hidden desktop:block shrink-0 overflow-hidden sticky top-0 h-screen
+          transition-[width] duration-300 ease-in-out
+          ${open ? 'w-56' : 'w-0'}`}
+      >
+        <SidebarContent onClose={onClose} onNavClick={onNavClick} />
+      </aside>
+
+      {/* Mobile / tablet: fixed overlay drawer */}
+      <div
+        className={`fixed inset-y-0 left-0 z-50 desktop:hidden
+          transition-transform duration-300 ease-in-out
+          ${open ? 'translate-x-0' : '-translate-x-full'}`}
+      >
+        <SidebarContent onClose={onClose} onNavClick={onNavClick} />
+      </div>
+    </>
+  )
+}

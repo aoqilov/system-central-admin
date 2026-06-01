@@ -1,0 +1,30 @@
+import { lazy } from 'react'
+import type { RouteObject } from 'react-router-dom'
+import AppLayout from '../components/layout/AppLayout'
+
+const Dashboard = lazy(() => import('../pages/Dashboard'))
+const LiveMonitor = lazy(() => import('../pages/LiveMonitor'))
+const Employees = lazy(() => import('../pages/Employees'))
+const Attractions = lazy(() => import('../pages/Attractions'))
+const Reports = lazy(() => import('../pages/Reports'))
+const Settings = lazy(() => import('../pages/Settings'))
+const Support = lazy(() => import('../pages/Support'))
+const Login = lazy(() => import('../pages/Login'))
+const NotFound = lazy(() => import('../pages/NotFound'))
+
+export const routes: RouteObject[] = [
+  {
+    element: <AppLayout />,
+    children: [
+      { path: '/', element: <Dashboard /> },
+      { path: '/live-monitor', element: <LiveMonitor /> },
+      { path: '/employees', element: <Employees /> },
+      { path: '/attractions', element: <Attractions /> },
+      { path: '/reports', element: <Reports /> },
+      { path: '/settings', element: <Settings /> },
+      { path: '/support', element: <Support /> },
+    ],
+  },
+  { path: '/login', element: <Login /> },
+  { path: '*', element: <NotFound /> },
+]
