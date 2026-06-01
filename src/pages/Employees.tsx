@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   LuUsers,
   LuUserCheck,
@@ -8,7 +9,6 @@ import {
   LuPhone,
   LuSend,
   LuTrash2,
-  LuDownload,
   LuX,
   LuPencil,
   LuPlus,
@@ -26,6 +26,7 @@ import { CusInput } from "../components/ui/inputs/CusInput";
 import CusSelect from "../components/ui/select/CusSelect";
 import dayjs from "dayjs";
 import { CusPagination } from "../components/ui/table/CusPagination";
+import { useTranslation } from "../i18n/languageConfig";
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
 
@@ -81,146 +82,148 @@ const STATUS_TO_BADGE: Record<
   [EmployeeStatus.VACATION]: "vacation",
 };
 
-const columns: ColumnDef<Employee>[] = [
-  {
-    key: "fullName",
-    header: "Xodim",
-    sortable: false,
-    render: (row) => (
-      <div className="flex items-center gap-3">
-        <img
-          src={row.avatarUrl ?? `https://i.pravatar.cc/150?u=${row.id}`}
-          alt={row.fullName}
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            objectFit: "cover",
-            flexShrink: 0,
-          }}
-        />
-        <div>
-          <p
-            style={{
-              fontWeight: 500,
-              color: "var(--text-default)",
-              fontSize: 13,
-            }}
-          >
-            {row.fullName}
-          </p>
-          <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
-            {row.age} yosh
-          </p>
-        </div>
-      </div>
-    ),
-  },
-  {
-    key: "role",
-    header: "Lavozim",
-    sortable: false,
-    render: (row) => <CusBadge role={row.role} />,
-  },
-  {
-    key: "status",
-    header: "Status",
-    sortable: false,
-    render: (row) => <CusBadge status={STATUS_TO_BADGE[row.status]} />,
-  },
-  {
-    key: "phone",
-    header: "Aloqa",
-    render: (row) => (
-      <div className="flex flex-col gap-0.5">
-        {row.phone && (
-          <span
-            className="flex items-center gap-1.5"
-            style={{ fontSize: 12, color: "var(--text-2)" }}
-          >
-            <LuPhone size={11} style={{ color: "var(--text-muted)" }} />
-            {row.phone}
-          </span>
-        )}
-        {row.telegram_username && (
-          <span
-            className="flex items-center gap-1.5"
-            style={{ fontSize: 12, color: "var(--text-2)" }}
-          >
-            <LuSend size={11} style={{ color: "var(--border-input)" }} />
-            {row.telegram_username}
-          </span>
-        )}
-      </div>
-    ),
-  },
-  {
-    key: "salary",
-    header: "Maosh",
-    align: "right",
-    sortable: true,
-    render: (row) =>
-      row.salary ? (
-        <span
-          style={{
-            fontWeight: 500,
-            color: "var(--text-default)",
-            fontSize: 13,
-          }}
-        >
-          {row.salary.toLocaleString()}{" "}
-          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>UZS</span>
-        </span>
-      ) : (
-        <span style={{ color: "var(--text-muted)" }}>—</span>
-      ),
-  },
-  {
-    key: "createdAt",
-    header: "Qo'shilgan",
-    sortable: true,
-    render: (row) => {
-      const days = dayjs().diff(dayjs(row.createdAt), "day");
-      return (
-        <div>
-          <p style={{ fontSize: 12, color: "var(--text-muted)" }}>
-            {dayjs(row.createdAt).format("DD.MM.YYYY")}
-          </p>
-          <p style={{ fontSize: 11, color: "var(--text-3)" }}>{days} kun</p>
-        </div>
-      );
-    },
-  },
-];
-
-// ─── Role & Status select options ─────────────────────────────────────────────
-
-const ROLE_OPTIONS = [
-  { label: "Barcha lavozimlar", value: "" },
-  { label: "Super Admin", value: EmployeeRole.ADMIN },
-  { label: "Kassir", value: EmployeeRole.CASHIER },
-  { label: "Operator", value: EmployeeRole.OPERATOR },
-  { label: "Security", value: EmployeeRole.SECURITY },
-  { label: "Cleaner", value: EmployeeRole.CLEANER },
-];
-
-const STATUS_OPTIONS = [
-  { label: "Barcha statuslar", value: "" },
-  { label: "Faol", value: EmployeeStatus.ACTIVE },
-  { label: "Nofaol", value: EmployeeStatus.INACTIVE },
-  { label: "Ta'tilda", value: EmployeeStatus.VACATION },
-  { label: "Ishdan bo'shatilgan", value: EmployeeStatus.FIRED },
-];
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Employees() {
+  const navigate = useNavigate();
+  const { t } = useTranslation("employees.");
   const [search, setSearch] = useState("");
   const [roleFilter, setRole] = useState("");
   const [statusFilter, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const PAGE_SIZE = 10;
+
+  const columns: ColumnDef<Employee>[] = [
+    {
+      key: "fullName",
+      header: t("columns.name"),
+      sortable: false,
+      render: (row) => (
+        <div className="flex items-center gap-3">
+          <img
+            src={row.avatarUrl ?? `https://i.pravatar.cc/150?u=${row.id}`}
+            alt={row.fullName}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              objectFit: "cover",
+              flexShrink: 0,
+            }}
+          />
+          <div>
+            <p
+              style={{
+                fontWeight: 500,
+                color: "var(--text-default)",
+                fontSize: 13,
+              }}
+            >
+              {row.fullName}
+            </p>
+            <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
+              {row.age} {t("ageSuffix")}
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "role",
+      header: t("columns.role"),
+      sortable: false,
+      render: (row) => <CusBadge role={row.role} />,
+    },
+    {
+      key: "status",
+      header: t("columns.status"),
+      sortable: false,
+      render: (row) => <CusBadge status={STATUS_TO_BADGE[row.status]} />,
+    },
+    {
+      key: "phone",
+      header: t("columns.contact"),
+      render: (row) => (
+        <div className="flex flex-col gap-0.5">
+          {row.phone && (
+            <span
+              className="flex items-center gap-1.5"
+              style={{ fontSize: 12, color: "var(--text-2)" }}
+            >
+              <LuPhone size={11} style={{ color: "var(--text-muted)" }} />
+              {row.phone}
+            </span>
+          )}
+          {row.telegram_username && (
+            <span
+              className="flex items-center gap-1.5"
+              style={{ fontSize: 12, color: "var(--text-2)" }}
+            >
+              <LuSend size={11} style={{ color: "var(--border-input)" }} />
+              {row.telegram_username}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "salary",
+      header: t("columns.salary"),
+      align: "right",
+      sortable: true,
+      render: (row) =>
+        row.salary ? (
+          <span
+            style={{
+              fontWeight: 500,
+              color: "var(--text-default)",
+              fontSize: 13,
+            }}
+          >
+            {row.salary.toLocaleString()}{" "}
+            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>UZS</span>
+          </span>
+        ) : (
+          <span style={{ color: "var(--text-muted)" }}>—</span>
+        ),
+    },
+    {
+      key: "createdAt",
+      header: t("columns.joined"),
+      sortable: true,
+      render: (row) => {
+        const days = dayjs().diff(dayjs(row.createdAt), "day");
+        return (
+          <div>
+            <p style={{ fontSize: 12, color: "var(--text-muted)" }}>
+              {dayjs(row.createdAt).format("DD.MM.YYYY")}
+            </p>
+            <p style={{ fontSize: 11, color: "var(--text-3)" }}>
+              {days} {t("daysSuffix")}
+            </p>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const ROLE_OPTIONS = [
+    { label: t("roles.all"),      value: "" },
+    { label: t("roles.admin"),    value: EmployeeRole.ADMIN },
+    { label: t("roles.cashier"),  value: EmployeeRole.CASHIER },
+    { label: t("roles.operator"), value: EmployeeRole.OPERATOR },
+    { label: t("roles.security"), value: EmployeeRole.SECURITY },
+    { label: t("roles.cleaner"),  value: EmployeeRole.CLEANER },
+  ];
+
+  const STATUS_OPTIONS = [
+    { label: t("statuses.all"),      value: "" },
+    { label: t("statuses.active"),   value: EmployeeStatus.ACTIVE },
+    { label: t("statuses.inactive"), value: EmployeeStatus.INACTIVE },
+    { label: t("statuses.vacation"), value: EmployeeStatus.VACATION },
+    { label: t("statuses.fired"),    value: EmployeeStatus.FIRED },
+  ];
 
   const filtered = useMemo(() => {
     setPage(1);
@@ -244,17 +247,11 @@ export default function Employees() {
     [filtered, page],
   );
 
-  // Stats
-  const total = employees.length;
-  const active = employees.filter(
-    (e) => e.status === EmployeeStatus.ACTIVE,
-  ).length;
-  const vacation = employees.filter(
-    (e) => e.status === EmployeeStatus.VACATION,
-  ).length;
+  const total    = employees.length;
+  const active   = employees.filter((e) => e.status === EmployeeStatus.ACTIVE).length;
+  const vacation = employees.filter((e) => e.status === EmployeeStatus.VACATION).length;
   const inactive = employees.filter(
-    (e) =>
-      e.status === EmployeeStatus.INACTIVE || e.status === EmployeeStatus.FIRED,
+    (e) => e.status === EmployeeStatus.INACTIVE || e.status === EmployeeStatus.FIRED,
   ).length;
 
   return (
@@ -262,45 +259,25 @@ export default function Employees() {
       {/* Header */}
       <div>
         <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>
-          Staff
+          {t("breadcrumb")}
         </p>
         <h1
           className="text-2xl font-semibold"
           style={{ color: "var(--text-default)" }}
         >
-          Employees
+          {t("title")}
         </h1>
         <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Park xodimlarini boshqaring.
+          {t("subtitle")}
         </p>
       </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 desktop:grid-cols-4 gap-3">
-        <StatCard
-          label="Jami xodimlar"
-          value={total}
-          icon={LuUsers}
-          color="#3b82f6"
-        />
-        <StatCard
-          label="Faol"
-          value={active}
-          icon={LuUserCheck}
-          color="#22c55e"
-        />
-        <StatCard
-          label="Ta'tilda"
-          value={vacation}
-          icon={LuSunMedium}
-          color="#f59e0b"
-        />
-        <StatCard
-          label="Nofaol / Bo'shatilgan"
-          value={inactive}
-          icon={LuUserX}
-          color="#ef4444"
-        />
+        <StatCard label={t("total")}    value={total}    icon={LuUsers}     color="#3b82f6" />
+        <StatCard label={t("active")}   value={active}   icon={LuUserCheck} color="#22c55e" />
+        <StatCard label={t("vacation")} value={vacation} icon={LuSunMedium} color="#f59e0b" />
+        <StatCard label={t("inactive")} value={inactive} icon={LuUserX}     color="#ef4444" />
       </div>
 
       {/* Table card */}
@@ -318,20 +295,21 @@ export default function Employees() {
         >
           <div className="flex-1">
             <CusInput
-              placeholder="Ism, telefon yoki telegram bo'yicha qidirish..."
+              placeholder={t("searchPlaceholder")}
               leftElement={<LuSearch size={14} />}
               clearable
               inputSize="sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onClear={() => setSearch("")}
+              style={{ maxWidth: 500 }}
             />
           </div>
           <div className="flex gap-2">
             <div style={{ width: 180 }}>
               <CusSelect
                 options={ROLE_OPTIONS}
-                placeholder="Lavozim"
+                placeholder={t("columns.role")}
                 size="sm"
                 value={roleFilter}
                 onChange={(v) => setRole(v as string)}
@@ -340,7 +318,7 @@ export default function Employees() {
             <div style={{ width: 180 }}>
               <CusSelect
                 options={STATUS_OPTIONS}
-                placeholder="Status"
+                placeholder={t("columns.status")}
                 size="sm"
                 value={statusFilter}
                 onChange={(v) => setStatus(v as string)}
@@ -355,7 +333,7 @@ export default function Employees() {
           style={{ borderColor: "var(--border-default)" }}
         >
           <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-            {filtered.length} ta xodim topildi
+            {t("found", { count: filtered.length })}
           </span>
           {(search || roleFilter || statusFilter) && (
             <button
@@ -374,7 +352,7 @@ export default function Employees() {
                 padding: 0,
               }}
             >
-              Filterni tozalash
+              {t("clearFilter")}
             </button>
           )}
         </div>
@@ -384,10 +362,9 @@ export default function Employees() {
           className="px-4 py-2 border-b flex items-center justify-between gap-3"
           style={{ borderColor: "var(--border-default)" }}
         >
-          {/* Chap: holat matni */}
           {selectedRows.length === 0 ? (
             <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-              Amal bajarish uchun qatorni tanlang
+              {t("selectRow")}
             </span>
           ) : (
             <span
@@ -397,26 +374,23 @@ export default function Employees() {
                 color: "var(--text-default)",
               }}
             >
-              {selectedRows.length} ta tanlandi
+              {t("selected", { count: selectedRows.length })}
             </span>
           )}
 
-          {/* O'ng: action tugmalar */}
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            {/* 0 tanlangan — faqat Add */}
             {selectedRows.length === 0 && (
               <CusButton
                 size="xs"
                 variant="solid"
                 colorPalette="blue"
                 leftIcon={<LuPlus size={13} />}
-                onClick={() => alert("Yangi xodim qo'shish")}
+                onClick={() => alert(t("addNew"))}
               >
-                Qo'shish
+                {t("addNew")}
               </CusButton>
             )}
 
-            {/* 1 tanlangan — Edit + Delete */}
             {selectedRows.length === 1 && (
               <>
                 <CusButton
@@ -424,9 +398,9 @@ export default function Employees() {
                   variant="solid"
                   colorPalette="orange"
                   leftIcon={<LuPencil size={13} />}
-                  onClick={() => alert("Tahrirlash")}
+                  onClick={() => alert(t("edit"))}
                 >
-                  Tahrirlash
+                  {t("edit")}
                 </CusButton>
                 <CusButton
                   size="xs"
@@ -434,11 +408,11 @@ export default function Employees() {
                   colorPalette="red"
                   leftIcon={<LuTrash2 size={13} />}
                   onClick={() => {
-                    alert("O'chirildi");
+                    alert(t("delete"));
                     setSelectedRows([]);
                   }}
                 >
-                  O'chirish
+                  {t("delete")}
                 </CusButton>
                 <button
                   onClick={() => setSelectedRows([])}
@@ -458,7 +432,6 @@ export default function Employees() {
               </>
             )}
 
-            {/* 2+ tanlangan — faqat Delete */}
             {selectedRows.length > 1 && (
               <>
                 <CusButton
@@ -467,11 +440,11 @@ export default function Employees() {
                   colorPalette="red"
                   leftIcon={<LuTrash2 size={13} />}
                   onClick={() => {
-                    alert(`${selectedRows.length} ta o'chirildi`);
+                    alert(t("deleteCount", { count: selectedRows.length }));
                     setSelectedRows([]);
                   }}
                 >
-                  O'chirish ({selectedRows.length})
+                  {t("delete")} ({selectedRows.length})
                 </CusButton>
                 <button
                   onClick={() => setSelectedRows([])}
@@ -504,7 +477,8 @@ export default function Employees() {
           selectable
           selectedRows={selectedRows}
           onSelectionChange={setSelectedRows}
-          emptyText="Hech qanday xodim topilmadi"
+          onRowClick={(row) => navigate(`/employee/${row.id}`)}
+          emptyText={t("notFound")}
         />
 
         {/* Pagination */}

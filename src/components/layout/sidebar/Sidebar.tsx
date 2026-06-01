@@ -12,27 +12,29 @@ import {
   LuCircleCheck,
   LuClock,
 } from 'react-icons/lu'
+import { useTranslation } from '../../../i18n/languageConfig'
 
 interface NavItemDef {
-  label: string
+  labelKey: string
   icon: IconType
   to: string
 }
 
 const navItems: NavItemDef[] = [
-  { label: 'Dashboard', icon: LuLayoutDashboard, to: '/' },
-  { label: 'Live Monitor', icon: LuActivity, to: '/live-monitor' },
-  { label: 'Employees', icon: LuUsers, to: '/employees' },
-  { label: 'Attractions', icon: LuFerrisWheel, to: '/attractions' },
-  { label: 'Reports', icon: LuChartBar, to: '/reports' },
+  { labelKey: 'dashboard',   icon: LuLayoutDashboard, to: '/' },
+  { labelKey: 'liveMonitor', icon: LuActivity,         to: '/live-monitor' },
+  { labelKey: 'employees',   icon: LuUsers,            to: '/employees' },
+  { labelKey: 'attractions', icon: LuFerrisWheel,      to: '/attractions' },
+  { labelKey: 'reports',     icon: LuChartBar,         to: '/reports' },
 ]
 
 const systemItems: NavItemDef[] = [
-  { label: 'Settings', icon: LuSettings, to: '/settings' },
-  { label: 'Support', icon: LuLifeBuoy, to: '/support' },
+  { labelKey: 'settings', icon: LuSettings,  to: '/settings' },
+  { labelKey: 'support',  icon: LuLifeBuoy,  to: '/support' },
 ]
 
 function NavItem({ item, onNavClick }: { item: NavItemDef; onNavClick: () => void }) {
+  const { t } = useTranslation('sidebar.')
   return (
     <NavLink
       to={item.to}
@@ -55,7 +57,7 @@ function NavItem({ item, onNavClick }: { item: NavItemDef; onNavClick: () => voi
             style={{ color: isActive ? undefined : 'var(--text-muted)' }}
             className={isActive ? 'text-blue-400' : 'group-hover:text-slate-300'}
           />
-          {item.label}
+          {t(item.labelKey)}
         </>
       )}
     </NavLink>
@@ -63,6 +65,7 @@ function NavItem({ item, onNavClick }: { item: NavItemDef; onNavClick: () => voi
 }
 
 function SidebarContent({ onClose, onNavClick }: { onClose: () => void; onNavClick: () => void }) {
+  const { t } = useTranslation('sidebar.')
   return (
     <div
       className="w-56 h-full flex flex-col"
@@ -99,7 +102,7 @@ function SidebarContent({ onClose, onNavClick }: { onClose: () => void; onNavCli
           className="text-xs font-medium uppercase tracking-wider px-3 mb-2"
           style={{ color: 'var(--text-dim)' }}
         >
-          Main
+          {t('main')}
         </p>
         {navItems.map(item => (
           <NavItem key={item.to} item={item} onNavClick={onNavClick} />
@@ -109,7 +112,7 @@ function SidebarContent({ onClose, onNavClick }: { onClose: () => void; onNavCli
           className="text-xs font-medium uppercase tracking-wider px-3 mt-5 mb-2 pt-4"
           style={{ borderTop: '1px solid var(--border-default)', color: 'var(--text-dim)' }}
         >
-          System
+          {t('system')}
         </p>
         {systemItems.map(item => (
           <NavItem key={item.to} item={item} onNavClick={onNavClick} />
@@ -123,16 +126,16 @@ function SidebarContent({ onClose, onNavClick }: { onClose: () => void; onNavCli
       >
         <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-4)' }}>
           <LuCircleCheck size={12} className="text-green-400 shrink-0" />
-          <span>All systems normal</span>
+          <span>{t('systemsNormal')}</span>
         </div>
         <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
           <LuClock size={12} className="shrink-0" />
           <div>
             <p className="font-medium leading-none" style={{ color: 'var(--text-3)' }}>
-              Park is open
+              {t('parkOpen')}
             </p>
             <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-              09:00 — 22:00 today
+              {t('parkHours')}
             </p>
           </div>
         </div>

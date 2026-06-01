@@ -34,6 +34,8 @@ import { CusSwitch } from "../components/ui/inputs/CusSwitch";
 import { CusTextArea } from "../components/ui/inputs/CusTextArea";
 import { CusDrawer } from "../components/ui/dialog/CusDrawer";
 import { CusButton } from "../components/ui/buttons/CusButton";
+import { CusBreadCrumb } from "../components/ui/bread-crumb/CusBreadCrumb";
+import { LuChevronRight, LuSlash } from "react-icons/lu";
 
 interface DashboardCard {
   label: string;
@@ -938,6 +940,79 @@ export default function Dashboard() {
             ))}
           </div>
         </CusDrawer>
+      </Section>
+
+      {/* ── CusBreadCrumb showcase ──────────────────────────────── */}
+
+      {/* 32. CusBreadCrumb — oddiy ishlatilish */}
+      <Section title="CusBreadCrumb — oddiy">
+        <CusBreadCrumb
+          items={[
+            { label: "Dashboard", to: "/" },
+            { label: "Xodimlar", to: "/employees" },
+            { label: "Ali Valiyev" },
+          ]}
+        />
+      </Section>
+
+      {/* 33. CusBreadCrumb — custom separator */}
+      <Section title="CusBreadCrumb — custom separator (chevron · slash)">
+        <CusBreadCrumb
+          items={[
+            { label: "Dashboard", to: "/" },
+            { label: "Attraksionlar", to: "/attractions" },
+            { label: "Roller Coaster" },
+          ]}
+          separator={<LuChevronRight size={12} />}
+        />
+        <CusBreadCrumb
+          items={[
+            { label: "Dashboard", to: "/" },
+            { label: "Hisobotlar", to: "/reports" },
+            { label: "Iyun 2026" },
+          ]}
+          separator={<LuSlash size={12} />}
+        />
+      </Section>
+
+      {/* 34. CusBreadCrumb — o'lchamlar */}
+      <Section title="CusBreadCrumb — size (sm · md · lg)">
+        <CusBreadCrumb
+          size="sm"
+          items={[{ label: "Dashboard", to: "/" }, { label: "sm size" }]}
+        />
+        <CusBreadCrumb
+          size="md"
+          items={[{ label: "Dashboard", to: "/" }, { label: "md size" }]}
+        />
+        <CusBreadCrumb
+          size="lg"
+          items={[{ label: "Dashboard", to: "/" }, { label: "lg size" }]}
+        />
+      </Section>
+
+      {/* 35. CusBreadCrumb — sahifa sarlavhasi ichida (real use-case) */}
+      <Section title="CusBreadCrumb — page header ichida (real use-case)">
+        <div>
+          <CusBreadCrumb
+            size="sm"
+            items={[
+              { label: "Dashboard", to: "/" },
+              { label: "Xodimlar", to: "/employees" },
+              { label: "Ali Valiyev" },
+            ]}
+            separator={<LuChevronRight size={10} />}
+          />
+          <h2
+            className="text-xl font-semibold mt-1"
+            style={{ color: "var(--text-default)" }}
+          >
+            Ali Valiyev
+          </h2>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            Operator · Faol
+          </p>
+        </div>
       </Section>
     </div>
   );
