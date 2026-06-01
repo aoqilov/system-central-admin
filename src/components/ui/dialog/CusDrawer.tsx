@@ -42,11 +42,20 @@ export function CusDrawer({
       lazyMount
       unmountOnExit
     >
-      <Drawer.Backdrop bg="rgba(0,0,0,0.5)" backdropFilter="blur(2px)" />
+      <Drawer.Backdrop
+        h="100%"
+        bg="rgba(0,0,0,0.5)"
+        backdropFilter="blur(2px)"
+        style={{ marginTop: 0 }}
+      />
 
       <Drawer.Positioner
         p="0"
-        style={{ padding: 0, alignItems: "stretch" }}
+        style={{
+          padding: 0,
+          marginTop: 0,
+          alignItems: isBottom ? "flex-end" : isTop ? "flex-start" : "stretch",
+        }}
       >
         <Drawer.Content
           bg="var(--bg-second)"
@@ -60,11 +69,7 @@ export function CusDrawer({
           maxH={isBottom ? "90dvh" : undefined}
           overflow="hidden"
           borderRadius={
-            isBottom
-              ? "16px 16px 0 0"
-              : isTop
-              ? "0 0 16px 16px"
-              : undefined
+            isBottom ? "16px 16px 0 0" : isTop ? "0 0 16px 16px" : undefined
           }
         >
           {/* Drag handle — faqat bottom placement uchun */}
@@ -90,7 +95,7 @@ export function CusDrawer({
           )}
 
           {/* Header */}
-          {(title || description) && (
+          {title && (
             <Drawer.Header
               borderBottomWidth="1px"
               borderColor="var(--border-default)"
@@ -106,15 +111,6 @@ export function CusDrawer({
                 >
                   {title}
                 </Drawer.Title>
-              )}
-              {description && (
-                <Drawer.Description
-                  fontSize="sm"
-                  color="var(--text-muted)"
-                  mt="0.5"
-                >
-                  {description}
-                </Drawer.Description>
               )}
             </Drawer.Header>
           )}
@@ -157,7 +153,6 @@ export function CusDrawer({
     </Drawer.Root>
   );
 }
-
 
 // ─── Ishlatish ────────────────────────────────────────────────────────────────
 

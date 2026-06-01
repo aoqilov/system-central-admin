@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { IconType } from "react-icons";
 import {
   LuUsers,
@@ -10,6 +10,21 @@ import {
   LuLock,
   LuPhone,
 } from "react-icons/lu";
+import { CusTable, type ColumnDef } from "../components/ui/table/CusTable";
+import { CusPagination } from "../components/ui/table/CusPagination";
+import { CusBadge } from "../components/ui/badge/CusBadge";
+import {
+  LuStar,
+  LuCheck,
+  LuTriangleAlert,
+  LuShield,
+} from "react-icons/lu";
+import {
+  employees,
+  EmployeeStatus,
+  EmployeeRole,
+  type Employee,
+} from "../data/employees";
 import { CusInput } from "../components/ui/inputs/CusInput";
 import {
   CusCheckbox,
@@ -431,6 +446,381 @@ export default function Dashboard() {
         <CusTextArea variant="outline" label="outline (default)" placeholder="Chegara bilan" />
         <CusTextArea variant="subtle" label="subtle" placeholder="Yengil fon" />
         <CusTextArea variant="flushed" label="flushed" placeholder="Faqat pastki chiziq" />
+      </Section>
+
+      {/* ── CusTable showcase ────────────────────────────────────── */}
+
+      {/* 18. CusTable — asosiy ishlatilish */}
+      <Section title="CusTable — asosiy (line variant + sort)">
+        {/* columns — har bir ustun uchun tavsif:
+            key    : data obyektidagi field nomi
+            header : ustun sarlavhasi
+            sortable: true bo'lsa, bosganda sort ishlaydi
+            render : custom cell ko'rinishi (ixtiyoriy) */}
+        <CusTable<Employee>
+          data={employees}
+          variant="line"
+          size="md"
+          columns={[
+            {
+              key: "fullName",
+              header: "Ism familiya",
+              sortable: true,
+              render: (row) => (
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <img
+                    src={row.avatarUrl}
+                    alt={row.fullName}
+                    style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover" }}
+                  />
+                  <span style={{ color: "var(--text-default)", fontWeight: 500 }}>
+                    {row.fullName}
+                  </span>
+                </div>
+              ),
+            },
+            {
+              key: "role",
+              header: "Lavozim",
+              sortable: true,
+              render: (row) => {
+                const map: Record<EmployeeRole, { label: string; color: string }> = {
+                  [EmployeeRole.ADMIN]:    { label: "Super Admin", color: "#8b5cf6" },
+                  [EmployeeRole.CASHIER]:  { label: "Kassir",      color: "#3b82f6" },
+                  [EmployeeRole.OPERATOR]: { label: "Operator",    color: "#06b6d4" },
+                  [EmployeeRole.SECURITY]: { label: "Security",    color: "#f59e0b" },
+                  [EmployeeRole.CLEANER]:  { label: "Cleaner",     color: "#6b7280" },
+                };
+                const m = map[row.role];
+                return (
+                  <span style={{
+                    display: "inline-block",
+                    padding: "2px 8px",
+                    borderRadius: 4,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    background: `${m.color}20`,
+                    color: m.color,
+                  }}>
+                    {m.label}
+                  </span>
+                );
+              },
+            },
+            {
+              key: "status",
+              header: "Status",
+              sortable: true,
+              render: (row) => {
+                const map: Record<EmployeeStatus, { label: string; color: string }> = {
+                  [EmployeeStatus.ACTIVE]:   { label: "Faol",     color: "#22c55e" },
+                  [EmployeeStatus.INACTIVE]: { label: "Nofaol",   color: "#6b7280" },
+                  [EmployeeStatus.FIRED]:    { label: "Ishdan bo'shatilgan", color: "#ef4444" },
+                  [EmployeeStatus.VACATION]: { label: "Ta'tilda",  color: "#f59e0b" },
+                };
+                const m = map[row.status];
+                return (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                    <span style={{
+                      width: 6, height: 6, borderRadius: "50%",
+                      background: m.color, display: "inline-block",
+                    }} />
+                    <span style={{ color: m.color, fontSize: 12 }}>{m.label}</span>
+                  </span>
+                );
+              },
+            },
+            {
+              key: "phone",
+              header: "Telefon",
+              render: (row) => (
+                <span style={{ color: "var(--text-2)", fontFamily: "monospace", fontSize: 12 }}>
+                  {row.phone ?? "—"}
+                </span>
+              ),
+            },
+            {
+              key: "salary",
+              header: "Maosh",
+              align: "right",
+              sortable: true,
+              render: (row) => (
+                <span style={{ color: "var(--text-default)", fontWeight: 500 }}>
+                  {row.salary?.toLocaleString() ?? "—"}{" "}
+                  <span style={{ color: "var(--text-muted)", fontSize: 11 }}>UZS</span>
+                </span>
+              ),
+            },
+          ] satisfies ColumnDef<Employee>[]}
+        />
+      </Section>
+
+      {/* 19. CusTable — outline + striped + interactive + maxH scroll */}
+      <Section title="CusTable — outline + striped + scroll + onRowClick">
+        <CusTable<Employee>
+          data={employees}
+          variant="outline"
+          size="sm"
+          striped
+          interactive
+          maxH="260px"
+          onRowClick={(row) => alert(`Tanlandi: ${row.fullName}`)}
+          columns={[
+            { key: "id",       header: "#",           width: 40, align: "center" },
+            { key: "fullName", header: "Ism",          sortable: true },
+            {
+              key: "role",
+              header: "Lavozim",
+              render: (row) => (
+                <span style={{ color: "var(--text-2)", fontSize: 12 }}>
+                  {row.role.replace("_", " ")}
+                </span>
+              ),
+            },
+            { key: "createdAt", header: "Qo'shilgan", sortable: true },
+          ] satisfies ColumnDef<Employee>[]}
+          caption="Qatorni bosing — alert chiqadi"
+        />
+      </Section>
+
+      {/* 20. CusTable — loading holati */}
+      <Section title="CusTable — isLoading holati">
+        <CusTable<Employee>
+          data={[]}
+          isLoading
+          variant="line"
+          columns={[
+            { key: "fullName", header: "Ism" },
+            { key: "role",     header: "Lavozim" },
+            { key: "status",   header: "Status" },
+          ] satisfies ColumnDef<Employee>[]}
+        />
+      </Section>
+
+      {/* 21. CusTable — bo'sh holat */}
+      <Section title="CusTable — bo'sh data holati">
+        <CusTable<Employee>
+          data={[]}
+          variant="outline"
+          emptyText="Hech qanday xodim topilmadi"
+          columns={[
+            { key: "fullName", header: "Ism" },
+            { key: "role",     header: "Lavozim" },
+            { key: "status",   header: "Status" },
+          ] satisfies ColumnDef<Employee>[]}
+        />
+      </Section>
+
+      {/* ── CusBadge showcase ────────────────────────────────────── */}
+
+      {/* 22. CusBadge — variantlar */}
+      <Section title="CusBadge — variantlar (variant prop)">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <CusBadge variant="solid"   colorPalette="blue">solid</CusBadge>
+          <CusBadge variant="subtle"  colorPalette="blue">subtle</CusBadge>
+          <CusBadge variant="outline" colorPalette="blue">outline</CusBadge>
+          <CusBadge variant="surface" colorPalette="blue">surface</CusBadge>
+          <CusBadge variant="plain"   colorPalette="blue">plain</CusBadge>
+        </div>
+      </Section>
+
+      {/* 23. CusBadge — ranglar */}
+      <Section title="CusBadge — colorPalette (barcha ranglar)">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {(["gray","red","orange","yellow","green","teal","blue","cyan","purple","pink"] as const).map(
+            (c) => (
+              <CusBadge key={c} colorPalette={c} variant="subtle">
+                {c}
+              </CusBadge>
+            )
+          )}
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+          {(["gray","red","orange","yellow","green","teal","blue","cyan","purple","pink"] as const).map(
+            (c) => (
+              <CusBadge key={c} colorPalette={c} variant="solid">
+                {c}
+              </CusBadge>
+            )
+          )}
+        </div>
+      </Section>
+
+      {/* 24. CusBadge — o'lchamlar */}
+      <Section title="CusBadge — size (o'lchamlar)">
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+          <CusBadge size="xs" colorPalette="purple">xs</CusBadge>
+          <CusBadge size="sm" colorPalette="purple">sm</CusBadge>
+          <CusBadge size="md" colorPalette="purple">md</CusBadge>
+          <CusBadge size="lg" colorPalette="purple">lg</CusBadge>
+        </div>
+      </Section>
+
+      {/* 25. CusBadge — dot, leftIcon, rightIcon */}
+      <Section title="CusBadge — dot · leftIcon · rightIcon">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <CusBadge colorPalette="green"  dot>dot • Faol</CusBadge>
+          <CusBadge colorPalette="red"    dot>dot • Xato</CusBadge>
+          <CusBadge colorPalette="yellow" dot>dot • Kutilmoqda</CusBadge>
+
+          <CusBadge colorPalette="blue"   variant="solid"   leftIcon={<LuStar size={10} />}>
+            leftIcon
+          </CusBadge>
+          <CusBadge colorPalette="green"  variant="outline" rightIcon={<LuCheck size={10} />}>
+            rightIcon
+          </CusBadge>
+          <CusBadge colorPalette="orange" variant="surface"
+            leftIcon={<LuTriangleAlert size={10} />}
+            rightIcon={<LuShield size={10} />}
+          >
+            ikkala icon
+          </CusBadge>
+        </div>
+      </Section>
+
+      {/* 26. CusBadge status prop — preset */}
+      <Section title="CusBadge — status prop (barcha holatlar)">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <CusBadge status="active" />
+          <CusBadge status="inactive" />
+          <CusBadge status="vacation" />
+          <CusBadge status="fired" />
+          <CusBadge status="pending" />
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+          <CusBadge status="active"   variant="solid"   size="md" />
+          <CusBadge status="inactive" variant="solid"   size="md" />
+          <CusBadge status="vacation" variant="outline" size="md" />
+          <CusBadge status="fired"    variant="outline" size="md" />
+          <CusBadge status="pending"  variant="surface" size="md" />
+        </div>
+      </Section>
+
+      {/* 27. CusBadge role prop — preset */}
+      <Section title="CusBadge — role prop (barcha lavozimlar)">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <CusBadge role="SUPER_ADMIN" />
+          <CusBadge role="OPERATOR_ATTRACTION" />
+          <CusBadge role="CASHIER" />
+          <CusBadge role="SECURITY" />
+          <CusBadge role="CLEANER" />
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+          <CusBadge role="SUPER_ADMIN"         variant="solid"   size="md" />
+          <CusBadge role="OPERATOR_ATTRACTION" variant="solid"   size="md" />
+          <CusBadge role="CASHIER"             variant="outline" size="md" />
+          <CusBadge role="SECURITY"            variant="outline" size="md" />
+          <CusBadge role="CLEANER"             variant="subtle"  size="md" />
+        </div>
+      </Section>
+
+      {/* 28. CusBadge — CusTable ichida (real use-case) */}
+      <Section title="CusBadge — CusTable ichida (real use-case)">
+        <CusTable<Employee>
+          data={employees.slice(0, 6)}
+          variant="line"
+          size="sm"
+          columns={[
+            {
+              key: "fullName",
+              header: "Xodim",
+              render: (row) => (
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <img
+                    src={row.avatarUrl}
+                    style={{ width: 24, height: 24, borderRadius: "50%" }}
+                  />
+                  <span style={{ fontWeight: 500, color: "var(--text-default)" }}>
+                    {row.fullName}
+                  </span>
+                </div>
+              ),
+            },
+            {
+              key: "role",
+              header: "Lavozim",
+              render: (row) => <CusBadge role={row.role} />,
+            },
+            {
+              key: "status",
+              header: "Status",
+              render: (row) => {
+                const map = {
+                  ACTIVE:   "active",
+                  INACTIVE: "inactive",
+                  FIRED:    "fired",
+                  VACATION: "vacation",
+                } as const;
+                return <CusBadge status={map[row.status] ?? "pending"} />;
+              },
+            },
+          ] satisfies ColumnDef<Employee>[]}
+        />
+      </Section>
+
+      {/* ── CusPagination showcase ───────────────────────────────── */}
+
+      {/* 29. CusPagination — asosiy variantlar */}
+      <Section title="CusPagination — asosiy (controlled)">
+        {(() => {
+          const [page, setPage] = useState(1);
+          const PAGE_SIZE = 4;
+          const paginated = useMemo(
+            () => employees.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+            [page]
+          );
+          return (
+            <div className="space-y-3">
+              <CusTable<Employee>
+                data={paginated}
+                variant="line"
+                size="sm"
+                columns={[
+                  { key: "fullName", header: "Ism",     render: (r) => <span style={{ fontSize: 13, color: "var(--text-default)" }}>{r.fullName}</span> },
+                  { key: "role",     header: "Lavozim", render: (r) => <CusBadge role={r.role} /> },
+                  { key: "status",   header: "Status",  render: (r) => <CusBadge status={{ ACTIVE:"active", INACTIVE:"inactive", FIRED:"fired", VACATION:"vacation" }[r.status] as "active"} /> },
+                ] satisfies ColumnDef<Employee>[]}
+              />
+              <CusPagination
+                count={employees.length}
+                pageSize={PAGE_SIZE}
+                page={page}
+                onPageChange={setPage}
+                showPageText
+              />
+            </div>
+          );
+        })()}
+      </Section>
+
+      {/* 30. CusPagination — showSizeSelect bilan */}
+      <Section title="CusPagination — showSizeSelect + siblingCount">
+        {(() => {
+          const [page2, setPage2] = useState(1);
+          const [size2, setSize2] = useState(5);
+          return (
+            <CusPagination
+              count={120}
+              pageSize={size2}
+              page={page2}
+              siblingCount={2}
+              onPageChange={setPage2}
+              onPageSizeChange={(s) => { setSize2(s); setPage2(1); }}
+              showPageText
+              showSizeSelect
+              pageSizeOptions={[5, 10, 20, 50]}
+            />
+          );
+        })()}
+      </Section>
+
+      {/* 31. CusPagination — o'lchamlar */}
+      <Section title="CusPagination — size (xs · sm · md)">
+        <div className="space-y-4">
+          <CusPagination count={100} pageSize={10} size="xs" />
+          <CusPagination count={100} pageSize={10} size="sm" />
+          <CusPagination count={100} pageSize={10} size="md" />
+        </div>
       </Section>
 
       {/* 18. CusDrawer — barcha placement'lar */}
