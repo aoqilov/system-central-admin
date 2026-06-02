@@ -29,7 +29,9 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
   }, []);
 
   function handleLock() {
-    navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('user_role')
+    navigate('/login', { state: { from: location }, replace: true })
   }
 
   return (

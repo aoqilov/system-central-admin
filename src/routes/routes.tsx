@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import type { RouteObject } from "react-router-dom";
 import AppLayout from "../components/layout/admin/AppLayout";
+import { AuthGuard } from "../middleware/AuthGuard";
 const OperatorLayout = lazy(
   () => import("../components/layout/operator/OperatorLayout"),
 );
@@ -16,13 +17,21 @@ const KassaDetail = lazy(() => import("../pages/KassaDetail"));
 const Reports = lazy(() => import("../pages/Reports"));
 const Settings = lazy(() => import("../pages/Settings"));
 const Support = lazy(() => import("../pages/Support"));
+const OperatorHome = lazy(() => import("../pages/forOperator/OperatorHome"));
+const OperatorPayment = lazy(() => import("../pages/forOperator/OperatorPayment"));
+const OperatorProfile = lazy(() => import("../pages/forOperator/OperatorProfile"));
 const Login = lazy(() => import("../pages/Login"));
+const Unauthorized = lazy(() => import("../pages/Unauthorized"));
 const NotFound = lazy(() => import("../pages/NotFound"));
 
 export const routes: RouteObject[] = [
   {
     // for admin pages
-    element: <AppLayout />,
+    element: (
+      <AuthGuard roles={["admin"]}>
+        <AppLayout />
+      </AuthGuard>
+    ),
     children: [
       { path: "/", element: <Dashboard /> },
       { path: "/live-monitor", element: <LiveMonitor /> },
@@ -39,9 +48,18 @@ export const routes: RouteObject[] = [
   },
   {
     // for operator pages
-    element: <OperatorLayout />,
-    children: [{ path: "/operator", element: <Dashboard /> }],
+    element: (
+      <AuthGuard roles={["operator"]}>
+        <OperatorLayout />
+      </AuthGuard>
+    ),
+    children: [
+      { path: "/operator",         element: <OperatorHome /> },
+      { path: "/operator/payment", element: <OperatorPayment /> },
+      { path: "/operator/profile", element: <OperatorProfile /> },
+    ],
   },
   { path: "/login", element: <Login /> },
+  { path: "/unauthorized", element: <Unauthorized /> },
   { path: "*", element: <NotFound /> },
 ];

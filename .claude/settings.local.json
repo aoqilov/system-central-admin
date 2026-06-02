@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npx vite *)",
       "WebFetch(domain:chakra-ui.com)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npx tsc *)"
     ]
   }
 }

@@ -13,10 +13,133 @@ import {
   LuRefreshCw,
   LuMonitor,
   LuGlobe,
+  LuAppWindow,
+  LuImage,
+  LuDatabase,
+  LuZap,
+  LuRefreshCcwDot,
 } from "react-icons/lu";
 import { useTheme } from "../context/ThemeContext";
 import { CusSwitch } from "../components/ui/inputs/CusSwitch";
 import { useTranslation, type Lang } from "../i18n/languageConfig";
+
+// ─── PWA Config Section ───────────────────────────────────────────────────────
+
+function KvRow({ label, value, mono = false }: { label: string; value: React.ReactNode; mono?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-2.5" style={{ borderBottom: "1px solid var(--border-default)" }}>
+      <span className="text-xs" style={{ color: "var(--text-muted)" }}>{label}</span>
+      <span className={`text-xs font-medium ${mono ? "font-mono" : ""}`} style={{ color: "var(--text-2)" }}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function ColorDot({ hex }: { hex: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className="w-3 h-3 rounded-sm border border-white/10 inline-block shrink-0" style={{ background: hex }} />
+      <span className="font-mono">{hex}</span>
+    </span>
+  );
+}
+
+function PwaConfigSection() {
+  return (
+    <div className="space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-wider px-1" style={{ color: "var(--text-dim)" }}>
+        PWA Konfiguratsiya
+      </p>
+
+      {/* App info */}
+      <div className="rounded-xl border overflow-hidden" style={{ background: "var(--bg-second)", borderColor: "var(--border-default)" }}>
+        <div className="flex items-center gap-2.5 px-5 py-3 border-b" style={{ borderColor: "var(--border-default)" }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#3b82f618" }}>
+            <LuAppWindow size={14} style={{ color: "#3b82f6" }} />
+          </div>
+          <p className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>App ma'lumotlari</p>
+        </div>
+        <div className="px-5 [&>*:last-child]:border-none">
+          <KvRow label="Nomi"       value="ParkOps Control Center" />
+          <KvRow label="Qisqa nomi" value="ParkOps" />
+          <KvRow label="Tavsif"     value="Park operatsiyalarini boshqarish tizimi" />
+          <KvRow label="Mavzu rangi"    value={<ColorDot hex="#0b0f17" />} />
+          <KvRow label="Fon rangi"      value={<ColorDot hex="#0b0f17" />} />
+        </div>
+      </div>
+
+      {/* Display */}
+      <div className="rounded-xl border overflow-hidden" style={{ background: "var(--bg-second)", borderColor: "var(--border-default)" }}>
+        <div className="flex items-center gap-2.5 px-5 py-3 border-b" style={{ borderColor: "var(--border-default)" }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#8b5cf618" }}>
+            <LuSmartphone size={14} style={{ color: "#8b5cf6" }} />
+          </div>
+          <p className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>Ko'rsatish rejimi</p>
+        </div>
+        <div className="px-5 [&>*:last-child]:border-none">
+          <KvRow label="Rejim"       value={<span className="px-2 py-0.5 rounded bg-purple-500/15 text-purple-400 font-mono text-[11px]">standalone</span>} />
+          <KvRow label="Yo'nalish"   value="any" mono />
+          <KvRow label="Start URL"   value="/" mono />
+          <KvRow label="Qamrov"      value="/" mono />
+        </div>
+      </div>
+
+      {/* Icons */}
+      <div className="rounded-xl border overflow-hidden" style={{ background: "var(--bg-second)", borderColor: "var(--border-default)" }}>
+        <div className="flex items-center gap-2.5 px-5 py-3 border-b" style={{ borderColor: "var(--border-default)" }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#06b6d418" }}>
+            <LuImage size={14} style={{ color: "#06b6d4" }} />
+          </div>
+          <p className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>Ikonkalar</p>
+        </div>
+        <div className="px-5 space-y-0 [&>*:last-child]:border-none">
+          {[
+            { file: "icons/icon.svg",          sizes: "any", purpose: "default",   purposeColor: "#3b82f6" },
+            { file: "icons/icon-maskable.svg",  sizes: "any", purpose: "maskable",  purposeColor: "#22c55e" },
+          ].map((ic) => (
+            <div key={ic.file} className="flex items-center justify-between gap-3 py-2.5" style={{ borderBottom: "1px solid var(--border-default)" }}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xs shrink-0">P</div>
+                <div>
+                  <p className="text-xs font-mono" style={{ color: "var(--text-2)" }}>{ic.file}</p>
+                  <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>image/svg+xml · {ic.sizes}</p>
+                </div>
+              </div>
+              <span className="text-[11px] px-2 py-0.5 rounded font-medium shrink-0" style={{ background: `${ic.purposeColor}18`, color: ic.purposeColor }}>
+                {ic.purpose}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Cache */}
+      <div className="rounded-xl border overflow-hidden" style={{ background: "var(--bg-second)", borderColor: "var(--border-default)" }}>
+        <div className="flex items-center gap-2.5 px-5 py-3 border-b" style={{ borderColor: "var(--border-default)" }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#eab30818" }}>
+            <LuDatabase size={14} style={{ color: "#eab308" }} />
+          </div>
+          <p className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>Kesh (Workbox)</p>
+        </div>
+        <div className="px-5 [&>*:last-child]:border-none">
+          <KvRow label="Yangilanish"    value={<span className="flex items-center gap-1.5"><LuRefreshCcwDot size={11} className="text-blue-400" /><span>autoUpdate</span></span>} />
+          <KvRow label="Oldindan kesh"  value={<span className="font-mono text-[10px]">js · css · html · svg · woff2</span>} />
+          <KvRow label="Navigatsiya"    value="index.html (fallback)" mono />
+          <KvRow
+            label="Runtime: Shriftlar"
+            value={
+              <span className="flex items-center gap-1.5">
+                <LuZap size={11} className="text-green-400" />
+                <span>CacheFirst · 1 yil</span>
+              </span>
+            }
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── SettingRow ───────────────────────────────────────────────────────────────
 
@@ -207,6 +330,9 @@ export default function Settings() {
         <SettingRow icon={LuSave}      iconColor="#3b82f6" label={t("autoSave")} description={t("autoSaveDesc")} checked={sys.autoSave} onChange={() => tog(sys, setSys, "autoSave")} />
         <SettingRow icon={LuRefreshCw} iconColor="#06b6d4" label={t("dataSync")} description={t("dataSyncDesc")} checked={sys.dataSync} onChange={() => tog(sys, setSys, "dataSync")} last />
       </Section>
+
+      {/* PWA Config */}
+      <PwaConfigSection />
 
       {/* Version */}
       <div className="flex items-center gap-2 pt-1" style={{ color: "var(--text-dim)" }}>
