@@ -12,6 +12,7 @@
     "liveMonitor": "Jonli Monitor",
     "employees": "Xodimlar",
     "attractions": "Attraksionlar",
+    "kassa": "Kassa",
     "reports": "Hisobotlar",
     "settings": "Sozlamalar",
     "support": "Yordam",
@@ -162,13 +163,14 @@
     "edit": "Tahrirlash",
     "delete": "O'chirish",
     "deleteCount": "{count} ta o'chirildi",
+    "ageSuffix": "yosh",
     "columns": {
       "name": "Attraksion",
       "category": "Kategoriya",
       "status": "Status",
       "price": "Narx",
-      "waitTime": "Kutish",
-      "visitors": "Tashrif"
+      "minAge": "Min. yosh",
+      "mainOperator": "Operator"
     },
     "categories": {
       "all": "Barcha kategoriyalar",

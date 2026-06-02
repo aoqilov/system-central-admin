@@ -12,6 +12,7 @@
     "liveMonitor": "Мониторинг",
     "employees": "Сотрудники",
     "attractions": "Аттракционы",
+    "kassa": "Касса",
     "reports": "Отчёты",
     "settings": "Настройки",
     "support": "Поддержка",
@@ -162,13 +163,14 @@
     "edit": "Редактировать",
     "delete": "Удалить",
     "deleteCount": "Удалено {count}",
+    "ageSuffix": "лет",
     "columns": {
       "name": "Аттракцион",
       "category": "Категория",
       "status": "Статус",
       "price": "Цена",
-      "waitTime": "Ожидание",
-      "visitors": "Посетители"
+      "minAge": "Мин. возраст",
+      "mainOperator": "Оператор"
     },
     "categories": {
       "all": "Все категории",

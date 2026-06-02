@@ -18,6 +18,7 @@ import {
   type AttractionCategory,
   type AttractionStatus,
 } from "../data/attractions";
+import { employees } from "../data/employees";
 import { CusTable, type ColumnDef } from "../components/ui/table/CusTable";
 import { CusBadge } from "../components/ui/badge/CusBadge";
 import { CusInput } from "../components/ui/inputs/CusInput";
@@ -108,7 +109,7 @@ export default function Attractions() {
       render: (row) => (
         <div className="flex items-center gap-3">
           <img
-            src={row.imageAttractionMain ?? `https://picsum.photos/seed/${row.id}/64/40`}
+            src={row.images.imageAttractionMain ?? `https://picsum.photos/seed/${row.id}/64/40`}
             alt={row.name}
             style={{
               width: 44,
@@ -148,6 +149,22 @@ export default function Attractions() {
       ),
     },
     {
+      key: "minAge",
+      header: t("columns.minAge"),
+      sortable: false,
+      render: (row) => {
+        const age = row.rulesAttraction?.minAge;
+        return age != null ? (
+          <span style={{ fontSize: 12, color: "var(--text-2)" }}>
+            {age}{" "}
+            <span style={{ color: "var(--text-muted)" }}>{t("ageSuffix")}</span>
+          </span>
+        ) : (
+          <span style={{ color: "var(--text-muted)" }}>—</span>
+        );
+      },
+    },
+    {
       key: "status",
       header: t("columns.status"),
       sortable: false,
@@ -176,30 +193,28 @@ export default function Attractions() {
       ),
     },
     {
-      key: "waitTime",
-      header: t("columns.waitTime"),
-      align: "right",
-      sortable: true,
-      render: (row) =>
-        row.waitTime > 0 ? (
-          <span style={{ fontSize: 12, color: "var(--text-2)" }}>
-            {row.waitTime}{" "}
-            <span style={{ color: "var(--text-muted)" }}>{t("minSuffix")}</span>
-          </span>
+      key: "mainOperator",
+      header: t("columns.mainOperator"),
+      sortable: false,
+      render: (row) => {
+        const emp = row.relationOperator.mainOperatorId
+          ? employees.find((e) => e.id === row.relationOperator.mainOperatorId)
+          : null;
+        return emp ? (
+          <div className="flex items-center gap-2">
+            <img
+              src={emp.avatarUrl ?? `https://i.pravatar.cc/150?u=${emp.id}`}
+              alt={emp.fullName ?? emp.firstName}
+              style={{ width: 22, height: 22, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+            />
+            <span style={{ fontSize: 12, color: "var(--text-2)" }}>
+              {emp.fullName ?? `${emp.firstName} ${emp.lastName}`}
+            </span>
+          </div>
         ) : (
           <span style={{ color: "var(--text-muted)" }}>—</span>
-        ),
-    },
-    {
-      key: "visitors",
-      header: t("columns.visitors"),
-      align: "right",
-      sortable: true,
-      render: (row) => (
-        <span style={{ fontSize: 12, color: "var(--text-2)" }}>
-          {row.visitors.toLocaleString()}
-        </span>
-      ),
+        );
+      },
     },
   ];
 

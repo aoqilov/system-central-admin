@@ -61,11 +61,32 @@ type ChartCfg = {
 };
 
 const ROLE_CHART: Record<EmployeeRole, ChartCfg> = {
-  [EmployeeRole.OPERATOR]: { dataKey: "ridesOperated",  labelKey: "rides",     color: "#3b82f6" },
-  [EmployeeRole.CASHIER]:  { dataKey: "ticketsSold",    labelKey: "tickets",   color: "#22c55e" },
-  [EmployeeRole.SECURITY]: { dataKey: "incidents",      labelKey: "incidents", color: "#ef4444" },
-  [EmployeeRole.CLEANER]:  { dataKey: "tasksDone",      labelKey: "tasks",     color: "#f59e0b" },
-  [EmployeeRole.ADMIN]:    { dataKey: "workedMinutes",  labelKey: "minutes",   color: "#8b5cf6", yFmt: (v) => `${Math.floor(v / 60)}h` },
+  [EmployeeRole.OPERATOR]: {
+    dataKey: "ridesOperated",
+    labelKey: "rides",
+    color: "#3b82f6",
+  },
+  [EmployeeRole.CASHIER]: {
+    dataKey: "ticketsSold",
+    labelKey: "tickets",
+    color: "#22c55e",
+  },
+  [EmployeeRole.SECURITY]: {
+    dataKey: "incidents",
+    labelKey: "incidents",
+    color: "#ef4444",
+  },
+  [EmployeeRole.CLEANER]: {
+    dataKey: "tasksDone",
+    labelKey: "tasks",
+    color: "#f59e0b",
+  },
+  [EmployeeRole.ADMIN]: {
+    dataKey: "workedMinutes",
+    labelKey: "minutes",
+    color: "#8b5cf6",
+    yFmt: (v) => `${Math.floor(v / 60)}h`,
+  },
 };
 
 function getRoleMainStat(
@@ -79,13 +100,25 @@ function getRoleMainStat(
   }
   switch (employee.role) {
     case EmployeeRole.OPERATOR:
-      return { value: String((rs as OperatorStats).ridesOperatedToday ?? 0), label: t("chart.rides") };
+      return {
+        value: String((rs as OperatorStats).ridesOperatedToday ?? 0),
+        label: t("chart.rides"),
+      };
     case EmployeeRole.CASHIER:
-      return { value: String((rs as CashierStats).ticketsSoldToday ?? 0), label: t("chart.tickets") };
+      return {
+        value: String((rs as CashierStats).ticketsSoldToday ?? 0),
+        label: t("chart.tickets"),
+      };
     case EmployeeRole.SECURITY:
-      return { value: String((rs as SecurityStats).incidentsToday ?? 0), label: t("chart.incidents") };
+      return {
+        value: String((rs as SecurityStats).incidentsToday ?? 0),
+        label: t("chart.incidents"),
+      };
     case EmployeeRole.CLEANER:
-      return { value: String((rs as CleanerStats).tasksDoneToday ?? 0), label: t("chart.tasks") };
+      return {
+        value: String((rs as CleanerStats).tasksDoneToday ?? 0),
+        label: t("chart.tasks"),
+      };
     default:
       return { value: "—", label: t("workedToday") };
   }
@@ -187,21 +220,45 @@ function RoleStats({ employee }: { employee: Employee }) {
   if (role === EmployeeRole.OPERATOR) {
     const s = rs as OperatorStats;
     items.push(
-      { label: t("role.ridesOperatedToday"), value: fmtCount(s.ridesOperatedToday ?? 0), color: "#3b82f6" },
-      { label: t("role.ridesOperatedTotal"), value: fmtCount(s.ridesOperatedTotal ?? 0), color: "#3b82f6" },
+      {
+        label: t("role.ridesOperatedToday"),
+        value: fmtCount(s.ridesOperatedToday ?? 0),
+        color: "#3b82f6",
+      },
+      {
+        label: t("role.ridesOperatedTotal"),
+        value: fmtCount(s.ridesOperatedTotal ?? 0),
+        color: "#3b82f6",
+      },
     );
   } else if (role === EmployeeRole.CASHIER) {
     const s = rs as CashierStats;
     items.push(
-      { label: t("role.ticketsSoldToday"), value: fmtCount(s.ticketsSoldToday ?? 0),           color: "#22c55e" },
-      { label: t("role.revenueToday"),     value: `${(s.revenueToday ?? 0).toLocaleString()} UZS`, color: "#22c55e" },
+      {
+        label: t("role.ticketsSoldToday"),
+        value: fmtCount(s.ticketsSoldToday ?? 0),
+        color: "#22c55e",
+      },
+      {
+        label: t("role.revenueToday"),
+        value: `${(s.revenueToday ?? 0).toLocaleString()} UZS`,
+        color: "#22c55e",
+      },
     );
   } else if (role === EmployeeRole.SECURITY) {
     const s = rs as SecurityStats;
-    items.push({ label: t("role.incidentsToday"), value: fmtCount(s.incidentsToday ?? 0), color: "#ef4444" });
+    items.push({
+      label: t("role.incidentsToday"),
+      value: fmtCount(s.incidentsToday ?? 0),
+      color: "#ef4444",
+    });
   } else if (role === EmployeeRole.CLEANER) {
     const s = rs as CleanerStats;
-    items.push({ label: t("role.tasksDoneToday"), value: fmtCount(s.tasksDoneToday ?? 0), color: "#f59e0b" });
+    items.push({
+      label: t("role.tasksDoneToday"),
+      value: fmtCount(s.tasksDoneToday ?? 0),
+      color: "#f59e0b",
+    });
   }
 
   if (items.length === 0) return null;
@@ -249,7 +306,13 @@ type ChartTooltipProps = {
   chartLabel?: string;
 };
 
-function ChartTooltip({ active, payload, label, cfg, chartLabel }: ChartTooltipProps) {
+function ChartTooltip({
+  active,
+  payload,
+  label,
+  cfg,
+  chartLabel,
+}: ChartTooltipProps) {
   if (!active || !payload?.length || !cfg) return null;
   return (
     <div
@@ -381,11 +444,11 @@ export default function EmployeeDetail() {
   const joinedDays = dayjs().diff(dayjs(employee.createdAt), "day");
   const mainStat = getRoleMainStat(employee, t);
   const roleCfg = ROLE_CHART[employee.role];
-  const avatarSrc = employee.avatarUrl ?? `https://i.pravatar.cc/150?u=${employee.id}`;
+  const avatarSrc =
+    employee.avatarUrl ?? `https://i.pravatar.cc/150?u=${employee.id}`;
 
   return (
     <div className="p-4 tablet:p-6 space-y-5">
-
       {/* ── Image lightbox overlay ────────────────────────────────────────────── */}
       {imgOpen && (
         <div
@@ -418,20 +481,15 @@ export default function EmployeeDetail() {
       )}
 
       {/* ── Back ──────────────────────────────────────────────────────────────── */}
-      <button
-        onClick={() => navigate("/employees")}
-        className="flex items-center gap-1.5 text-sm"
-        style={{
-          color: "var(--text-muted)",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: 0,
-        }}
+      <CusButton
+        variant="outline"
+        onClick={() => navigate("/attractions")}
+        colorPalette="gray"
+        size="xs"
       >
         <LuArrowLeft size={14} />
         {t("backTo")}
-      </button>
+      </CusButton>
 
       {/* ── Header card ───────────────────────────────────────────────────────── */}
       <div
@@ -464,7 +522,9 @@ export default function EmployeeDetail() {
                 style={{ color: "var(--text-muted)" }}
               >
                 {employee.age} {t("ageSuffix")} &nbsp;•&nbsp;{" "}
-                {t("sinceDate", { date: dayjs(employee.createdAt).format("DD.MM.YYYY") })}
+                {t("sinceDate", {
+                  date: dayjs(employee.createdAt).format("DD.MM.YYYY"),
+                })}
               </p>
               <div className="flex flex-wrap gap-2 mt-2.5">
                 <CusBadge role={employee.role as BadgeRole} size="sm" />
@@ -510,7 +570,9 @@ export default function EmployeeDetail() {
                 color="#3b82f6"
               />
               <HeaderStat
-                value={core.attendanceRate != null ? `${core.attendanceRate}%` : "—"}
+                value={
+                  core.attendanceRate != null ? `${core.attendanceRate}%` : "—"
+                }
                 label={t("attendance")}
                 color={
                   (core.attendanceRate ?? 0) >= 90
@@ -583,10 +645,18 @@ export default function EmployeeDetail() {
               {t("info")}
             </p>
             {employee.phone && (
-              <InfoRow icon={LuPhone} label={t("phone")} value={employee.phone} />
+              <InfoRow
+                icon={LuPhone}
+                label={t("phone")}
+                value={employee.phone}
+              />
             )}
             {employee.telegram_username && (
-              <InfoRow icon={LuSend} label={t("telegram")} value={employee.telegram_username} />
+              <InfoRow
+                icon={LuSend}
+                label={t("telegram")}
+                value={employee.telegram_username}
+              />
             )}
             {employee.salary && (
               <InfoRow
@@ -634,20 +704,32 @@ export default function EmployeeDetail() {
               <div className="space-y-2.5">
                 {core.checkIn && (
                   <div className="flex items-center justify-between">
-                    <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+                    <span
+                      className="text-sm"
+                      style={{ color: "var(--text-muted)" }}
+                    >
                       {t("checkIn")}
                     </span>
-                    <span className="text-sm font-medium" style={{ color: "var(--text-default)" }}>
+                    <span
+                      className="text-sm font-medium"
+                      style={{ color: "var(--text-default)" }}
+                    >
                       {core.checkIn}
                     </span>
                   </div>
                 )}
                 {core.checkOut && (
                   <div className="flex items-center justify-between">
-                    <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+                    <span
+                      className="text-sm"
+                      style={{ color: "var(--text-muted)" }}
+                    >
                       {t("checkOut")}
                     </span>
-                    <span className="text-sm font-medium" style={{ color: "var(--text-default)" }}>
+                    <span
+                      className="text-sm font-medium"
+                      style={{ color: "var(--text-default)" }}
+                    >
                       {core.checkOut}
                     </span>
                   </div>
@@ -661,20 +743,32 @@ export default function EmployeeDetail() {
                       marginTop: 2,
                     }}
                   >
-                    <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+                    <span
+                      className="text-sm"
+                      style={{ color: "var(--text-muted)" }}
+                    >
                       {t("workedToday")}
                     </span>
-                    <span className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>
+                    <span
+                      className="text-sm font-semibold"
+                      style={{ color: "var(--text-default)" }}
+                    >
                       {fmtMin(core.workedTodayMinutes)}
                     </span>
                   </div>
                 )}
                 {core.totalWorkedMinutes && (
                   <div className="flex items-center justify-between">
-                    <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+                    <span
+                      className="text-sm"
+                      style={{ color: "var(--text-muted)" }}
+                    >
                       {t("totalWorked")}
                     </span>
-                    <span className="text-sm font-medium" style={{ color: "var(--text-default)" }}>
+                    <span
+                      className="text-sm font-medium"
+                      style={{ color: "var(--text-default)" }}
+                    >
                       {fmtMin(core.totalWorkedMinutes)}
                     </span>
                   </div>

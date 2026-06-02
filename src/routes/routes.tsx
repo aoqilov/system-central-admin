@@ -8,6 +8,8 @@ const Employees = lazy(() => import('../pages/Employees'))
 const EmployeeDetail = lazy(() => import('../pages/EmployeeDetail'))
 const Attractions = lazy(() => import('../pages/Attractions'))
 const AttractionDetail = lazy(() => import('../pages/AttractionDetail'))
+const Kassa = lazy(() => import('../pages/Kassa'))
+const KassaDetail = lazy(() => import('../pages/KassaDetail'))
 const Reports = lazy(() => import('../pages/Reports'))
 const Settings = lazy(() => import('../pages/Settings'))
 const Support = lazy(() => import('../pages/Support'))
@@ -24,6 +26,8 @@ export const routes: RouteObject[] = [
       { path: '/employee/:id', element: <EmployeeDetail /> },
       { path: '/attractions', element: <Attractions /> },
       { path: '/attraction/:id', element: <AttractionDetail /> },
+      { path: '/kassa', element: <Kassa /> },
+      { path: '/kassa/:id', element: <KassaDetail /> },
       { path: '/reports', element: <Reports /> },
       { path: '/settings', element: <Settings /> },
       { path: '/support', element: <Support /> },

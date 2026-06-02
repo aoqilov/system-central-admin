@@ -188,13 +188,13 @@ export default function LiveMonitor() {
 
   const openCount = attractions.filter(a => a.status === 'open').length
   const avgWait = Math.round(
-    attractions.filter(a => a.status === 'open' && a.waitTime > 0).reduce((s, a) => s + a.waitTime, 0) /
-    attractions.filter(a => a.status === 'open' && a.waitTime > 0).length
+    attractions.filter(a => a.status === 'open' && (a.rulesAttraction?.roundTime ?? 0) > 0).reduce((s, a) => s + (a.rulesAttraction?.roundTime ?? 0), 0) /
+    attractions.filter(a => a.status === 'open' && (a.rulesAttraction?.roundTime ?? 0) > 0).length
   )
 
   const topAttractions = [...attractions]
     .filter(a => a.status === 'open')
-    .sort((a, b) => b.visitors - a.visitors)
+    .sort((a, b) => ((b.statsVisitors ?? []).slice(-1)[0]?.count ?? 0) - ((a.statsVisitors ?? []).slice(-1)[0]?.count ?? 0))
     .slice(0, 6)
 
   return (
@@ -282,8 +282,8 @@ export default function LiveMonitor() {
             </div>
             <div className="px-4 py-2">
               {topAttractions.map((a, i) => {
-                const max = topAttractions[0].visitors
-                const pct = Math.round((a.visitors / max) * 100)
+                const max = (topAttractions[0].statsVisitors ?? []).slice(-1)[0]?.count ?? 1
+                const pct = Math.round((((a.statsVisitors ?? []).slice(-1)[0]?.count ?? 0) / max) * 100)
                 return (
                   <div key={a.id} className="py-2 border-b last:border-0" style={{ borderColor: 'var(--border-default)' }}>
                     <div className="flex items-center justify-between mb-1">
@@ -292,7 +292,7 @@ export default function LiveMonitor() {
                         {a.name}
                       </p>
                       <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>
-                        {a.visitors}
+                        {(a.statsVisitors ?? []).slice(-1)[0]?.count ?? 0}
                       </span>
                     </div>
                     <div className="h-1 rounded-full" style={{ background: 'var(--border-default)' }}>
@@ -361,11 +361,11 @@ export default function LiveMonitor() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    {a.status === 'open' ? `${a.visitors} visitors` : cfg.label}
+                    {a.status === 'open' ? `${(a.statsVisitors ?? []).slice(-1)[0]?.count ?? 0} visitors` : cfg.label}
                   </span>
-                  {a.status === 'open' && a.waitTime > 0 && (
+                  {a.status === 'open' && (a.rulesAttraction?.roundTime ?? 0) > 0 && (
                     <span className="text-[10px] tabular-nums" style={{ color: 'var(--text-dim)' }}>
-                      {a.waitTime}m
+                      {a.rulesAttraction?.roundTime}m
                     </span>
                   )}
                 </div>

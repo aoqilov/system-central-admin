@@ -11,6 +11,7 @@ import {
   LuX,
   LuCircleCheck,
   LuClock,
+  LuBanknote,
 } from 'react-icons/lu'
 import { useTranslation } from '../../../i18n/languageConfig'
 
@@ -25,6 +26,7 @@ const navItems: NavItemDef[] = [
   { labelKey: 'liveMonitor', icon: LuActivity,         to: '/live-monitor' },
   { labelKey: 'employees',   icon: LuUsers,            to: '/employees' },
   { labelKey: 'attractions', icon: LuFerrisWheel,      to: '/attractions' },
+  { labelKey: 'kassa',       icon: LuBanknote,         to: '/kassa' },
   { labelKey: 'reports',     icon: LuChartBar,         to: '/reports' },
 ]
 

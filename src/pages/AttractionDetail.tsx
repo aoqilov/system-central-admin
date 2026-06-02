@@ -1,151 +1,126 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from "recharts";
+import {
   LuArrowLeft,
-  LuTag,
-  LuClock,
-  LuUsers,
+  LuUserPlus,
+  LuImage,
   LuUser,
   LuRuler,
   LuWeight,
-  LuInfo,
-  LuBriefcase,
-  LuImage,
+  LuClock,
+  LuTag,
+  LuCalendar,
+  LuCheck,
+  LuUsers,
   LuActivity,
+  LuInfo,
+  LuLayoutGrid,
+  LuHistory,
 } from "react-icons/lu";
 import {
   attractions,
   type AttractionCategory,
   type AttractionStatus,
 } from "../data/attractions";
-import { employees } from "../data/employees";
+import { employees, EmployeeStatus } from "../data/employees";
 import { CusBadge } from "../components/ui/badge/CusBadge";
 import { CusButton } from "../components/ui/buttons/CusButton";
+import { CusDialog } from "../components/ui/dialog/CusDialog";
+import { CusDrawer } from "../components/ui/dialog/CusDrawer";
+import {
+  CusCard as Card,
+  CusCardHeader as CardHeader,
+  CusInfoRow as InfoRow,
+} from "../components/shared/card/CusCard";
 import { useTranslation } from "../i18n/languageConfig";
+import dayjs from "dayjs";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type CP = "gray" | "red" | "orange" | "yellow" | "green" | "teal" | "blue" | "cyan" | "purple" | "pink";
+type CP =
+  | "gray"
+  | "red"
+  | "orange"
+  | "yellow"
+  | "green"
+  | "teal"
+  | "blue"
+  | "cyan"
+  | "purple"
+  | "pink";
 
-const STATUS_TO_BADGE: Record<AttractionStatus, "active" | "pending" | "fired"> = {
-  open:        "active",
-  maintenance: "pending",
-  closed:      "fired",
-};
+const STATUS_TO_BADGE: Record<
+  AttractionStatus,
+  "active" | "pending" | "fired"
+> = { open: "active", maintenance: "pending", closed: "fired" };
 
 const CATEGORY_COLOR: Record<AttractionCategory, CP> = {
-  thrill:        "red",
-  family:        "blue",
-  kids:          "green",
-  water:         "cyan",
-  playground:    "orange",
+  thrill: "red",
+  family: "blue",
+  kids: "green",
+  water: "cyan",
+  playground: "orange",
   entertainment: "purple",
 };
 
-// ─── Header Stat ──────────────────────────────────────────────────────────────
+// ─── Chart helpers ────────────────────────────────────────────────────────────
 
-function HeaderStat({
-  value,
-  label,
-  color,
-  divider = true,
-}: {
-  value: string;
-  label: string;
-  color?: string;
-  divider?: boolean;
-}) {
-  return (
-    <div
-      className="flex-1 flex flex-col items-center justify-center py-4 px-2 tablet:px-4 tablet:py-5 bg-[var(--bg-main)] rounded-xl text-center"
-      style={divider ? { borderLeft: "1px solid var(--border-default)" } : {}}
-    >
-      <p
-        className="text-xl tablet:text-2xl font-bold leading-none"
-        style={{ color: color ?? "var(--text-default)" }}
-      >
-        {value}
-      </p>
-      <p
-        className="text-xs mt-1.5 text-center"
-        style={{ color: "var(--text-muted)" }}
-      >
-        {label}
-      </p>
-      {color && (
-        <div
-          className="w-5 h-0.5 mt-2 rounded-full"
-          style={{ background: color }}
-        />
-      )}
-    </div>
-  );
+function shortDate(iso: string) {
+  const d = new Date(iso);
+  return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
-// ─── Info Row ─────────────────────────────────────────────────────────────────
-
-function InfoRow({
-  icon: Icon,
-  label,
-  value,
-  last = false,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: string;
-  last?: boolean;
-}) {
-  return (
-    <div
-      className="flex items-center gap-3 py-3"
-      style={last ? {} : { borderBottom: "1px solid var(--border-default)" }}
-    >
-      <div
-        className="w-7 h-7 rounded-md flex items-center justify-center shrink-0"
-        style={{ background: "var(--bg-hover)" }}
-      >
-        <Icon size={13} style={{ color: "var(--text-muted)" }} />
-      </div>
-      <div>
-        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-          {label}
-        </p>
-        <p className="text-sm font-medium" style={{ color: "var(--text-default)" }}>
-          {value}
-        </p>
-      </div>
-    </div>
-  );
+interface TipProps {
+  active?: boolean;
+  payload?: Array<{ value?: number }>;
+  label?: string;
 }
 
-// ─── Section Card ─────────────────────────────────────────────────────────────
-
-function SectionCard({
-  icon: Icon,
-  title,
-  children,
-  iconColor,
-}: {
-  icon: React.ElementType;
-  title: string;
-  children: React.ReactNode;
-  iconColor?: string;
-}) {
+function VisitorsTooltip({ active, payload, label }: TipProps) {
+  if (!active || !payload?.length) return null;
   return (
     <div
-      className="rounded-xl border p-5"
+      className="rounded-lg px-3 py-2 text-sm border shadow-xl"
       style={{
-        background: "var(--bg-second)",
-        borderColor: "var(--border-default)",
+        background: "var(--bg-tooltip)",
+        borderColor: "var(--border-2)",
+        color: "var(--text-4)",
       }}
     >
-      <div className="flex items-center gap-2 mb-4">
-        <Icon size={14} style={{ color: iconColor ?? "var(--text-muted)" }} />
-        <p className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>
-          {title}
-        </p>
-      </div>
-      {children}
+      <p className="mb-1">{label}</p>
+      <p className="font-medium" style={{ color: "#22c55e" }}>
+        Tashrif: {payload[0].value?.toLocaleString()}
+      </p>
+    </div>
+  );
+}
+
+function RevenueTooltip({ active, payload, label }: TipProps) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div
+      className="rounded-lg px-3 py-2 text-sm border shadow-xl"
+      style={{
+        background: "var(--bg-tooltip)",
+        borderColor: "var(--border-2)",
+        color: "var(--text-4)",
+      }}
+    >
+      <p className="mb-1">{label}</p>
+      <p className="font-medium" style={{ color: "#3b82f6" }}>
+        Daromad: {payload[0].value?.toLocaleString()} UZS
+      </p>
     </div>
   );
 }
@@ -156,7 +131,13 @@ export default function AttractionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation("attractionDetail.");
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [selectedEmp, setSelectedEmp] = useState<number | null>(null);
+  const [localOperatorId, setLocalOperatorId] = useState<number | undefined>(
+    undefined,
+  );
 
   const attraction = attractions.find((a) => a.id === Number(id));
 
@@ -166,11 +147,11 @@ export default function AttractionDetail() {
         className="p-6 flex flex-col items-center justify-center gap-3"
         style={{ minHeight: 400 }}
       >
-        <p className="text-base font-semibold" style={{ color: "var(--text-default)" }}>
+        <p
+          className="text-base font-semibold"
+          style={{ color: "var(--text-default)" }}
+        >
           {t("notFound")}
-        </p>
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          ID: {id}
         </p>
         <CusButton
           size="sm"
@@ -184,154 +165,177 @@ export default function AttractionDetail() {
     );
   }
 
-  const mainImg = attraction.imageAttractionMain;
-  const secondaryImgs = attraction.imageAttractionSecondary ?? [];
-  const allImgs = [...(mainImg ? [mainImg] : []), ...secondaryImgs];
+  // ── Derived values ───────────────────────────────────────────────────────────
 
-  const operator   = attraction.relationOperatorId
-    ? employees.find((e) => e.id === attraction.relationOperatorId)
+  const operatorId =
+    localOperatorId ?? attraction.relationOperator.mainOperatorId;
+  const operator = operatorId
+    ? employees.find((e) => e.id === operatorId)
     : null;
-  const helpers    = (attraction.relationOperatorHelpers ?? [])
-    .map((hid) => employees.find((e) => e.id === hid))
-    .filter(Boolean);
 
-  const hasRestrictions =
-    attraction.minAge !== null ||
-    attraction.minHeight !== undefined ||
-    attraction.maxHeight !== undefined ||
-    attraction.minWeight !== undefined ||
-    attraction.maxWeight !== undefined ||
-    attraction.maxWeightPerCup !== undefined ||
-    attraction.maxWeightPerBoat !== undefined;
+  const helpers = (attraction.relationOperator.helperOperatorIds ?? [])
+    .map(({ id, relationdate }) => ({
+      emp: employees.find((e) => e.id === id),
+      relationdate,
+    }))
+    .filter(
+      (h): h is { emp: NonNullable<typeof h.emp>; relationdate: string } =>
+        !!h.emp,
+    );
 
-  const hasPricingDetail =
-    attraction.priceStandard !== undefined || attraction.priceVIP !== undefined;
+  const historyOperator = attraction.relationOperator.relationHistory
+    ? employees.find(
+        (e) =>
+          e.id === attraction.relationOperator.relationHistory!.mainOperatorId,
+      )
+    : null;
+
+  const mainImg = attraction.images.imageAttractionMain;
+
+  // Chart data — use stored stats, format date as MM/DD label
+  const visitorChartData = (attraction.statsVisitors ?? []).map((s) => ({
+    day: shortDate(s.date),
+    visitors: s.count,
+  }));
+  const revenueChartData = (attraction.statsRevenue ?? []).map((s) => ({
+    day: shortDate(s.date),
+    revenue: s.amount,
+  }));
+
+  // Today's totals (last entry)
+  const sv = attraction.statsVisitors ?? [];
+  const sr = attraction.statsRevenue ?? [];
+  const todayVisitors = sv.length > 0 ? sv[sv.length - 1].count : 0;
+  const todayRevenue = sr.length > 0 ? sr[sr.length - 1].amount : 0;
+
+  // Operator connection info
+  const connectedDate = operator?.createdAt ?? "";
+  const connectedDays = connectedDate
+    ? Math.round(
+        (new Date("2026-06-02").getTime() - new Date(connectedDate).getTime()) /
+          86400000,
+      )
+    : 0;
+
+  // Restriction rows
+  const rules = attraction.rulesAttraction;
+  type RI = { icon: React.ElementType; label: string; value: string };
+  const restrictionRows: RI[] = [];
+  if (rules) {
+    if (rules.minAge !== null && rules.minAge !== undefined)
+      restrictionRows.push({
+        icon: LuUser,
+        label: "Minimal yosh",
+        value: `${rules.minAge} yosh`,
+      });
+    if (rules.minHeight !== undefined)
+      restrictionRows.push({
+        icon: LuRuler,
+        label: "Min bo'y",
+        value: `${rules.minHeight} sm`,
+      });
+    if (rules.maxHeight !== undefined)
+      restrictionRows.push({
+        icon: LuRuler,
+        label: "Max bo'y",
+        value: `${rules.maxHeight} sm`,
+      });
+    if (rules.minWeight !== undefined)
+      restrictionRows.push({
+        icon: LuWeight,
+        label: "Min vazn",
+        value: `${rules.minWeight} kg`,
+      });
+    if (rules.maxWeight !== undefined)
+      restrictionRows.push({
+        icon: LuWeight,
+        label: "Max vazn",
+        value: `${rules.maxWeight} kg`,
+      });
+    if (rules.maxWeightPerCup !== undefined)
+      restrictionRows.push({
+        icon: LuWeight,
+        label: "Max vazn (chashka)",
+        value: `${rules.maxWeightPerCup} kg`,
+      });
+    if (rules.maxWeightPerBoat !== undefined)
+      restrictionRows.push({
+        icon: LuWeight,
+        label: "Max vazn (qayiq)",
+        value: `${rules.maxWeightPerBoat} kg`,
+      });
+  }
+
+  // Assign candidates (active employees)
+  const assignCandidates = employees.filter(
+    (e) => e.status === EmployeeStatus.ACTIVE,
+  );
+
+  function handleAssign() {
+    if (selectedEmp !== null) {
+      setLocalOperatorId(selectedEmp);
+      setAssignOpen(false);
+      setSelectedEmp(null);
+    }
+  }
 
   return (
-    <div className="p-4 tablet:p-6 space-y-5">
-
-      {/* ── Lightbox ──────────────────────────────────────────────────────────── */}
-      {lightboxSrc && (
-        <div
-          onClick={() => setLightboxSrc(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 9999,
-            background: "rgba(0,0,0,0.88)",
-            backdropFilter: "blur(6px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "zoom-out",
-          }}
-        >
-          <img
-            src={lightboxSrc}
-            alt={attraction.name}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: "90vw",
-              maxHeight: "90dvh",
-              borderRadius: 16,
-              objectFit: "contain",
-              boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
-            }}
-          />
-        </div>
-      )}
-
+    <div className="p-4 tablet:p-6 space-y-4">
       {/* ── Back ──────────────────────────────────────────────────────────────── */}
-      <button
+      <CusButton
+        variant="outline"
         onClick={() => navigate("/attractions")}
-        className="flex items-center gap-1.5 text-sm"
-        style={{
-          color: "var(--text-muted)",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: 0,
-        }}
+        colorPalette="gray"
+        size="xs"
       >
         <LuArrowLeft size={14} />
         {t("backTo")}
-      </button>
+      </CusButton>
 
-      {/* ── Header card ───────────────────────────────────────────────────────── */}
-      <div
-        className="rounded-xl border overflow-hidden"
-        style={{
-          background: "var(--bg-second)",
-          borderColor: "var(--border-default)",
-        }}
-      >
-        <div className="flex flex-col desktop:flex-row">
-
-          {/* Left: main image + thumbnails */}
-          <div className="relative desktop:w-[320px] shrink-0">
-            {mainImg ? (
-              <img
-                src={mainImg}
-                alt={attraction.name}
-                onClick={() => setLightboxSrc(mainImg)}
-                className="w-full object-cover cursor-zoom-in"
-                style={{ height: 220, display: "block" }}
-              />
-            ) : (
-              <div
-                className="w-full flex items-center justify-center"
-                style={{
-                  height: 220,
-                  background: "var(--bg-hover)",
-                  color: "var(--text-muted)",
-                }}
-              >
-                <LuImage size={32} />
-              </div>
-            )}
-            {/* Thumbnails */}
-            {secondaryImgs.length > 0 && (
-              <div
-                className="flex gap-1.5 p-2 overflow-x-auto"
-                style={{ borderTop: "1px solid var(--border-default)" }}
-              >
-                {allImgs.map((src, i) => (
+      {/* ═══════════════════════════════════════════════════════════════════════
+          ROW 1: Attraction Card + Operator Card
+      ═══════════════════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-1 desktop:grid-cols-[3fr_2fr] gap-4 items-stretch">
+        {/* ── Attraction Header Card ─────────────────────────────────────────── */}
+        <Card>
+          <div className="flex" style={{ minHeight: 148 }}>
+            {/* Image */}
+            <div className="shrink-0 self-stretch bg-red-300 h-full ">
+              {mainImg ? (
+                <div style={{ minHeight: 148, width: 300 }}>
                   <img
-                    key={i}
-                    src={src}
-                    alt=""
-                    onClick={() => setLightboxSrc(src)}
-                    className="shrink-0 cursor-pointer rounded-md object-cover"
-                    style={{
-                      width: 52,
-                      height: 38,
-                      opacity: lightboxSrc === src ? 1 : 0.75,
-                      border: lightboxSrc === src
-                        ? "2px solid #3b82f6"
-                        : "2px solid transparent",
-                    }}
+                    src={mainImg}
+                    alt={attraction.name}
+                    className=" object-cover "
+                    style={{ display: "block" }}
                   />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Right: name + info + stats */}
-          <div className="flex flex-col flex-1">
-            {/* Name + badges */}
-            <div className="p-5 desktop:p-6 flex-1">
+                </div>
+              ) : (
+                <div
+                  className="w-full h-full flex items-center justify-center "
+                  style={{ background: "var(--bg-hover)" }}
+                >
+                  <LuImage size={28} style={{ color: "var(--text-muted)" }} />
+                </div>
+              )}
+            </div>
+            {/* Info */}
+            <div className="flex-1 p-5 min-w-0 flex flex-col justify-center">
               <h1
-                className="text-xl desktop:text-3xl font-semibold leading-tight"
+                className="text-xl font-semibold leading-tight truncate"
                 style={{ color: "var(--text-default)" }}
               >
                 {attraction.name}
               </h1>
               {attraction.manufacturer && (
-                <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
+                <p
+                  className="text-xs mt-1 truncate"
+                  style={{ color: "var(--text-muted)" }}
+                >
                   {attraction.manufacturer}
                 </p>
               )}
-              <div className="flex flex-wrap gap-2 mt-3">
+              <div className="flex flex-wrap items-center gap-2 mt-3">
                 <CusBadge
                   colorPalette={CATEGORY_COLOR[attraction.category]}
                   variant="surface"
@@ -343,197 +347,458 @@ export default function AttractionDetail() {
                   {t(`statuses.${attraction.status}`)}
                 </CusBadge>
               </div>
-            </div>
-
-            {/* 3 header stats */}
-            <div
-              className="flex border-t"
-              style={{ borderColor: "var(--border-default)" }}
-            >
-              <HeaderStat
-                value={`${attraction.price.toLocaleString()}`}
-                label={`${t("price")} (UZS)`}
-                color="#3b82f6"
-                divider={false}
-              />
-              <HeaderStat
-                value={attraction.waitTime > 0 ? `${attraction.waitTime}` : "—"}
-                label={`${t("waitTime")}, ${t("minSuffix")}`}
-                color="#f59e0b"
-              />
-              <HeaderStat
-                value={attraction.visitors.toLocaleString()}
-                label={t("visitors")}
-                color="#22c55e"
-              />
+              <button
+                onClick={() => setHistoryOpen(true)}
+                className="mt-3 self-start flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-md"
+                style={{
+                  color: "var(--text-muted)",
+                  background: "var(--bg-hover)",
+                  border: "1px solid var(--border-default)",
+                  cursor: "pointer",
+                }}
+              >
+                <LuHistory size={11} />
+                Operatorlar tarixi
+              </button>
             </div>
           </div>
-        </div>
+        </Card>
 
-        {/* Note banner */}
-        {attraction.note && (
-          <div
-            className="px-5 py-3 flex items-start gap-2.5"
+        {/* ── Operator Card ─────────────────────────────────────────────────── */}
+        {operator ? (
+          <Card>
+            <div className="flex " style={{ minHeight: 148 }}>
+              {/* Avatar */}
+              <div className="shrink-0 self-stretch " style={{ width: 120 }}>
+                <img
+                  src={
+                    operator.avatarUrl ??
+                    `https://i.pravatar.cc/150?u=${operator.id}`
+                  }
+                  alt={operator.fullName ?? operator.firstName}
+                  className="w-full h-full object-cover "
+                  style={{ display: "block" }}
+                />
+              </div>
+              {/* Info */}
+              <div className="flex-1 p-4 min-w-0 flex flex-col justify-center">
+                <span
+                  className="text-[11px] font-medium mb-1.5"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Asosiy operator
+                </span>
+                <p
+                  className="text-sm font-semibold leading-tight truncate"
+                  style={{ color: "var(--text-default)" }}
+                >
+                  {operator.fullName ??
+                    `${operator.firstName} ${operator.lastName}`}
+                </p>
+                <p
+                  className="text-xs mt-1.5"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {connectedDate}
+                  <span
+                    className="ml-2 px-1.5 py-0.5 rounded text-xs font-medium"
+                    style={{
+                      background: "var(--bg-hover)",
+                      color: "var(--text-2)",
+                    }}
+                  >
+                    {connectedDays} kun
+                  </span>
+                </p>
+                <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+                  <CusBadge
+                    status={
+                      operator.status === EmployeeStatus.ACTIVE
+                        ? "active"
+                        : "fired"
+                    }
+                    size="sm"
+                  >
+                    {operator.status}
+                  </CusBadge>
+                  {operator.currency && (
+                    <CusBadge colorPalette="gray" variant="surface" size="sm">
+                      {operator.currency}
+                    </CusBadge>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Helpers */}
+            {helpers.length > 0 && (
+              <div
+                className="border-t px-4 py-3"
+                style={{ borderColor: "var(--border-default)" }}
+              >
+                <p
+                  className="text-[11px] mb-2"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Yordamchilar
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {helpers.map(({ emp, relationdate }) => (
+                    <div
+                      key={emp.id}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-lg"
+                      style={{
+                        background: "var(--bg-hover)",
+                        border: "1px solid var(--border-default)",
+                      }}
+                    >
+                      <img
+                        src={
+                          emp.avatarUrl ??
+                          `https://i.pravatar.cc/150?u=${emp.id}`
+                        }
+                        alt={emp.fullName ?? emp.firstName}
+                        style={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                          flexShrink: 0,
+                        }}
+                      />
+                      <div>
+                        <p
+                          className="text-[11px] font-medium leading-tight"
+                          style={{ color: "var(--text-default)" }}
+                        >
+                          {emp.fullName ?? `${emp.firstName} ${emp.lastName}`}
+                        </p>
+                        <p
+                          className="text-[10px] leading-tight"
+                          style={{ color: "var(--text-muted)" }}
+                        >
+                          {relationdate}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </Card>
+        ) : (
+          /* No operator → blur ghost + plus icon */
+          <button
+            onClick={() => setAssignOpen(true)}
+            className="relative rounded-xl border overflow-hidden w-full"
             style={{
-              borderTop: "1px solid var(--border-default)",
-              background: "var(--bg-hover)",
+              background: "var(--bg-second)",
+              borderColor: "var(--border-default)",
+              minHeight: 148,
+              cursor: "pointer",
+              textAlign: "left",
             }}
           >
-            <LuInfo size={13} style={{ color: "#f59e0b", marginTop: 2, flexShrink: 0 }} />
-            <p className="text-sm" style={{ color: "var(--text-2)" }}>
-              {attraction.note}
-            </p>
-          </div>
+            {/* Blurred ghost skeleton */}
+            <div
+              style={{
+                filter: "blur(5px)",
+                opacity: 0.2,
+                pointerEvents: "none",
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+              }}
+            >
+              <div
+                style={{
+                  width: 120,
+                  background: "var(--bg-hover)",
+                  borderRadius: "12px 0 0 12px",
+                }}
+              />
+              <div
+                className="flex-1 p-5"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
+              >
+                <div
+                  className="rounded"
+                  style={{
+                    width: 130,
+                    height: 14,
+                    background: "var(--bg-hover)",
+                  }}
+                />
+                <div
+                  className="rounded"
+                  style={{
+                    width: 90,
+                    height: 11,
+                    background: "var(--bg-hover)",
+                  }}
+                />
+                <div
+                  className="rounded"
+                  style={{
+                    width: 60,
+                    height: 20,
+                    marginTop: 4,
+                    background: "var(--bg-hover)",
+                  }}
+                />
+              </div>
+            </div>
+            {/* Overlay */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+              }}
+            >
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center"
+                style={{
+                  background: "var(--bg-hover)",
+                  border: "1.5px dashed var(--border-2)",
+                }}
+              >
+                <LuUserPlus size={22} style={{ color: "var(--text-muted)" }} />
+              </div>
+              <p
+                className="text-sm font-medium"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Operator biriktirish
+              </p>
+            </div>
+          </button>
         )}
       </div>
 
-      {/* ── Body ──────────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 desktop:grid-cols-[1fr_300px] gap-4">
-
-        {/* Left */}
+      {/* ═══════════════════════════════════════════════════════════════════════
+          BODY: Charts (left) + Aside info (right)
+      ═══════════════════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-1 desktop:grid-cols-[3fr_1.2fr] gap-4 items-start">
+        {/* ── Left: charts stacked ──────────────────────────────────────────── */}
         <div className="space-y-4">
-
-          {/* Restrictions */}
-          {hasRestrictions && (() => {
-            type RI = { icon: React.ElementType; label: string; value: string };
-            const items: RI[] = [];
-            if (attraction.minAge !== null && attraction.minAge !== undefined)
-              items.push({ icon: LuUser,   label: t("minAge"),           value: `${attraction.minAge} ${t("ageSuffix")}` });
-            if (attraction.minHeight !== undefined)
-              items.push({ icon: LuRuler,  label: t("minHeight"),        value: `${attraction.minHeight} ${t("heightSuffix")}` });
-            if (attraction.maxHeight !== undefined)
-              items.push({ icon: LuRuler,  label: t("maxHeight"),        value: `${attraction.maxHeight} ${t("heightSuffix")}` });
-            if (attraction.minWeight !== undefined)
-              items.push({ icon: LuWeight, label: t("minWeight"),        value: `${attraction.minWeight} ${t("weightSuffix")}` });
-            if (attraction.maxWeight !== undefined)
-              items.push({ icon: LuWeight, label: t("maxWeight"),        value: `${attraction.maxWeight} ${t("weightSuffix")}` });
-            if (attraction.maxWeightPerCup !== undefined)
-              items.push({ icon: LuWeight, label: t("maxWeightPerCup"), value: `${attraction.maxWeightPerCup} ${t("weightSuffix")}` });
-            if (attraction.maxWeightPerBoat !== undefined)
-              items.push({ icon: LuWeight, label: t("maxWeightPerBoat"), value: `${attraction.maxWeightPerBoat} ${t("weightSuffix")}` });
-            return (
-              <SectionCard icon={LuActivity} title={t("restrictions")} iconColor="#ef4444">
-                {items.map((item, i) => (
-                  <InfoRow
-                    key={item.label}
-                    icon={item.icon}
-                    label={item.label}
-                    value={item.value}
-                    last={i === items.length - 1}
+          {/* Visitors chart */}
+          <Card>
+            <CardHeader
+              icon={LuUsers}
+              title="Haftalik tashriflar"
+              iconColor="#22c55e"
+            />
+            <div className="p-5">
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart
+                  data={visitorChartData}
+                  margin={{ top: 4, right: 4, left: -24, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--chart-grid)"
+                    vertical={false}
                   />
-                ))}
-              </SectionCard>
-            );
-          })()}
-
-          {/* Image gallery */}
-          {secondaryImgs.length > 0 && (
-            <SectionCard icon={LuImage} title={t("images")}>
-              <div className="grid grid-cols-2 tablet:grid-cols-3 gap-2">
-                {secondaryImgs.map((src, i) => (
-                  <img
-                    key={i}
-                    src={src}
-                    alt=""
-                    onClick={() => setLightboxSrc(src)}
-                    className="w-full rounded-lg object-cover cursor-zoom-in"
-                    style={{ height: 110 }}
+                  <XAxis
+                    dataKey="day"
+                    tick={{ fill: "var(--chart-tick)", fontSize: 12 }}
+                    axisLine={false}
+                    tickLine={false}
                   />
-                ))}
-              </div>
-            </SectionCard>
-          )}
+                  <YAxis
+                    tick={{ fill: "var(--chart-tick)", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    content={<VisitorsTooltip />}
+                    cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                  />
+                  <Bar
+                    dataKey="visitors"
+                    fill="#22c55e"
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={40}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          {/* Revenue chart */}
+          <Card>
+            <CardHeader
+              icon={LuTag}
+              title="Haftalik daromad"
+              iconColor="#3b82f6"
+            />
+            <div className="p-5">
+              <ResponsiveContainer width="100%" height={180}>
+                <AreaChart
+                  data={revenueChartData}
+                  margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset="0%"
+                        stopColor="#3b82f6"
+                        stopOpacity={0.25}
+                      />
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--chart-grid)"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="day"
+                    tick={{ fill: "var(--chart-tick)", fontSize: 12 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fill: "var(--chart-tick)", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip
+                    content={<RevenueTooltip />}
+                    cursor={{ stroke: "var(--border-2)" }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                    fill="url(#revGrad)"
+                    dot={{ fill: "#3b82f6", strokeWidth: 0, r: 3 }}
+                    activeDot={{
+                      r: 5,
+                      fill: "#3b82f6",
+                      stroke: "var(--bg-main)",
+                      strokeWidth: 2,
+                    }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
         </div>
 
-        {/* Right */}
-        <div className="space-y-4">
+        {/* ── Right: aside info ─────────────────────────────────────────────── */}
+        <Card>
+          <CardHeader
+            icon={LuActivity}
+            title="Attraksion ma'lumoti"
+            iconColor="#a78bfa"
+          />
+          <div className="px-5 pb-2">
+            <InfoRow
+              icon={LuTag}
+              label="Narx"
+              value={`${attraction.price.toLocaleString()} UZS`}
+            />
+            {rules && (
+              <>
+                <InfoRow
+                  icon={LuClock}
+                  label="Aylanish vaqti"
+                  value={`${rules.roundTime} daqiqa`}
+                />
+                <InfoRow
+                  icon={LuLayoutGrid}
+                  label="Joylar soni"
+                  value={`${rules.numberOfPlaceRound} ta`}
+                />
+                {restrictionRows.map((row, i) => (
+                  <InfoRow
+                    key={row.label}
+                    icon={row.icon}
+                    label={row.label}
+                    value={row.value}
+                    last={i === restrictionRows.length - 1}
+                  />
+                ))}
+                {restrictionRows.length === 0 && (
+                  <p
+                    className="text-sm py-3 border-t"
+                    style={{
+                      color: "var(--text-muted)",
+                      borderColor: "var(--border-default)",
+                    }}
+                  >
+                    Cheklovlar yo'q
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        </Card>
+      </div>
 
-          {/* Pricing */}
-          <SectionCard icon={LuTag} title={t("pricing")} iconColor="#3b82f6">
-            <div className="space-y-2.5">
-              {hasPricingDetail ? (
-                <>
-                  {attraction.priceStandard !== undefined && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-                        {t("standard")}
-                      </span>
-                      <span className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>
-                        {attraction.priceStandard.toLocaleString()}{" "}
-                        <span style={{ fontSize: 11, color: "var(--text-muted)" }}>UZS</span>
-                      </span>
-                    </div>
-                  )}
-                  {attraction.priceVIP !== undefined && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-                        {t("vip")}
-                      </span>
-                      <span
-                        className="text-sm font-semibold"
-                        style={{ color: "#f59e0b" }}
-                      >
-                        {attraction.priceVIP.toLocaleString()}{" "}
-                        <span style={{ fontSize: 11, color: "var(--text-muted)" }}>UZS</span>
-                      </span>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-                    {t("price")}
-                  </span>
-                  <span className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>
-                    {attraction.price.toLocaleString()}{" "}
-                    <span style={{ fontSize: 11, color: "var(--text-muted)" }}>UZS</span>
-                  </span>
-                </div>
-              )}
+      {/* ═══════════════════════════════════════════════════════════════════════
+          History Drawer
+      ═══════════════════════════════════════════════════════════════════════ */}
+      <CusDrawer
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        title="Operator tarixi"
+        placement="end"
+        size="md"
+      >
+        <div className="space-y-6">
+          {/* Current: 2 columns */}
+          <div>
+            <p
+              className="text-xs font-semibold uppercase mb-3"
+              style={{ color: "var(--text-muted)", letterSpacing: "0.07em" }}
+            >
+              Joriy holat
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Main operator */}
               <div
-                className="flex items-center justify-between pt-2.5"
-                style={{ borderTop: "1px solid var(--border-default)" }}
+                className="rounded-lg p-3.5 border"
+                style={{
+                  borderColor: "var(--border-default)",
+                  background: "var(--bg-hover)",
+                }}
               >
-                <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-                  {t("waitTime")}
-                </span>
-                <span className="text-sm font-medium" style={{ color: "var(--text-default)" }}>
-                  {attraction.waitTime > 0
-                    ? `${attraction.waitTime} ${t("minSuffix")}`
-                    : "—"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-                  {t("visitors")}
-                </span>
-                <span
-                  className="text-sm font-semibold"
-                  style={{ color: "#22c55e" }}
+                <p
+                  className="text-xs font-medium mb-3"
+                  style={{ color: "var(--text-muted)" }}
                 >
-                  {attraction.visitors.toLocaleString()}
-                </span>
-              </div>
-            </div>
-          </SectionCard>
-
-          {/* Operators */}
-          <SectionCard icon={LuBriefcase} title={t("operators")}>
-            {!operator && helpers.length === 0 ? (
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                {t("noOperator")}
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {operator && (
-                  <div>
-                    <p className="text-xs mb-1.5" style={{ color: "var(--text-muted)" }}>
-                      {t("operator")}
+                  Asosiy operator
+                </p>
+                {operator ? (
+                  <>
+                    <p
+                      className="text-xs mb-2"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {attraction.relationOperator.relationDay ?? connectedDate}
                     </p>
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2">
                       <img
-                        src={operator.avatarUrl ?? `https://i.pravatar.cc/150?u=${operator.id}`}
-                        alt={operator.fullName}
+                        src={
+                          operator.avatarUrl ??
+                          `https://i.pravatar.cc/150?u=${operator.id}`
+                        }
+                        alt={operator.fullName ?? operator.firstName}
                         style={{
                           width: 28,
                           height: 28,
@@ -542,26 +807,54 @@ export default function AttractionDetail() {
                           flexShrink: 0,
                         }}
                       />
-                      <span
-                        className="text-sm font-medium"
+                      <p
+                        className="text-sm font-medium leading-tight"
                         style={{ color: "var(--text-default)" }}
                       >
-                        {operator.fullName}
-                      </span>
+                        {operator.fullName ??
+                          `${operator.firstName} ${operator.lastName}`}
+                      </p>
                     </div>
-                  </div>
+                  </>
+                ) : (
+                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                    Biriktilmagan
+                  </p>
                 )}
-                {helpers.length > 0 && (
-                  <div style={operator ? { borderTop: "1px solid var(--border-default)", paddingTop: 12 } : {}}>
-                    <p className="text-xs mb-1.5" style={{ color: "var(--text-muted)" }}>
-                      {t("helpers")}
-                    </p>
-                    <div className="space-y-2">
-                      {helpers.map((h) => h && (
-                        <div key={h.id} className="flex items-center gap-2.5">
+              </div>
+
+              {/* Helper operators */}
+              <div
+                className="rounded-lg p-3.5 border"
+                style={{
+                  borderColor: "var(--border-default)",
+                  background: "var(--bg-hover)",
+                }}
+              >
+                <p
+                  className="text-xs font-medium mb-3"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Yordamchilar
+                </p>
+                {helpers.length > 0 ? (
+                  <div className="space-y-3">
+                    {helpers.map(({ emp, relationdate }) => (
+                      <div key={emp.id}>
+                        <p
+                          className="text-xs mb-1"
+                          style={{ color: "var(--text-muted)" }}
+                        >
+                          {dayjs(relationdate).format("DD.MM.YYYY")} da
+                          biriktirilgan
+                        </p>
+                        <div className="flex items-center gap-2">
                           <img
-                            src={h.avatarUrl ?? `https://i.pravatar.cc/150?u=${h.id}`}
-                            alt={h.fullName}
+                            src={
+                              emp.avatarUrl ??
+                              `https://i.pravatar.cc/150?u=${emp.id}`
+                            }
+                            alt={emp.fullName ?? emp.firstName}
                             style={{
                               width: 24,
                               height: 24,
@@ -570,19 +863,106 @@ export default function AttractionDetail() {
                               flexShrink: 0,
                             }}
                           />
-                          <span className="text-sm" style={{ color: "var(--text-2)" }}>
-                            {h.fullName}
-                          </span>
+                          <p
+                            className="text-sm leading-tight"
+                            style={{ color: "var(--text-default)" }}
+                          >
+                            {emp.fullName ?? `${emp.firstName} ${emp.lastName}`}
+                          </p>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
+                ) : (
+                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                    Yo'q
+                  </p>
                 )}
               </div>
-            )}
-          </SectionCard>
+            </div>
+          </div>
+
+          {/* History */}
         </div>
-      </div>
+      </CusDrawer>
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          Assign Operator Modal
+      ═══════════════════════════════════════════════════════════════════════ */}
+      <CusDialog
+        open={assignOpen}
+        onClose={() => {
+          setAssignOpen(false);
+          setSelectedEmp(null);
+        }}
+        title="Operator biriktirish"
+        description="Attraksion uchun xodimni tanlang"
+        size="md"
+        footer={
+          <>
+            <CusButton
+              variant="outline"
+              onClick={() => {
+                setAssignOpen(false);
+                setSelectedEmp(null);
+              }}
+            >
+              Bekor qilish
+            </CusButton>
+            <CusButton isDisabled={selectedEmp === null} onClick={handleAssign}>
+              Biriktirish
+            </CusButton>
+          </>
+        }
+      >
+        <div className="space-y-2">
+          {assignCandidates.map((emp) => {
+            const isSelected = selectedEmp === emp.id;
+            return (
+              <button
+                key={emp.id}
+                onClick={() => setSelectedEmp(emp.id)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left"
+                style={{
+                  background: isSelected ? "var(--bg-hover)" : "transparent",
+                  border: `1px solid ${isSelected ? "var(--border-2)" : "var(--border-default)"}`,
+                  cursor: "pointer",
+                  transition: "background 0.15s, border-color 0.15s",
+                }}
+              >
+                <img
+                  src={emp.avatarUrl ?? `https://i.pravatar.cc/150?u=${emp.id}`}
+                  alt={emp.fullName ?? emp.firstName}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    flexShrink: 0,
+                  }}
+                />
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="text-sm font-medium truncate"
+                    style={{ color: "var(--text-default)" }}
+                  >
+                    {emp.fullName ?? `${emp.firstName} ${emp.lastName}`}
+                  </p>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    {emp.role}
+                  </p>
+                </div>
+                {isSelected && (
+                  <LuCheck
+                    size={16}
+                    style={{ color: "#22c55e", flexShrink: 0 }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </CusDialog>
     </div>
   );
 }
