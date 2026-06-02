@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  LuSearch,
   LuBell,
   LuChevronDown,
   LuLock,
@@ -16,7 +15,6 @@ interface HeaderProps {
 }
 
 export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
-  const [search, setSearch] = useState<string>("");
   const [timeStr, setTimeStr] = useState(() =>
     new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
   );
@@ -55,36 +53,6 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
           <LuPanelLeft size={18} className="hidden desktop:block" />
         )}
       </button>
-
-      {/* Search — desktop only */}
-      {/* <div className="relative flex-1 max-w-md hidden desktop:block">
-        <LuSearch
-          size={14}
-          className="absolute left-3 top-1/2 -translate-y-1/2"
-          style={{ color: 'var(--text-muted)' }}
-        />
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search attractions, staff, reports..."
-          className="w-full rounded-lg pl-9 pr-4 py-2 text-sm outline-none transition-all focus:border-blue-500/50"
-          style={{
-            background: 'var(--bg-input)',
-            border: '1px solid var(--border-default)',
-            color: 'var(--text-3)',
-          }}
-        />
-        <kbd
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-xs px-1.5 py-0.5 rounded border"
-          style={{
-            color: 'var(--text-dim)',
-            background: 'var(--bg-second)',
-            borderColor: 'var(--border-default)',
-          }}
-        >
-          ⌘K
-        </kbd>
-      </div> */}
 
       <div className="flex items-center gap-2 ml-auto">
         {/* Live indicator — tablet+ */}

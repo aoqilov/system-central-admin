@@ -13,7 +13,7 @@ import {
   LuClock,
   LuBanknote,
 } from 'react-icons/lu'
-import { useTranslation } from '../../../i18n/languageConfig'
+import { useTranslation } from '../../../../i18n/languageConfig'
 
 interface NavItemDef {
   labelKey: string

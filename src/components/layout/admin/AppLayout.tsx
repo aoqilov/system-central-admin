@@ -5,9 +5,9 @@ import Header from "./header/Header";
 import {
   CusBreadCrumb,
   type BreadCrumbItem,
-} from "../ui/bread-crumb/CusBreadCrumb";
+} from "../../ui/bread-crumb/CusBreadCrumb";
 import { LuChevronRight } from "react-icons/lu";
-import { useTranslation } from "../../i18n/languageConfig";
+import { useTranslation } from "../../../i18n/languageConfig";
 
 const SECTION_MAP: Record<string, { key: string; parentPath?: string }> = {
   "live-monitor": { key: "sidebar.liveMonitor" },
@@ -15,6 +15,7 @@ const SECTION_MAP: Record<string, { key: string; parentPath?: string }> = {
   employee:       { key: "sidebar.employees",  parentPath: "/employees" },
   attractions:    { key: "sidebar.attractions" },
   attraction:     { key: "sidebar.attractions", parentPath: "/attractions" },
+  kassa:          { key: "sidebar.kassa",       parentPath: "/kassa" },
   reports:        { key: "sidebar.reports" },
   settings:       { key: "sidebar.settings" },
   support:        { key: "sidebar.support" },
