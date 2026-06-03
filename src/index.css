@@ -33,6 +33,16 @@
   --scrollbar-track: #f1f5f9;
   --scrollbar-thumb: #e2e8f0;
   --scrollbar-thumb-hover: #cbd5e1;
+
+  /* active color */
+  --color-blue: #3b82f6;
+  --color-green: #22c55e;
+  --color-cyan: #06b6d4;
+  --color-yellow: #eab308;
+  --color-red: #ef4444;
+  --color-purple: #a855f7;
+  --color-pink: #ec4899;
+  --color-gray: #6b7280;
 }
 
 /* Dark mode */
@@ -80,7 +90,7 @@
   body {
     background-color: var(--bg-main);
     color: var(--text-default);
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: "Plus Jakarta Sans", sans-serif;
     margin: 0;
     padding: 0;
   }

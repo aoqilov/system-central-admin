@@ -72,12 +72,12 @@ export function CusTable<T extends object>({
   selectable = false,
   selectedRows,
   onSelectionChange,
-  colorHeader,
+  colorHeader = "var(--bg-hover)",
   colorTextHeader,
   colorTextHeaderHover,
   colorHeaderHover,
   colorBody,
-  colorBodyHover,
+  colorBodyHover = "var(--bg-hover)",
 }: CusTableProps<T>) {
   const uid = useId().replace(/:/g, "");
   const scope = `cus-table-${uid}`;
@@ -149,10 +149,10 @@ export function CusTable<T extends object>({
         </p>
       )}
       <style>{`
-        .${scope} th { ${colorHeader ? `background:${colorHeader};` : ""} ${colorTextHeader ? `color:${colorTextHeader};` : ""} }
+        .${scope} th { ${colorHeader ? `background:${colorHeader} !important;` : ""} ${colorTextHeader ? `color:${colorTextHeader};` : ""} }
         .${scope} th:hover { ${colorHeaderHover ? `background:${colorHeaderHover};` : ""} ${colorTextHeaderHover ? `color:${colorTextHeaderHover};` : ""} }
         .${scope} tbody tr { ${colorBody ? `background:${colorBody};` : ""} }
-        .${scope} tbody tr:hover { ${colorBodyHover ? `background:${colorBodyHover};` : ""} }
+        .${scope} tbody tr:hover { ${colorBodyHover ? `background:${colorBodyHover} !important;` : ""} }
       `}</style>
 
       <Table.ScrollArea

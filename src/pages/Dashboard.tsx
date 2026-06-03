@@ -9,7 +9,14 @@ import {
   LuMail,
   LuLock,
   LuPhone,
+  LuList,
+  LuChartColumn,
+  LuMap,
+  LuLayoutGrid,
+  LuClock,
+  LuCalendarDays,
 } from "react-icons/lu";
+import { CusSegment } from "../components/ui/segment/CusSegment";
 import { CusTable, type ColumnDef } from "../components/ui/table/CusTable";
 import { CusPagination } from "../components/ui/table/CusPagination";
 import { CusBadge } from "../components/ui/badge/CusBadge";
@@ -108,6 +115,10 @@ export default function Dashboard() {
   const [drawerEnd, setDrawerEnd] = useState(false);
   const [drawerStart, setDrawerStart] = useState(false);
   const [drawerBottom, setDrawerBottom] = useState(false);
+
+  // CusSegment states
+  const [view, setView]     = useState("list");
+  const [period, setPeriod] = useState("week");
 
   return (
     <div className="p-4 tablet:p-6 space-y-6 max-w-3xl">
@@ -940,6 +951,76 @@ export default function Dashboard() {
             ))}
           </div>
         </CusDrawer>
+      </Section>
+
+      {/* ── CusSegment showcase ─────────────────────────────────── */}
+
+      {/* 36. CusSegment — ikonasiz, oddiy */}
+      <Section title="CusSegment — faqat label">
+        <CusSegment
+          value={period}
+          onValueChange={setPeriod}
+          items={[
+            { id: "day",   label: "Kun" },
+            { id: "week",  label: "Hafta" },
+            { id: "month", label: "Oy" },
+            { id: "year",  label: "Yil" },
+          ]}
+        />
+        <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+          Tanlangan: <span style={{ color: "var(--text-3)" }}>{period}</span>
+        </p>
+      </Section>
+
+      {/* 37. CusSegment — chap icon */}
+      <Section title="CusSegment — iconPosition=left (default)">
+        <CusSegment
+          value={view}
+          onValueChange={setView}
+          iconPosition="left"
+          items={[
+            { id: "list",  label: "Ro'yxat",    icon: <LuList /> },
+            { id: "grid",  label: "Grid",        icon: <LuLayoutGrid /> },
+            { id: "chart", label: "Statistika",  icon: <LuChartColumn /> },
+            { id: "map",   label: "Xarita",      icon: <LuMap /> },
+          ]}
+        />
+        <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+          Tanlangan: <span style={{ color: "var(--text-3)" }}>{view}</span>
+        </p>
+      </Section>
+
+      {/* 38. CusSegment — o'ng icon */}
+      <Section title="CusSegment — iconPosition=right">
+        <CusSegment
+          defaultValue="week"
+          iconPosition="right"
+          items={[
+            { id: "day",   label: "Bugun",  icon: <LuClock /> },
+            { id: "week",  label: "Hafta",  icon: <LuCalendarDays /> },
+            { id: "month", label: "Oy",     icon: <LuCalendarDays /> },
+          ]}
+        />
+      </Section>
+
+      {/* 39. CusSegment — size'lar */}
+      <Section title="CusSegment — size (xs · sm · md · lg)">
+        <div className="space-y-3">
+          {(["xs", "sm", "md", "lg"] as const).map((s) => (
+            <div key={s} className="flex items-center gap-3">
+              <span className="text-xs w-6" style={{ color: "var(--text-muted)" }}>{s}</span>
+              <CusSegment
+                size={s}
+                defaultValue="a"
+                items={[
+                  { id: "a", label: "Variant A" },
+                  { id: "b", label: "Variant B" },
+                  { id: "c", label: "Variant C" },
+                ]}
+              />
+            </div>
+          ))}
+        </div>
       </Section>
 
       {/* ── CusBreadCrumb showcase ──────────────────────────────── */}
