@@ -19,7 +19,8 @@
     "support": "Поддержка",
     "systemsNormal": "Все системы в норме",
     "parkOpen": "Парк открыт",
-    "parkHours": "09:00 — 22:00 сегодня"
+    "parkHours": "09:00 — 22:00 сегодня",
+    "qrCode": "QR Код"
   },
   "employees": {
     "breadcrumb": "Персонал",

@@ -18,12 +18,17 @@ const Reports = lazy(() => import("../pages/Reports"));
 const Settings = lazy(() => import("../pages/Settings"));
 const Support = lazy(() => import("../pages/Support"));
 const OperatorHome = lazy(() => import("../pages/forOperator/OperatorHome"));
-const OperatorPayment = lazy(() => import("../pages/forOperator/OperatorPayment"));
-const OperatorProfile = lazy(() => import("../pages/forOperator/OperatorProfile"));
+const OperatorPayment = lazy(
+  () => import("../pages/forOperator/OperatorPayment"),
+);
+const OperatorProfile = lazy(
+  () => import("../pages/forOperator/OperatorProfile"),
+);
 const Login = lazy(() => import("../pages/Login"));
 const Unauthorized = lazy(() => import("../pages/Unauthorized"));
 const NotFound = lazy(() => import("../pages/NotFound"));
 const DevUI = lazy(() => import("../pages/DevUI"));
+const QrCode = lazy(() => import("../pages/QrCode"));
 
 export const routes: RouteObject[] = [
   {
@@ -45,7 +50,10 @@ export const routes: RouteObject[] = [
       { path: "/reports", element: <Reports /> },
       { path: "/settings", element: <Settings /> },
       { path: "/support", element: <Support /> },
-      ...(import.meta.env.DEV ? [{ path: "/test-ui", element: <DevUI /> }] : []),
+      { path: "/qrcode", element: <QrCode /> },
+      ...(import.meta.env.DEV
+        ? [{ path: "/test-ui", element: <DevUI /> }]
+        : []),
     ],
   },
   {
@@ -56,7 +64,7 @@ export const routes: RouteObject[] = [
       </AuthGuard>
     ),
     children: [
-      { path: "/operator",         element: <OperatorHome /> },
+      { path: "/operator", element: <OperatorHome /> },
       { path: "/operator/payment", element: <OperatorPayment /> },
       { path: "/operator/profile", element: <OperatorProfile /> },
     ],

@@ -13,6 +13,7 @@ import {
   LuClock,
   LuBanknote,
 } from "react-icons/lu";
+import { IoQrCodeSharp } from "react-icons/io5";
 import { useTranslation } from "../../../../i18n/languageConfig";
 import { SiTestcafe } from "react-icons/si";
 
@@ -42,6 +43,7 @@ const navGroups: NavGroupDef[] = [
       { labelKey: "employees", icon: LuUsers, to: "/employees" },
       { labelKey: "attractions", icon: LuFerrisWheel, to: "/attractions" },
       { labelKey: "kassa", icon: LuBanknote, to: "/kassa" },
+      { labelKey: "qrCode", icon: IoQrCodeSharp, to: "/qrcode" },
     ],
   },
 ];
@@ -49,7 +51,9 @@ const navGroups: NavGroupDef[] = [
 const systemItems: NavItemDef[] = [
   { labelKey: "settings", icon: LuSettings, to: "/settings" },
   { labelKey: "support", icon: LuLifeBuoy, to: "/support" },
-  ...(import.meta.env.DEV ? [{ labelKey: "test-UI", icon: SiTestcafe, to: "/test-ui" }] : []),
+  ...(import.meta.env.DEV
+    ? [{ labelKey: "test-UI", icon: SiTestcafe, to: "/test-ui" }]
+    : []),
 ];
 
 function NavItem({
@@ -148,7 +152,7 @@ function SidebarContent({
             }
           >
             <p
-              className="text-xs font-medium uppercase tracking-wider px-3 mb-2"
+              className="text-[10px] font-medium uppercase tracking-wider px-3 mb-2"
               style={{ color: "var(--text-dim)" }}
             >
               {t(group.labelKey)}

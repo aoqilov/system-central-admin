@@ -19,7 +19,8 @@
     "support": "Yordam",
     "systemsNormal": "Tizimlar normal ishlayapti",
     "parkOpen": "Park ochiq",
-    "parkHours": "09:00 — 22:00 bugun"
+    "parkHours": "09:00 — 22:00 bugun",
+    "qrCode": "QR Kod"
   },
   "employees": {
     "breadcrumb": "Staff",
