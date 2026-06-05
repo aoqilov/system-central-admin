@@ -8,8 +8,11 @@ import {
   LuPanelLeft,
   LuSettings,
   LuLogOut,
+  LuSun,
+  LuMoon,
 } from "react-icons/lu";
 import { CusPopover } from "../../../ui/popover/CusPopover";
+import { useTheme } from "../../../../context/ThemeContext";
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -29,6 +32,8 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
   }, []);
+
+  const { theme, toggle } = useTheme();
 
   function handleLogout() {
     localStorage.removeItem("auth_token");
@@ -142,6 +147,19 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
             >
               <LuSettings size={14} style={{ color: "var(--text-muted)" }} />
               Sozlamalar
+            </button>
+
+            <button
+              onClick={toggle}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+              style={{ color: "var(--text-2)" }}
+            >
+              {theme === "dark" ? (
+                <LuSun size={14} style={{ color: "var(--text-muted)" }} />
+              ) : (
+                <LuMoon size={14} style={{ color: "var(--text-muted)" }} />
+              )}
+              {theme === "dark" ? "Yorug' rejim" : "Qorong'u rejim"}
             </button>
 
             <button

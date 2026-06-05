@@ -184,6 +184,12 @@ const paymentBreakdown = [
   { label: "Karta to'ldirish", value: 2_670_000, color: "var(--color-purple)" },
 ];
 
+const selfPayBreakdown = [
+  { label: "Payme", value: 5_870_000, color: "#1fce6b" },
+  { label: "Click", value: 4_350_000, color: "#1a73e8" },
+  { label: "Uzumbank", value: 3_120_000, color: "#f97316" },
+];
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const fmt = (v: number) =>
@@ -361,124 +367,128 @@ const LiveMonitorKassa = () => {
 
       {/* ── Row 2: main body ──────────────────────────────── */}
       <div className="grid grid-cols-1 desktop:grid-cols-[3fr_2fr] gap-4 items-start">
-        {/* Left — live transaction feed */}
-        <CusCard>
-          <CusCardHeader
-            icon={LuActivity}
-            title="Jonli tranzaksiyalar"
-            iconColor="var(--color-green)"
-            action={
-              <div className="flex items-center gap-1.5">
-                <span
-                  className="w-2 h-2 rounded-full animate-pulse"
-                  style={{ background: "var(--color-green)" }}
-                />
-                <span
-                  className="text-xs"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  Live
-                </span>
-              </div>
-            }
-          />
-          <CusTable<Transaction>
-            data={transactions}
-            maxH="400px"
-            stickyHeader
-            variant="outline"
-            colorHeader="var(--bg-hover)"
-            size="sm"
-            columns={
-              [
-                {
-                  key: "time",
-                  header: "Vaqt",
-                  render: (tx) => (
-                    <span
-                      className="font-mono text-xs"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      {tx.time}
-                    </span>
-                  ),
-                },
-                {
-                  key: "kassaName",
-                  header: "Kassa",
-                  render: (tx) => (
-                    <span style={{ color: "var(--text-2)" }}>
-                      {tx.kassaName}
-                    </span>
-                  ),
-                },
-                {
-                  key: "cashier",
-                  header: "Kassir",
-                  render: (tx) => (
-                    <span style={{ color: "var(--text-3)" }}>{tx.cashier}</span>
-                  ),
-                },
-                {
-                  key: "amount",
-                  header: "Miqdor",
-                  align: "right",
-                  render: (tx) => (
-                    <span
-                      style={{
-                        fontWeight: 600,
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                    >
-                      {tx.amount.toLocaleString()}
-                    </span>
-                  ),
-                },
-                {
-                  key: "paymentType",
-                  header: "To'lov",
-                  render: (tx) => (
-                    <span
-                      style={{
-                        display: "inline-block",
-                        padding: "2px 8px",
-                        borderRadius: 4,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        background: `${PAYMENT_COLOR[tx.paymentType]}18`,
-                        color: PAYMENT_COLOR[tx.paymentType],
-                      }}
-                    >
-                      {tx.paymentType}
-                    </span>
-                  ),
-                },
-                {
-                  key: "status",
-                  header: "Status",
-                  render: (tx) => {
-                    const st = STATUS_CFG[tx.status];
-                    const StIcon = st.icon;
-                    return (
+        {/* Left — live transaction feed + self-pay chart */}
+        <div className="flex flex-col gap-4">
+          <CusCard>
+            <CusCardHeader
+              icon={LuActivity}
+              title="Jonli tranzaksiyalar"
+              iconColor="var(--color-green)"
+              action={
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="w-2 h-2 rounded-full animate-pulse"
+                    style={{ background: "var(--color-green)" }}
+                  />
+                  <span
+                    className="text-xs"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    Live
+                  </span>
+                </div>
+              }
+            />
+            <CusTable<Transaction>
+              data={transactions}
+              maxH="400px"
+              stickyHeader
+              variant="outline"
+              colorHeader="var(--bg-hover)"
+              size="sm"
+              columns={
+                [
+                  {
+                    key: "time",
+                    header: "Vaqt",
+                    render: (tx) => (
+                      <span
+                        className="font-mono text-xs"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        {tx.time}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: "kassaName",
+                    header: "Kassa",
+                    render: (tx) => (
+                      <span style={{ color: "var(--text-2)" }}>
+                        {tx.kassaName}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: "cashier",
+                    header: "Kassir",
+                    render: (tx) => (
+                      <span style={{ color: "var(--text-3)" }}>
+                        {tx.cashier}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: "amount",
+                    header: "Miqdor",
+                    align: "right",
+                    render: (tx) => (
                       <span
                         style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 4,
-                          fontSize: 12,
-                          color: st.color,
+                          fontWeight: 600,
+                          fontVariantNumeric: "tabular-nums",
                         }}
                       >
-                        <StIcon size={13} />
-                        {st.label}
+                        {tx.amount.toLocaleString()}
                       </span>
-                    );
+                    ),
                   },
-                },
-              ] satisfies ColumnDef<Transaction>[]
-            }
-          />
-        </CusCard>
+                  {
+                    key: "paymentType",
+                    header: "To'lov",
+                    render: (tx) => (
+                      <span
+                        style={{
+                          display: "inline-block",
+                          padding: "2px 8px",
+                          borderRadius: 4,
+                          fontSize: 11,
+                          fontWeight: 600,
+                          background: `${PAYMENT_COLOR[tx.paymentType]}18`,
+                          color: PAYMENT_COLOR[tx.paymentType],
+                        }}
+                      >
+                        {tx.paymentType}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: "status",
+                    header: "Status",
+                    render: (tx) => {
+                      const st = STATUS_CFG[tx.status];
+                      const StIcon = st.icon;
+                      return (
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 4,
+                            fontSize: 12,
+                            color: st.color,
+                          }}
+                        >
+                          <StIcon size={13} />
+                          {st.label}
+                        </span>
+                      );
+                    },
+                  },
+                ] satisfies ColumnDef<Transaction>[]
+              }
+            />
+          </CusCard>
+        </div>
 
         {/* Right — charts */}
         <div className="flex flex-col gap-4">
@@ -508,13 +518,11 @@ const LiveMonitorKassa = () => {
               />
             </div>
           </CusCard>
-
-          {/* To'lov usullari */}
           <CusCard>
             <CusCardHeader
-              icon={LuRefreshCw}
-              title="To'lov usullari"
-              iconColor="var(--color-purple)"
+              icon={LuTrendingUp}
+              title="Mijoz o'z-hisobini toldirgan to'lovi"
+              iconColor="var(--color-cyan)"
               action={
                 <span
                   className="text-xs"
@@ -526,15 +534,17 @@ const LiveMonitorKassa = () => {
             />
             <div className="p-4">
               <BarListChart
-                data={paymentBreakdown}
+                data={selfPayBreakdown}
                 valueFormatter={fmtFull}
                 sort="desc"
                 barHeight={34}
                 gap={10}
-                labelWidth="42%"
+                labelWidth="38%"
               />
             </div>
           </CusCard>
+
+          {/* To'lov usullari */}
         </div>
       </div>
     </div>
