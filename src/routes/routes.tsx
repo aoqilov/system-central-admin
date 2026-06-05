@@ -2,6 +2,12 @@ import { lazy } from "react";
 import type { RouteObject } from "react-router-dom";
 import AppLayout from "../components/layout/admin/AppLayout";
 import { AuthGuard } from "../middleware/AuthGuard";
+import KassaProfile from "../pages/forKassa/KassaProfile";
+const KassaLayout = lazy(
+  () => import("../components/layout/kassa/KassaLayout"),
+);
+const KassaHome = lazy(() => import("../pages/forKassa/KassaHome"));
+const KassaStats = lazy(() => import("../pages/forKassa/KassaStats"));
 const OperatorLayout = lazy(
   () => import("../components/layout/operator/OperatorLayout"),
 );
@@ -67,6 +73,19 @@ export const routes: RouteObject[] = [
       { path: "/operator", element: <OperatorHome /> },
       { path: "/operator/payment", element: <OperatorPayment /> },
       { path: "/operator/profile", element: <OperatorProfile /> },
+    ],
+  },
+  {
+    // for kassa pages
+    element: (
+      <AuthGuard roles={["kassa"]}>
+        <KassaLayout />
+      </AuthGuard>
+    ),
+    children: [
+      { path: "/rolekassa", element: <KassaHome /> },
+      { path: "/rolekassa/stats", element: <KassaStats /> },
+      { path: "/rolekassa/profile", element: <KassaProfile /> },
     ],
   },
   { path: "/login", element: <Login /> },

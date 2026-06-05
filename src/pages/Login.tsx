@@ -16,10 +16,25 @@ interface Account {
 }
 
 const ACCOUNTS: Record<string, Account> = {
-  superadmin: { password: "superadmin", role: "superadmin", defaultPath: "/",         label: "Super Admin" },
-  admin:      { password: "admin",      role: "admin",      defaultPath: "/",         label: "Admin" },
-  operator:   { password: "operator",   role: "operator",   defaultPath: "/operator", label: "Operator" },
-  kassir:     { password: "kassir",     role: "kassir",     defaultPath: "/",         label: "Kassir" },
+  superadmin: {
+    password: "superadmin",
+    role: "superadmin",
+    defaultPath: "/",
+    label: "Super Admin",
+  },
+  admin: { password: "admin", role: "admin", defaultPath: "/", label: "Admin" },
+  operator: {
+    password: "operator",
+    role: "operator",
+    defaultPath: "/operator",
+    label: "Operator",
+  },
+  kassa: {
+    password: "kassa",
+    role: "kassa",
+    defaultPath: "/rolekassa",
+    label: "Kassa",
+  },
 };
 
 const ROLE_OPTIONS = Object.entries(ACCOUNTS).map(([key, acc]) => ({
