@@ -1,28 +1,34 @@
 import dayjs from "dayjs";
 import type { GenerateQrBatchDto, Party, QrCode, QrStatus } from "../qr.types";
+import { mockQrCodes, INITIAL_BATCH_COUNTER } from "../../../data/qrCodes";
 
-// In-memory store — keyin fetch/axios ga almashtiriladi
-let store: QrCode[] = [];
-let batchCounter = 0; // har yangi partiyada oshadi
+// ─── In-memory store ──────────────────────────────────────────────────────────
+// Mock data bilan boshlang'ich holatda, keyin fetch/axios ga almashtiriladi
+
+let store: QrCode[] = [...mockQrCodes];
+let batchCounter = INITIAL_BATCH_COUNTER;
+
+// ─── API functions ────────────────────────────────────────────────────────────
 
 export async function generateQrBatch(dto: GenerateQrBatchDto): Promise<QrCode[]> {
   const batchId = crypto.randomUUID();
-  const serial = ++batchCounter;
-  const now = dayjs().toISOString();
+  const serial  = ++batchCounter;
+  const now     = dayjs().toISOString();
 
   const codes: QrCode[] = Array.from({ length: dto.count }, (_, i) => ({
-    id: crypto.randomUUID(),
-    token: crypto.randomUUID(), // TODO: serverda generatsiya
-    status: "no-active" as const, // MAJBURIY — dto dan olma
+    id:          crypto.randomUUID(),
+    token:       crypto.randomUUID(),
+    status:      "no-active" as const,
     batchId,
     batchSerial: serial,
-    order: i + 1,
-    partia: dto.partia,
-    validFrom: dto.validFrom ?? null,
-    validUntil: dto.validUntil ?? null,
-    userId: null,
-    createdAt: now,
-    updatedAt: now,
+    order:       i + 1,
+    partia:      dto.partia,
+    amount:      dto.amount ?? 0,
+    validFrom:   dto.validFrom ?? null,
+    validUntil:  dto.validUntil ?? null,
+    userId:      null,
+    createdAt:   now,
+    updatedAt:   now,
   }));
 
   store = [...store, ...codes];
@@ -37,11 +43,11 @@ export async function listParties(): Promise<Party[]> {
       existing.count += 1;
     } else {
       map.set(code.batchId, {
-        batchId: code.batchId,
+        batchId:     code.batchId,
         batchSerial: code.batchSerial,
-        partia: code.partia,
-        count: 1,
-        createdAt: code.createdAt,
+        partia:      code.partia,
+        count:       1,
+        createdAt:   code.createdAt,
       });
     }
   }
@@ -56,6 +62,11 @@ export async function listCodes(batchId: string): Promise<QrCode[]> {
 
 export async function deleteCode(id: string): Promise<void> {
   store = store.filter((c) => c.id !== id);
+}
+
+export async function deleteCodes(ids: string[]): Promise<void> {
+  const set = new Set(ids);
+  store = store.filter((c) => !set.has(c.id));
 }
 
 export async function updateStatus(id: string, status: QrStatus): Promise<QrCode> {

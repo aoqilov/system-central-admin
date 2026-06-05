@@ -3,11 +3,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   LuBell,
   LuChevronDown,
-  LuLock,
   LuMenu,
   LuPanelLeftClose,
   LuPanelLeft,
+  LuSettings,
+  LuLogOut,
 } from "react-icons/lu";
+import { CusPopover } from "../../../ui/popover/CusPopover";
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -28,10 +30,10 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
     return () => clearInterval(id);
   }, []);
 
-  function handleLock() {
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('user_role')
-    navigate('/login', { state: { from: location }, replace: true })
+  function handleLogout() {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("user_role");
+    navigate("/login", { state: { from: location }, replace: true });
   }
 
   return (
@@ -62,9 +64,11 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
           className="hidden tablet:flex items-center gap-2 text-xs"
           style={{ color: "var(--text-4)" }}
         >
-          <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span>Live</span>
-          <span className="font-mono" style={{ color: "var(--text-3)" }}>
+          <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
+          <span className="font-mono text-md" style={{ color: "var(--text-3)" }}>
+            Live
+          </span>
+          <span className="font-mono text-xl" style={{ color: "var(--text-3)" }}>
             {timeStr}
           </span>
         </div>
@@ -79,42 +83,83 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
           </span>
         </button>
 
-        <button
-          onClick={handleLock}
-          title="Lock / Sign out"
-          className="p-2 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5 hover:text-red-400"
-          style={{ color: "var(--text-muted)" }}
-        >
-          <LuLock size={15} />
-        </button>
-
-        <button
-          className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5 border"
-          style={{ borderColor: "var(--border-default)" }}
-        >
-          <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
-            O
-          </div>
-          <div className="text-left hidden tablet:block">
-            <p
-              className="text-xs font-medium leading-none"
-              style={{ color: "var(--text-2)" }}
+        {/* User menu */}
+        <CusPopover
+          placement="bottom-end"
+          width={220}
+          trigger={(open) => (
+            <button
+              className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5 border"
+              style={{ borderColor: "var(--border-default)" }}
             >
+              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
+                O
+              </div>
+              <div className="text-left hidden tablet:block">
+                <p
+                  className="text-xs font-medium leading-none"
+                  style={{ color: "var(--text-2)" }}
+                >
+                  Owner
+                </p>
+                <p
+                  className="text-[10px] mt-0.5"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  admin@park.io
+                </p>
+              </div>
+              <LuChevronDown
+                size={12}
+                className="ml-1 hidden tablet:block transition-transform duration-200"
+                style={{
+                  color: "var(--text-muted)",
+                  transform: open ? "rotate(180deg)" : "rotate(0deg)",
+                }}
+              />
+            </button>
+          )}
+        >
+          {/* User info */}
+          <div
+            className="px-4 py-3 border-b"
+            style={{ borderColor: "var(--border-default)" }}
+          >
+            <p className="text-xs font-semibold" style={{ color: "var(--text-default)" }}>
               Owner
             </p>
-            <p
-              className="text-[10px] mt-0.5"
-              style={{ color: "var(--text-muted)" }}
-            >
+            <p className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
               admin@park.io
             </p>
           </div>
-          <LuChevronDown
-            size={12}
-            className="ml-1 hidden tablet:block"
-            style={{ color: "var(--text-muted)" }}
-          />
-        </button>
+
+          {/* Menu items */}
+          <div className="p-1.5 space-y-0.5">
+            <button
+              onClick={() => navigate("/settings")}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+              style={{ color: "var(--text-2)" }}
+            >
+              <LuSettings size={14} style={{ color: "var(--text-muted)" }} />
+              Sozlamalar
+            </button>
+
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors"
+              style={{ color: "#ef4444" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.08)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+              }}
+            >
+              <LuLogOut size={14} />
+              Chiqish
+            </button>
+          </div>
+        </CusPopover>
       </div>
     </header>
   );

@@ -1,30 +1,16 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
-import {
   LuSearch,
   LuCheck,
   LuWrench,
   LuBan,
   LuLayoutGrid,
   LuMapPin,
-  LuClock,
   LuPencil,
   LuTrash2,
   LuPlus,
   LuX,
-  LuTrendingUp,
-  LuBanknote,
-  LuCreditCard,
 } from "react-icons/lu";
 import { kassaList, type Kassa, type KassaStatus } from "../data/kassa";
 import { employees } from "../data/employees";
@@ -34,10 +20,6 @@ import { CusInput } from "../components/ui/inputs/CusInput";
 import CusSelect from "../components/ui/select/CusSelect";
 import { CusPagination } from "../components/ui/table/CusPagination";
 import { CusButton } from "../components/ui/buttons/CusButton";
-import {
-  CusCard as Card,
-  CusCardHeader as CardHeader,
-} from "../components/shared/card/CusCard";
 
 // ─── Configs ──────────────────────────────────────────────────────────────────
 
@@ -52,142 +34,6 @@ const STATUS_LABEL: Record<KassaStatus, string> = {
   maintenance: "Ta'mirda",
   inactive: "Yopiq",
 };
-
-// ─── Chart data ───────────────────────────────────────────────────────────────
-
-const WEEK = ["27/5", "28/5", "29/5", "30/5", "31/5", "1/6", "2/6"];
-const COLORS = [
-  "#3b82f6",
-  "#22c55e",
-  "#f59e0b",
-  "#8b5cf6",
-  "#06b6d4",
-  "#ec4899",
-  "#ef4444",
-  "#64748b",
-];
-
-function _s(n: number) {
-  return ((n * 9301 + 49297) % 233280) / 233280;
-}
-
-const activeKassas = kassaList.filter((k) => k.todayRevenue > 0);
-
-// Chart 1 — stacked weekly revenue per kassa
-const weeklyByKassa = WEEK.map((day, di) => {
-  const row: Record<string, string | number> = { day };
-  activeKassas.forEach((k, ki) => {
-    const seed = k.id * 17 + di * 11 + ki * 3;
-    row[k.name] = Math.round((k.todayRevenue / 7) * (0.45 + _s(seed) * 1.1));
-  });
-  return row;
-});
-
-// Chart 2 — weekly revenue by payment method
-const totalDaily = kassaList.reduce((s, k) => s + k.todayRevenue, 0) / 7;
-const weeklyByPayment = WEEK.map((day, di) => {
-  const base = Math.round(totalDaily * (0.65 + _s(di * 19) * 0.7));
-  const uzcard = Math.round(base * 0.46);
-  const toldirish = base - uzcard;
-  return { day, uzcard, toldirish };
-});
-
-// ─── Tooltips ─────────────────────────────────────────────────────────────────
-
-interface TipProps {
-  active?: boolean;
-  payload?: Array<{ name: string; value: number; color: string }>;
-  label?: string;
-}
-
-function KassaTip({ active, payload, label }: TipProps) {
-  if (!active || !payload?.length) return null;
-  const total = payload.reduce((s, p) => s + (p.value ?? 0), 0);
-  return (
-    <div
-      className="rounded-lg px-3 py-2.5 border shadow-xl text-xs space-y-1"
-      style={{
-        background: "var(--bg-tooltip)",
-        borderColor: "var(--border-2)",
-        color: "var(--text-4)",
-        minWidth: 160,
-      }}
-    >
-      <p className="font-medium mb-1.5">{label}</p>
-      {payload.map((p) => (
-        <div key={p.name} className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-1.5">
-            <span
-              className="w-2 h-2 rounded-sm shrink-0"
-              style={{ background: p.color }}
-            />
-            <span style={{ color: "var(--text-muted)" }}>{p.name}</span>
-          </div>
-          <span className="font-medium tabular-nums">
-            {(p.value / 1000).toFixed(0)}k
-          </span>
-        </div>
-      ))}
-      <div
-        className="flex justify-between pt-1 border-t"
-        style={{ borderColor: "var(--border-2)" }}
-      >
-        <span style={{ color: "var(--text-muted)" }}>Jami</span>
-        <span className="font-semibold tabular-nums">
-          {(total / 1000).toFixed(0)}k
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function PayTip({ active, payload, label }: TipProps) {
-  if (!active || !payload?.length) return null;
-  const labels: Record<string, string> = {
-    naqd: "Naqd pul",
-    uzcard: "UzCard",
-    toldirish: "Karta to'ldirish",
-  };
-  const total = payload.reduce((s, p) => s + (p.value ?? 0), 0);
-  return (
-    <div
-      className="rounded-lg px-3 py-2.5 border shadow-xl text-xs space-y-1"
-      style={{
-        background: "var(--bg-tooltip)",
-        borderColor: "var(--border-2)",
-        color: "var(--text-4)",
-        minWidth: 170,
-      }}
-    >
-      <p className="font-medium mb-1.5">{label}</p>
-      {payload.map((p) => (
-        <div key={p.name} className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-1.5">
-            <span
-              className="w-2 h-2 rounded-sm shrink-0"
-              style={{ background: p.color }}
-            />
-            <span style={{ color: "var(--text-muted)" }}>
-              {labels[p.name] ?? p.name}
-            </span>
-          </div>
-          <span className="font-medium tabular-nums">
-            {(p.value / 1000).toFixed(0)}k
-          </span>
-        </div>
-      ))}
-      <div
-        className="flex justify-between pt-1 border-t"
-        style={{ borderColor: "var(--border-2)" }}
-      >
-        <span style={{ color: "var(--text-muted)" }}>Jami</span>
-        <span className="font-semibold tabular-nums">
-          {(total / 1000).toFixed(0)}k
-        </span>
-      </div>
-    </div>
-  );
-}
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
 
@@ -333,82 +179,16 @@ export default function KassaPage() {
       },
     },
     {
-      key: "openedAt",
-      header: "Ochildi",
+      key: "note",
+      header: "Izoh",
       sortable: false,
       render: (row) =>
-        row.openedAt ? (
-          <div className="flex items-center gap-1.5">
-            <LuClock size={11} style={{ color: "var(--text-muted)" }} />
-            <span
-              className="text-xs tabular-nums"
-              style={{ color: "var(--text-2)" }}
-            >
-              {row.openedAt}
-            </span>
-          </div>
-        ) : (
-          <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>
-        ),
-    },
-    {
-      key: "todayTransactions",
-      header: "Tranzaksiya",
-      align: "right",
-      sortable: true,
-      render: (row) => (
-        <span
-          className="text-sm tabular-nums"
-          style={{ color: "var(--text-2)" }}
-        >
-          {row.todayTransactions > 0 ? (
-            row.todayTransactions
-          ) : (
-            <span style={{ color: "var(--text-muted)" }}>—</span>
-          )}
-        </span>
-      ),
-    },
-    {
-      key: "todayRevenue",
-      header: "Bugungi daromad",
-      align: "right",
-      sortable: true,
-      render: (row) =>
-        row.todayRevenue > 0 ? (
-          <div className="text-right">
-            <p
-              className="text-sm font-semibold tabular-nums"
-              style={{ color: "var(--text-default)" }}
-            >
-              {row.todayRevenue.toLocaleString()}
-            </p>
-            <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-              UZS
-            </p>
-          </div>
-        ) : (
-          <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>
-        ),
-    },
-    {
-      key: "lastActivity",
-      header: "Oxirgi faollik",
-      sortable: false,
-      render: (row) =>
-        row.lastActivity ? (
-          <span
-            className="text-xs tabular-nums"
-            style={{ color: "var(--text-muted)" }}
-          >
-            {row.lastActivity}
-          </span>
-        ) : row.note ? (
+        row.note ? (
           <span className="text-xs" style={{ color: "var(--text-muted)" }}>
             {row.note}
           </span>
         ) : (
-          <span style={{ color: "var(--text-muted)" }}>—</span>
+          <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>
         ),
     },
   ];
@@ -464,151 +244,6 @@ export default function KassaPage() {
           value={inactCount}
           color="#ef4444"
         />
-      </div>
-
-      {/* Charts row */}
-      <div className="grid grid-cols-1 desktop:grid-cols-2 gap-4">
-        {/* Chart 1: Stacked weekly by kassa */}
-        <Card>
-          <CardHeader
-            icon={LuTrendingUp}
-            title="Haftalik tushum (kassalar bo'yicha)"
-            iconColor="#3b82f6"
-          />
-          <div className="p-5">
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart
-                data={weeklyByKassa}
-                margin={{ top: 4, right: 4, left: -18, bottom: 0 }}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="var(--chart-grid)"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="day"
-                  tick={{ fill: "var(--chart-tick)", fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fill: "var(--chart-tick)", fontSize: 10 }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(v: number) =>
-                    `${(v / 1_000_000).toFixed(1)}M`
-                  }
-                />
-                <Tooltip
-                  content={<KassaTip />}
-                  cursor={{ fill: "rgba(255,255,255,0.04)" }}
-                />
-                {activeKassas.map((k, i) => (
-                  <Bar
-                    key={k.id}
-                    dataKey={k.name}
-                    stackId="a"
-                    fill={COLORS[i % COLORS.length]}
-                    radius={
-                      i === activeKassas.length - 1
-                        ? [4, 4, 0, 0]
-                        : [0, 0, 0, 0]
-                    }
-                    maxBarSize={44}
-                  />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-            {/* Legend */}
-            <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3">
-              {activeKassas.map((k, i) => (
-                <div key={k.id} className="flex items-center gap-1.5">
-                  <span
-                    className="w-2.5 h-2.5 rounded-sm shrink-0"
-                    style={{ background: COLORS[i % COLORS.length] }}
-                  />
-                  <span
-                    className="text-[11px]"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    {k.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-
-        {/* Chart 2: Payment method grouped bar */}
-        <Card>
-          <CardHeader
-            icon={LuCreditCard}
-            title="To'lov turi bo'yicha haftalik tushum"
-            iconColor="#8b5cf6"
-          />
-          <div className="p-5">
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart
-                data={weeklyByPayment}
-                margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="var(--chart-grid)"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="day"
-                  tick={{ fill: "var(--chart-tick)", fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  width={52}
-                  tick={{ fill: "var(--chart-tick)", fontSize: 10 }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(v: number) =>
-                    `${(v / 1_000_000).toFixed(1)}M`
-                  }
-                />
-                <Tooltip
-                  content={<PayTip />}
-                  cursor={{ fill: "rgba(255,255,255,0.04)" }}
-                />
-                <Legend
-                  formatter={(value: string) =>
-                    ({
-                      uzcard: "UzCard",
-                      toldirish: "Karta to'ldirish",
-                    })[value] ?? value
-                  }
-                  wrapperStyle={{
-                    fontSize: 11,
-                    color: "var(--text-muted)",
-                    paddingTop: 8,
-                  }}
-                />
-
-                <Bar
-                  dataKey="uzcard"
-                  fill="#3b82f6"
-                  activeBar={{ fill: "#1d4ed8", stroke: "#1e40af" }}
-                  radius={[6, 6, 0, 0]}
-                  maxBarSize={28}
-                />
-                <Bar
-                  dataKey="toldirish"
-                  fill="#8b5c"
-                  activeBar={{ fill: "#7c3aed", stroke: "#6d28d9" }}
-                  radius={[6, 6, 0, 0]}
-                  maxBarSize={28}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
       </div>
 
       {/* Table card */}

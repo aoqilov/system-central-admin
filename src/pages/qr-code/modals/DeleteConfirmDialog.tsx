@@ -8,23 +8,24 @@ import type { QrCode } from "../qr.types";
 interface Props {
   open: boolean;
   onClose: () => void;
-  code: QrCode | null;
-  onConfirm: (id: string) => Promise<void>;
+  codes: QrCode[];
+  onConfirm: (ids: string[]) => Promise<void>;
 }
 
-export function DeleteConfirmDialog({ open, onClose, code, onConfirm }: Props) {
+export function DeleteConfirmDialog({ open, onClose, codes, onConfirm }: Props) {
   const [loading, setLoading] = useState(false);
 
-  // Close animatsiyasi paytida kontent yo'qolib ketmasin
-  const lastCode = useRef<QrCode | null>(null);
-  if (code) lastCode.current = code;
-  const c = lastCode.current;
+  const lastCodes = useRef<QrCode[]>([]);
+  if (codes.length > 0) lastCodes.current = codes;
+  const list = lastCodes.current;
+
+  const isBulk = list.length > 1;
 
   async function handleConfirm() {
-    if (!c) return;
+    if (list.length === 0) return;
     setLoading(true);
     try {
-      await onConfirm(c.id);
+      await onConfirm(list.map((c) => c.id));
       onClose();
     } finally {
       setLoading(false);
@@ -40,7 +41,7 @@ export function DeleteConfirmDialog({ open, onClose, code, onConfirm }: Props) {
     <CusDialog
       open={open}
       onClose={handleClose}
-      title="Kodni o'chirish"
+      title={isBulk ? `${list.length} ta kodni o'chirish` : "Kodni o'chirish"}
       size="sm"
       closeOnBackdrop={!loading}
       footer={
@@ -65,7 +66,7 @@ export function DeleteConfirmDialog({ open, onClose, code, onConfirm }: Props) {
         </>
       }
     >
-      {c && (
+      {list.length > 0 && (
         <div className="flex items-start gap-3">
           <div
             className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
@@ -74,15 +75,28 @@ export function DeleteConfirmDialog({ open, onClose, code, onConfirm }: Props) {
             <LuTriangleAlert size={16} style={{ color: "#ef4444" }} />
           </div>
           <div>
-            <p className="text-sm font-medium" style={{ color: "var(--text-default)" }}>
-              Ushbu kodni o'chirasizmi?
-            </p>
-            <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-              Token:{" "}
-              <span className="font-mono">{c.token.slice(0, 8)}…</span>
-              {" · "}
-              Partiya: <strong>{c.partia}</strong>
-            </p>
+            {isBulk ? (
+              <>
+                <p className="text-sm font-medium" style={{ color: "var(--text-default)" }}>
+                  {list.length} ta kodni o'chirasizmi?
+                </p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                  Tanlangan barcha kodlar o'chirib tashlanadi.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium" style={{ color: "var(--text-default)" }}>
+                  Ushbu kodni o'chirasizmi?
+                </p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                  Token:{" "}
+                  <span className="font-mono">{list[0].token.slice(0, 8)}…</span>
+                  {" · "}
+                  Partiya: <strong>{list[0].partia}</strong>
+                </p>
+              </>
+            )}
             <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
               Bu amalni ortga qaytarib bo'lmaydi.
             </p>

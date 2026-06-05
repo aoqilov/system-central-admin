@@ -15,10 +15,10 @@ interface Props {
 const DEFAULT_COUNT = 100;
 
 export function GenerateBatchDialog({ open, onClose, onGenerate }: Props) {
-  const [partia, setPartia] = useState("");
+  const [partia,   setPartia]   = useState("");
   const [countStr, setCountStr] = useState(String(DEFAULT_COUNT));
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ partia?: string; count?: string }>({});
+  const [loading,  setLoading]  = useState(false);
+  const [errors,   setErrors]   = useState<{ partia?: string; count?: string }>({});
 
   function validate(): boolean {
     const errs: typeof errors = {};
@@ -35,20 +35,22 @@ export function GenerateBatchDialog({ open, onClose, onGenerate }: Props) {
     setLoading(true);
     try {
       await onGenerate({ partia: partia.trim(), count: Number(countStr) });
-      setPartia("");
-      setCountStr(String(DEFAULT_COUNT));
-      setErrors({});
+      resetForm();
       onClose();
     } finally {
       setLoading(false);
     }
   }
 
-  function handleClose() {
-    if (loading) return;
+  function resetForm() {
     setPartia("");
     setCountStr(String(DEFAULT_COUNT));
     setErrors({});
+  }
+
+  function handleClose() {
+    if (loading) return;
+    resetForm();
     onClose();
   }
 

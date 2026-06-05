@@ -16,7 +16,10 @@ import {
   LuChevronDown,
   LuToggleLeft,
   LuTable2,
+  LuCalendar,
 } from "react-icons/lu";
+import { CalendarDate } from "@internationalized/date";
+import type { DateValue } from "@ark-ui/react/date-picker";
 import { CusButton } from "../components/ui/buttons/CusButton";
 import { CusBadge } from "../components/ui/badge/CusBadge";
 import { CusInput } from "../components/ui/inputs/CusInput";
@@ -27,6 +30,7 @@ import CusSelect from "../components/ui/select/CusSelect";
 import { CusTable } from "../components/ui/table/CusTable";
 import type { ColumnDef } from "../components/ui/table/CusTable";
 import { CusCard, CusCardHeader } from "../components/shared/card/CusCard";
+import { CusCalendar } from "../components/ui/calendar/CusCalendar";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -126,6 +130,33 @@ export default function DevUI() {
   const [selectVal, setSelectVal] = useState("operator");
   const [inputVal, setInputVal] = useState("");
   const [tableSelected, setTableSelected] = useState<number[]>([]);
+
+  // Calendar state
+  const [calColor, setCalColor] = useState<
+    "blue" | "green" | "red" | "orange" | "purple" | "cyan" | "teal" | "pink"
+  >("blue");
+  const [singleVal, setSingleVal] = useState<DateValue[]>([]);
+  const [rangeVal, setRangeVal]   = useState<DateValue[]>([]);
+  const [multiVal, setMultiVal]   = useState<DateValue[]>([]);
+
+  const CAL_COLORS = [
+    { key: "blue",   bg: "#3b82f6" },
+    { key: "green",  bg: "#22c55e" },
+    { key: "red",    bg: "#ef4444" },
+    { key: "orange", bg: "#f97316" },
+    { key: "purple", bg: "#a855f7" },
+    { key: "cyan",   bg: "#06b6d4" },
+    { key: "teal",   bg: "#14b8a6" },
+    { key: "pink",   bg: "#ec4899" },
+  ] as const;
+
+  const fmtDate = (v: DateValue[]) =>
+    v.length === 0
+      ? "—"
+      : v.map((d) => `${d.day}/${d.month}/${d.year}`).join(" → ");
+
+  const isWeekend = (date: DateValue) =>
+    new Date(date.year, date.month - 1, date.day).getDay() % 6 === 0;
 
   return (
     <div className="p-4 tablet:p-6 space-y-8 max-w-4xl mx-auto">
@@ -479,6 +510,265 @@ export default function DevUI() {
               </div>
             ))}
           </Row>
+        </div>
+      </CusCard>
+
+      {/* ── CusCalendar ── */}
+      <CusCard>
+        <CusCardHeader icon={LuCalendar} title="CusCalendar" />
+        <div className="p-4 space-y-8">
+
+          {/* Color picker */}
+          <Section title="colorPalette — rang tanlash">
+            <div className="flex flex-wrap items-center gap-2">
+              {CAL_COLORS.map(({ key, bg }) => (
+                <button
+                  key={key}
+                  onClick={() => setCalColor(key)}
+                  title={key}
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    background: bg,
+                    border: calColor === key
+                      ? "3px solid var(--text-default)"
+                      : "3px solid transparent",
+                    outline: calColor === key ? `2px solid ${bg}` : "none",
+                    outlineOffset: 2,
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                />
+              ))}
+              <span className="text-xs ml-1" style={{ color: "var(--text-muted)" }}>
+                Tanlangan: <strong style={{ color: "var(--text-2)" }}>{calColor}</strong>
+              </span>
+            </div>
+
+            {/* Live preview with selected color */}
+            <div className="mt-4 flex justify-start">
+              <CusCalendar
+                colorPalette={calColor}
+                selectionMode="single"
+                value={singleVal}
+                onValueChange={({ value }) => setSingleVal(value)}
+              />
+            </div>
+            <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+              Tanlangan sana: <strong style={{ color: "var(--text-2)" }}>{fmtDate(singleVal)}</strong>
+            </p>
+          </Section>
+
+          {/* selectionMode */}
+          <Section title="selectionMode">
+            <div className="grid grid-cols-1 desktop:grid-cols-3 gap-6">
+
+              {/* single */}
+              <div className="space-y-2">
+                <p className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
+                  single (default)
+                </p>
+                <CusCalendar
+                  colorPalette={calColor}
+                  selectionMode="single"
+                  value={singleVal}
+                  onValueChange={({ value }) => setSingleVal(value)}
+                  size="sm"
+                />
+                <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                  {fmtDate(singleVal)}
+                </p>
+              </div>
+
+              {/* range */}
+              <div className="space-y-2">
+                <p className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
+                  range
+                </p>
+                <CusCalendar
+                  colorPalette={calColor}
+                  selectionMode="range"
+                  value={rangeVal}
+                  onValueChange={({ value }) => setRangeVal(value)}
+                  size="sm"
+                />
+                <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                  {fmtDate(rangeVal)}
+                </p>
+              </div>
+
+              {/* multiple */}
+              <div className="space-y-2">
+                <p className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
+                  multiple (max 3)
+                </p>
+                <CusCalendar
+                  colorPalette={calColor}
+                  selectionMode="multiple"
+                  maxSelectedDates={3}
+                  value={multiVal}
+                  onValueChange={({ value }) => setMultiVal(value)}
+                  size="sm"
+                />
+                <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                  {multiVal.length} ta tanlandi
+                </p>
+              </div>
+            </div>
+          </Section>
+
+          {/* isDateUnavailable + min/max */}
+          <Section title="isDateUnavailable & min / max">
+            <div className="grid grid-cols-1 desktop:grid-cols-2 gap-6">
+
+              {/* Weekends blocked */}
+              <div className="space-y-2">
+                <p className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
+                  Dam olish kunlari bloklangan
+                </p>
+                <CusCalendar
+                  colorPalette={calColor}
+                  selectionMode="single"
+                  isDateUnavailable={isWeekend}
+                  size="sm"
+                />
+              </div>
+
+              {/* min / max bounds */}
+              <div className="space-y-2">
+                <p className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
+                  min=bugun, max=30 kun keyin
+                </p>
+                <CusCalendar
+                  colorPalette={calColor}
+                  selectionMode="range"
+                  min={new CalendarDate(
+                    new Date().getFullYear(),
+                    new Date().getMonth() + 1,
+                    new Date().getDate(),
+                  )}
+                  max={new CalendarDate(
+                    new Date().getFullYear(),
+                    new Date().getMonth() + 1,
+                    Math.min(new Date().getDate() + 30, 28),
+                  )}
+                  size="sm"
+                />
+              </div>
+            </div>
+          </Section>
+
+          {/* numOfMonths */}
+          <Section title="numOfMonths=2">
+            <CusCalendar
+              colorPalette={calColor}
+              selectionMode="range"
+              numOfMonths={2}
+              size="sm"
+            />
+          </Section>
+
+          {/* locale + showWeekNumbers */}
+          <Section title="locale & showWeekNumbers">
+            <div className="grid grid-cols-1 desktop:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <p className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
+                  locale="uz-UZ"
+                </p>
+                <CusCalendar
+                  colorPalette={calColor}
+                  selectionMode="single"
+                  locale="uz-UZ"
+                  size="sm"
+                />
+              </div>
+              <div className="space-y-2">
+                <p className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
+                  showWeekNumbers + locale="ru-RU"
+                </p>
+                <CusCalendar
+                  colorPalette={calColor}
+                  selectionMode="single"
+                  locale="ru-RU"
+                  showWeekNumbers
+                  size="sm"
+                />
+              </div>
+            </div>
+          </Section>
+
+          {/* sizes */}
+          <Section title="size">
+            <div className="flex flex-wrap gap-6 items-start">
+              {(["xs", "sm", "md", "lg"] as const).map((s) => (
+                <div key={s} className="space-y-1">
+                  <p className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
+                    size="{s}"
+                  </p>
+                  <CusCalendar
+                    colorPalette={calColor}
+                    selectionMode="single"
+                    size={s}
+                  />
+                </div>
+              ))}
+            </div>
+          </Section>
+
+          {/* disabled / readOnly */}
+          <Section title="disabled & readOnly">
+            <div className="flex flex-wrap gap-6 items-start">
+              <div className="space-y-1">
+                <p className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>disabled</p>
+                <CusCalendar
+                  colorPalette={calColor}
+                  selectionMode="single"
+                  size="sm"
+                  disabled
+                  defaultValue={[new CalendarDate(
+                    new Date().getFullYear(),
+                    new Date().getMonth() + 1,
+                    10,
+                  )]}
+                />
+              </div>
+              <div className="space-y-1">
+                <p className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>readOnly</p>
+                <CusCalendar
+                  colorPalette={calColor}
+                  selectionMode="single"
+                  size="sm"
+                  readOnly
+                  defaultValue={[new CalendarDate(
+                    new Date().getFullYear(),
+                    new Date().getMonth() + 1,
+                    15,
+                  )]}
+                />
+              </div>
+            </div>
+          </Section>
+
+          {/* defaultView */}
+          <Section title="defaultView">
+            <div className="flex flex-wrap gap-6 items-start">
+              {(["day", "month", "year"] as const).map((v) => (
+                <div key={v} className="space-y-1">
+                  <p className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>
+                    defaultView="{v}"
+                  </p>
+                  <CusCalendar
+                    colorPalette={calColor}
+                    selectionMode="single"
+                    size="sm"
+                    defaultView={v}
+                  />
+                </div>
+              ))}
+            </div>
+          </Section>
+
         </div>
       </CusCard>
 

@@ -1,4 +1,4 @@
-import { useCallback, useState, type ElementType } from "react";
+import { useCallback, useEffect, useState, type ElementType } from "react";
 import { LuQrCode } from "react-icons/lu";
 import { IoQrCodeSharp } from "react-icons/io5";
 import { useQrCodes } from "./qr-code/hooks/useQrCodes";
@@ -52,16 +52,22 @@ function StatCard({
 export default function QrCode() {
   const qr = useQrCodes();
 
+  // Mock data'ni sahifa ochilganda yuklash va birinchi partiyani tanlash
+  useEffect(() => {
+    qr.refreshParties().then((list) => {
+      if (list.length > 0) qr.selectParty(list[0].batchId);
+    });
+  }, []);
+
   // dialog state
   const [generateOpen, setGenerateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<QrCodeType | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<QrCodeType | null>(null);
+  const [deleteTargets, setDeleteTargets] = useState<QrCodeType[]>([]);
 
   // stats from all codes in active party
-  const activeCount    = qr.codes.filter((c) => c.status === "active").length;
-  const insideCount    = qr.codes.filter((c) => c.status === "user-active").length;
-  const noActiveCount  = qr.codes.filter((c) => c.status === "no-active").length;
-  const leftCount      = qr.codes.filter((c) => c.status === "user-leave-active").length;
+  const activeCount   = qr.codes.filter((c) => c.status === "active").length;
+  const insideCount   = qr.codes.filter((c) => c.status === "user-active").length;
+  const noActiveCount = qr.codes.filter((c) => c.status === "no-active").length;
 
   const handleGenerate = useCallback(
     async (dto: Parameters<typeof qr.generate>[0]) => { await qr.generate(dto); },
@@ -74,17 +80,17 @@ export default function QrCode() {
   );
 
   const handleDelete = useCallback(
-    async (id: string) => { await qr.remove(id); },
-    [qr.remove],
+    async (ids: string[]) => { await qr.removeMany(ids); },
+    [qr.removeMany],
   );
 
   const handleEditOpen = useCallback(
-    (code: QrCodeType) => setEditTarget(code),
+    (codes: QrCodeType[]) => setEditTarget(codes[0] ?? null),
     [],
   );
 
   const handleDeleteOpen = useCallback(
-    (code: QrCodeType) => setDeleteTarget(code),
+    (codes: QrCodeType[]) => setDeleteTargets(codes),
     [],
   );
 
@@ -209,9 +215,9 @@ export default function QrCode() {
       />
 
       <DeleteConfirmDialog
-        open={deleteTarget !== null}
-        onClose={() => setDeleteTarget(null)}
-        code={deleteTarget}
+        open={deleteTargets.length > 0}
+        onClose={() => setDeleteTargets([])}
+        codes={deleteTargets}
         onConfirm={handleDelete}
       />
     </div>

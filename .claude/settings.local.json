@@ -4,7 +4,9 @@
       "Bash(npx vite *)",
       "WebFetch(domain:chakra-ui.com)",
       "WebSearch",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(Get-Content \"c:\\\\Users\\\\user\\\\Desktop\\\\park-system-mobile\\\\src\\\\components\\\\ui\\\\popover\\\\CusPopover.tsx\")",
+      "Bash(xxd \"c:\\\\Users\\\\user\\\\Desktop\\\\park-system-mobile\\\\src\\\\components\\\\ui\\\\popover\\\\CusPopover.tsx\")"
     ]
   }
 }

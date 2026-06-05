@@ -58,7 +58,17 @@ const PAY_LEGEND = [
   { label: "Karta to'ldirish", color: "#8b5cf6" },
 ];
 
-const activeKassas = kassaList.filter((k) => k.todayRevenue > 0);
+// Static base values replacing removed interface fields
+const BASE_REV: Record<number, number> = {
+  1: 4_850_000, 2: 3_210_000, 3: 0,
+  4: 2_640_000, 5: 1_920_000, 6: 0,
+  7: 3_780_000, 8: 0,
+};
+const BASE_TX: Record<number, number> = {
+  1: 112, 2: 87, 3: 0, 4: 64, 5: 53, 6: 0, 7: 95, 8: 0,
+};
+
+const activeKassas = kassaList.filter((k) => (BASE_REV[k.id] ?? 0) > 0);
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -272,7 +282,7 @@ const ReportsKassa = () => {
         activeKassas.forEach((k, ki) => {
           const seed = k.id * 17 + di * 11 + ki * 3;
           row[k.name] = Math.round(
-            (k.todayRevenue / 7) * (0.45 + _s(seed) * 1.1),
+            ((BASE_REV[k.id] ?? 0) / 7) * (0.45 + _s(seed) * 1.1),
           );
         });
         return row;
@@ -288,7 +298,7 @@ const ReportsKassa = () => {
         const label = `${d.date()}/${d.month() + 1}`;
         const total = activeKassas.reduce((s, k, ki) => {
           const seed = k.id * 17 + di * 11 + ki * 3;
-          return s + Math.round((k.todayRevenue / 7) * (0.45 + _s(seed) * 1.1));
+          return s + Math.round(((BASE_REV[k.id] ?? 0) / 7) * (0.45 + _s(seed) * 1.1));
         }, 0);
         const naqd = Math.round(total * (0.38 + _s(di * 19 + 1) * 0.07));
         const uzcard = Math.round(total * (0.33 + _s(di * 19 + 2) * 0.07));
@@ -310,10 +320,11 @@ const ReportsKassa = () => {
         let naqd = 0;
         let uzcard = 0;
         dates.forEach((_, di) => {
+          const baseRev = BASE_REV[k.id] ?? 0;
           const rev =
-            k.todayRevenue > 0
+            baseRev > 0
               ? Math.round(
-                  (k.todayRevenue / 7) * (0.45 + _s(k.id * 17 + di * 11) * 1.1),
+                  (baseRev / 7) * (0.45 + _s(k.id * 17 + di * 11) * 1.1),
                 )
               : 0;
           const n = Math.round(rev * (0.38 + _s(k.id * 7 + di * 3) * 0.07));
@@ -328,9 +339,9 @@ const ReportsKassa = () => {
           location: k.location,
           status: k.status,
           transactions:
-            k.todayTransactions > 0
+            (BASE_TX[k.id] ?? 0) > 0
               ? Math.round(
-                  k.todayTransactions *
+                  (BASE_TX[k.id] ?? 0) *
                     dates.length *
                     (0.7 + _s(k.id * 23) * 0.6),
                 )

@@ -79,6 +79,18 @@ export function useQrCodes() {
     [activeBatchId, refreshParties],
   );
 
+  const removeMany = useCallback(
+    async (ids: string[]) => {
+      await api.deleteCodes(ids);
+      if (activeBatchId) {
+        const list = await api.listCodes(activeBatchId);
+        setCodes(list);
+        await refreshParties();
+      }
+    },
+    [activeBatchId, refreshParties],
+  );
+
   const changeStatus = useCallback(async (id: string, status: QrStatus) => {
     const updated = await api.updateStatus(id, status);
     setCodes((prev) => prev.map((c) => (c.id === id ? updated : c)));
@@ -104,6 +116,7 @@ export function useQrCodes() {
     generate,
     selectParty,
     remove,
+    removeMany,
     changeStatus,
     setFilters,
     setPage,

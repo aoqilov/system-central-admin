@@ -1,8 +1,7 @@
 export type QrStatus =
   | "no-active"
   | "active"
-  | "user-active"
-  | "user-leave-active";
+  | "user-active";
 
 export interface QrCode {
   id: string;
@@ -12,6 +11,7 @@ export interface QrCode {
   batchSerial: number; // partiya tartib raqami (1, 2, 3…)
   order: number;       // partiya ichida tartib raqami (1, 2, 3…)
   partia: string;
+  amount: number;      // to'lov miqdori (so'm)
   validFrom: string | null;
   validUntil: string | null;
   userId: number | null;
@@ -39,25 +39,24 @@ export function formatQrRef(batchSerial: number, order: number): string {
 export interface GenerateQrBatchDto {
   count: number;
   partia: string;
+  amount?: number;
   validFrom?: string;
   validUntil?: string;
 }
 
-export type QrBadgeScheme = "gray" | "green" | "blue" | "yellow";
+export type QrBadgeScheme = "gray" | "green" | "blue";
 
 export const QR_STATUS_META: Record<
   QrStatus,
   { label: string; scheme: QrBadgeScheme }
 > = {
-  "no-active":         { label: "Faolsiz",       scheme: "gray"   },
-  "active":            { label: "Faol",           scheme: "green"  },
-  "user-active":       { label: "Ichkarida",      scheme: "blue"   },
-  "user-leave-active": { label: "Chiqdi (faol)",  scheme: "yellow" },
+  "no-active":   { label: "Faolsiz",  scheme: "gray"  },
+  "active":      { label: "Faol",     scheme: "green" },
+  "user-active": { label: "Ichkarida", scheme: "blue" },
 };
 
 export const TRANSITIONS: Record<QrStatus, QrStatus[]> = {
-  "no-active":         ["active"],
-  "active":            ["user-active"],
-  "user-active":       ["user-leave-active"],
-  "user-leave-active": ["user-active"],
+  "no-active":   ["active"],
+  "active":      ["user-active"],
+  "user-active": ["no-active"],
 };
