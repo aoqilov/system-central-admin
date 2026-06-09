@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   LuScanLine,
   LuQrCode,
@@ -10,10 +11,14 @@ import {
   LuPhone,
   LuLink,
   LuX,
+  LuTriangleAlert,
 } from "react-icons/lu";
+import { Dialog } from "@chakra-ui/react";
 import { CusInput } from "../../components/ui/inputs/CusInput";
 import { CusButton } from "../../components/ui/buttons/CusButton";
 import { CusSegment } from "../../components/ui/segment/CusSegment";
+import { CusDialog } from "../../components/ui/dialog/CusDialog";
+import { useKassa } from "../../context/KassaContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -288,10 +293,13 @@ function RelationPanel({ onSuccess }: { onSuccess: () => void }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function KassaHome() {
+  const { smena } = useKassa();
+  const navigate = useNavigate();
   const [qrInfo, setQrInfo] = useState<QrInfo>(EMPTY_QR);
   const [checked, setChecked] = useState(false);
   const [rightMode, setRightMode] = useState<RightMode>("aktivatsa");
   const [panelKey, setPanelKey] = useState(0);
+  const [warnDismissed, setWarnDismissed] = useState(false);
   const { toasts, show: showToast, remove } = useToast();
 
   function handleCheckQr() {
@@ -311,6 +319,52 @@ export default function KassaHome() {
     <div className="flex flex-col h-full">
 
       <ToastList items={toasts} onRemove={remove} />
+
+      {/* ── No-smena warning dialog ─────────────────────────── */}
+      <CusDialog
+        open={!smena && !warnDismissed}
+        onClose={() => setWarnDismissed(true)}
+        size="sm"
+        closeOnBackdrop={false}
+        footer={
+          <>
+            <Dialog.ActionTrigger asChild>
+              <CusButton variant="outline" onClick={() => setWarnDismissed(true)}>
+                OK
+              </CusButton>
+            </Dialog.ActionTrigger>
+            <CusButton
+              colorPalette="blue"
+              onClick={() => navigate("/rolekassa/stats")}
+            >
+              Smena ochishga o'tish
+            </CusButton>
+          </>
+        }
+      >
+        <div className="flex flex-col items-center gap-4 py-2">
+          <div
+            className="w-16 h-16 rounded-2xl flex items-center justify-center"
+            style={{ background: "#f9731618" }}
+          >
+            <LuTriangleAlert size={30} style={{ color: "#fb923c" }} />
+          </div>
+          <div className="text-center">
+            <p
+              className="font-semibold text-base"
+              style={{ color: "var(--text-default)" }}
+            >
+              Smena ochilmagan!
+            </p>
+            <p
+              className="text-sm mt-1"
+              style={{ color: "var(--text-muted)" }}
+            >
+              To'lov qilish uchun avval smena oching.
+            </p>
+          </div>
+        </div>
+      </CusDialog>
 
       {/* ── Page header ─────────────────────────────────────── */}
       <div

@@ -1,5 +1,6 @@
 import { Suspense, useState, useEffect } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { KassaProvider } from "../../../context/KassaContext";
 import {
   LuLayoutDashboard,
   LuChartBar,
@@ -19,11 +20,11 @@ import { CusPopover } from "../../ui/popover/CusPopover";
 const NAV = [
   {
     to: "/rolekassa",
-    label: "Bosh sahifa",
+    label: "Tolov qilish",
     icon: LuLayoutDashboard,
     end: true,
   },
-  { to: "/rolekassa/stats", label: "Statistika", icon: LuChartBar },
+  { to: "/rolekassa/stats", label: "Smena", icon: LuChartBar },
   { to: "/rolekassa/profile", label: "Profil", icon: LuUser },
 ];
 
@@ -240,6 +241,7 @@ export default function KassaLayout() {
   }
 
   return (
+    <KassaProvider>
     <div
       className="min-h-screen tablet:flex"
       style={{ background: "var(--bg-main)" }}
@@ -463,5 +465,6 @@ export default function KassaLayout() {
         {/* Logout tab — mobile only */}
       </nav>
     </div>
+    </KassaProvider>
   );
 }
