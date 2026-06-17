@@ -135,7 +135,7 @@ export function CusPagination({
           {/* Page numbers */}
           <Pagination.Items
             render={(pg) => (
-              <Pagination.Item key={pg.value} value={pg.value} type="page">
+              <Pagination.Item key={pg.value} value={pg.value} type="page" asChild>
                 <IconButton
                   aria-label={`${pg.value}-sahifa`}
                   size={size}

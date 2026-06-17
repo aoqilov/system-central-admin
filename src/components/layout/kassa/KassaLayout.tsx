@@ -1,6 +1,5 @@
 import { Suspense, useState, useEffect } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import { KassaProvider } from "../../../context/KassaContext";
 import {
   LuLayoutDashboard,
   LuChartBar,
@@ -16,6 +15,7 @@ import {
 import dayjs from "dayjs";
 import { useTheme } from "../../../context/ThemeContext";
 import { CusPopover } from "../../ui/popover/CusPopover";
+import { clearAuth } from "@/widgets/features/login/api/authApi";
 
 const NAV = [
   {
@@ -68,8 +68,7 @@ function SidebarContent({
   const navigate = useNavigate();
 
   function handleLogout() {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user_role");
+    clearAuth();
     navigate("/login", { replace: true });
   }
 
@@ -235,13 +234,11 @@ export default function KassaLayout() {
   const [collapsed, setCollapsed] = useState(false);
 
   function handleLogout() {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user_role");
+    clearAuth();
     navigate("/login", { replace: true });
   }
 
   return (
-    <KassaProvider>
     <div
       className="min-h-screen tablet:flex"
       style={{ background: "var(--bg-main)" }}
@@ -465,6 +462,5 @@ export default function KassaLayout() {
         {/* Logout tab — mobile only */}
       </nav>
     </div>
-    </KassaProvider>
   );
 }

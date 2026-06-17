@@ -16,6 +16,7 @@ import {
 } from "react-icons/lu";
 import { useTheme } from "../../context/ThemeContext";
 import { useTranslation, type Lang } from "../../i18n/languageConfig";
+import { clearAuth } from "@/widgets/features/login/api/authApi";
 import { CusSwitch } from "../../components/ui/inputs/CusSwitch";
 import { employees, EmployeeRole, EmployeeStatus } from "../../data/employees";
 import { attractions } from "../../data/attractions";
@@ -95,8 +96,7 @@ export default function OperatorProfile() {
   const todayRevenue = att.statsRevenue?.slice(-1)[0]?.amount ?? 0;
 
   function handleLogout() {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user_role");
+    clearAuth();
     navigate("/login", { replace: true });
   }
 

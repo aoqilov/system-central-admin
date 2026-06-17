@@ -28,7 +28,13 @@ import { CusBadge } from "../../components/ui/badge/CusBadge";
 import { CusDialog } from "../../components/ui/dialog/CusDialog";
 import { CusButton } from "../../components/ui/buttons/CusButton";
 import { CusInput } from "../../components/ui/inputs/CusInput";
-import { useKassa, type SmenaInfo } from "../../context/KassaContext";
+interface SmenaInfo {
+  id: number;
+  name: string;
+  date: string;
+  kassir: string;
+  startTime: string;
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -493,7 +499,19 @@ function EmptySmena({ onOpen }: { onOpen: () => void }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function KassaStats() {
-  const { smena, nextSmenaNum, openSmena, closeSmena } = useKassa();
+  const [lastNum, setLastNum] = useState(4);
+  const [smena, setSmena] = useState<SmenaInfo | null>(null);
+  const nextSmenaNum = lastNum + 1;
+
+  function openSmena(kassir: string, time: string) {
+    const num = lastNum + 1;
+    setLastNum(num);
+    setSmena({ id: num, name: `Smena #${num}`, date: dayjs().format("DD.MM.YYYY"), kassir, startTime: time });
+  }
+
+  function closeSmena() {
+    setSmena(null);
+  }
 
   const [openDialog, setOpenDialog] = useState(false);
   const [closeDialog, setCloseDialog] = useState(false);

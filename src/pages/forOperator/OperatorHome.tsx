@@ -8,10 +8,7 @@ import {
   LuTrash2,
   LuInbox,
 } from "react-icons/lu";
-import {
-  useOperatorRounds,
-  type Round,
-} from "../../context/OperatorRoundsContext";
+import { useRounds, type Round } from "../../hooks/useRounds";
 import { employees, EmployeeRole } from "../../data/employees";
 import { attractions } from "../../data/attractions";
 import dayjs from "dayjs";
@@ -85,7 +82,7 @@ function RoundRow({ round, last }: { round: Round; last: boolean }) {
 }
 
 export default function OperatorHome() {
-  const { rounds, clearRounds } = useOperatorRounds();
+  const { rounds, clearRounds } = useRounds();
   const att = DEMO_ATTRACTION;
 
   const today = dayjs().format("YYYY-MM-DD");

@@ -20,7 +20,13 @@
     "systemsNormal": "Все системы в норме",
     "parkOpen": "Парк открыт",
     "parkHours": "09:00 — 22:00 сегодня",
-    "qrCode": "QR Код"
+    "qrCode": "QR Код",
+    "liveKassa": "Касса",
+    "liveAttraction": "Аттракцион",
+    "liveEmployees": "Сотрудники",
+    "reportsKassa": "Касса",
+    "reportsAttraction": "Аттракцион",
+    "reportsEmployees": "Сотрудники"
   },
   "employees": {
     "breadcrumb": "Персонал",

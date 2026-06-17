@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom'
 import { LuShieldOff } from 'react-icons/lu'
 import { CusButton } from '../components/ui/buttons/CusButton'
+import { clearAuth } from '@/widgets/features/login/api/authApi'
 
 export default function Unauthorized() {
   const navigate = useNavigate()
 
   function handleLogout() {
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('user_role')
+    clearAuth()
     navigate('/login', { replace: true })
   }
 

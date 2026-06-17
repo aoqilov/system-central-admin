@@ -20,7 +20,13 @@
     "systemsNormal": "Tizimlar normal ishlayapti",
     "parkOpen": "Park ochiq",
     "parkHours": "09:00 — 22:00 bugun",
-    "qrCode": "QR Kod"
+    "qrCode": "QR Kod",
+    "liveKassa": "Kassa",
+    "liveAttraction": "Attraksion",
+    "liveEmployees": "Xodimlar",
+    "reportsKassa": "Kassa",
+    "reportsAttraction": "Attraksion",
+    "reportsEmployees": "Xodimlar"
   },
   "employees": {
     "breadcrumb": "Staff",

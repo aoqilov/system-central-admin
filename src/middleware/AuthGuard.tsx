@@ -1,18 +1,15 @@
 import { Navigate, useLocation } from "react-router-dom";
+import {
+  getStoredToken,
+  getStoredRole,
+  type UserRole,
+} from "@/widgets/features/login/api/authApi";
+import { isLocked } from "@/utils/pinLock";
 
-export type UserRole = "superadmin" | "admin" | "operator" | "kassa";
-
-export function getStoredToken(): string | null {
-  return localStorage.getItem("auth_token");
-}
-
-export function getStoredRole(): UserRole | null {
-  return localStorage.getItem("user_role") as UserRole | null;
-}
+export type { UserRole };
 
 interface AuthGuardProps {
   children: React.ReactNode;
-  /** Ruxsat etilgan rollar. Ko'rsatilmasa — faqat token tekshiriladi. */
   roles?: UserRole[];
 }
 
@@ -21,8 +18,11 @@ export function AuthGuard({ children, roles }: AuthGuardProps) {
   const token = getStoredToken();
 
   if (!token) {
-    // Login dan keyin qaytib kelish uchun redirect saqlab qo'yamiz
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (isLocked()) {
+    return <Navigate to="/lock" replace />;
   }
 
   if (roles && roles.length > 0) {

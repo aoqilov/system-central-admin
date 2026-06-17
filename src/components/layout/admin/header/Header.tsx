@@ -10,9 +10,12 @@ import {
   LuLogOut,
   LuSun,
   LuMoon,
+  LuLock,
 } from "react-icons/lu";
 import { CusPopover } from "../../../ui/popover/CusPopover";
 import { useTheme } from "../../../../context/ThemeContext";
+import { clearAuth } from "@/widgets/features/login/api/authApi";
+import { isPinEnabled, lockApp } from "@/utils/pinLock";
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -23,6 +26,7 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
   const [timeStr, setTimeStr] = useState(() =>
     new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
   );
+  const [pinEnabled, setPinEnabled] = useState(() => isPinEnabled());
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,12 +37,24 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
     return () => clearInterval(id);
   }, []);
 
+  useEffect(() => {
+    function onPinChanged() {
+      setPinEnabled(isPinEnabled());
+    }
+    window.addEventListener("pin-lock-changed", onPinChanged);
+    return () => window.removeEventListener("pin-lock-changed", onPinChanged);
+  }, []);
+
   const { theme, toggle } = useTheme();
 
   function handleLogout() {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user_role");
+    clearAuth();
     navigate("/login", { state: { from: location }, replace: true });
+  }
+
+  function handleLock() {
+    lockApp();
+    navigate("/lock", { replace: true });
   }
 
   return (
@@ -87,6 +103,18 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
             2
           </span>
         </button>
+
+        {/* Lock button — faqat PIN yoqilgan bo'lsa */}
+        {pinEnabled && (
+          <button
+            onClick={handleLock}
+            className="p-2 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+            style={{ color: "var(--text-4)" }}
+            title="Ekranni bloklash"
+          >
+            <LuLock size={16} />
+          </button>
+        )}
 
         {/* User menu */}
         <CusPopover

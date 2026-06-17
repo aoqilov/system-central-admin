@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 
 interface CusPopoverProps {
   trigger: ReactNode | ((open: boolean) => ReactNode);
-  children: ReactNode;
+  children: ReactNode | ((close: () => void) => ReactNode);
   placement?: "bottom" | "bottom-end" | "bottom-start" | "top" | "top-end" | "top-start" | "left" | "right";
   width?: number | string;
 }
@@ -39,7 +39,7 @@ export function CusPopover({
             outline: "none",
           }}
         >
-          {children}
+          {typeof children === "function" ? children(() => setOpen(false)) : children}
         </Popover.Content>
       </Popover.Positioner>
     </Popover.Root>

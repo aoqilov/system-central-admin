@@ -1,4 +1,5 @@
 import { lazy } from "react";
+import { Navigate } from "react-router-dom";
 import type { RouteObject } from "react-router-dom";
 import AppLayout from "../components/layout/admin/AppLayout";
 import { AuthGuard } from "../middleware/AuthGuard";
@@ -12,17 +13,33 @@ const OperatorLayout = lazy(
   () => import("../components/layout/operator/OperatorLayout"),
 );
 
-const Dashboard = lazy(() => import("../pages/Dashboard"));
-const LiveMonitor = lazy(() => import("../pages/LiveMonitor"));
-const Employees = lazy(() => import("../pages/Employees"));
-const EmployeeDetail = lazy(() => import("../pages/EmployeeDetail"));
-const Attractions = lazy(() => import("../pages/Attractions"));
-const AttractionDetail = lazy(() => import("../pages/AttractionDetail"));
-const Kassa = lazy(() => import("../pages/Kassa"));
-const KassaDetail = lazy(() => import("../pages/KassaDetail"));
-const Reports = lazy(() => import("../pages/Reports"));
-const Settings = lazy(() => import("../pages/Settings"));
-const Support = lazy(() => import("../pages/Support"));
+const Dashboard = lazy(() => import("../pages/admin/main/Dashboard"));
+const LiveMonitorKassa = lazy(
+  () => import("../pages/admin/main/LiveMonitorKassa"),
+);
+const LiveMonitorAttraction = lazy(
+  () => import("../pages/admin/main/LiveMonitorAttraction"),
+);
+const LiveMonitorEmployes = lazy(
+  () => import("../pages/admin/main/LiveMonitorEmployes"),
+);
+const Employees = lazy(() => import("../pages/admin/control/Employees"));
+const EmployeeDetail = lazy(() => import("../pages/admin/control/EmployeeDetail"));
+const Attractions = lazy(() => import("../pages/admin/control/Attractions"));
+const AttractionDetail = lazy(
+  () => import("../pages/admin/control/AttractionDetail"),
+);
+const Kassa = lazy(() => import("../pages/admin/control/Kassa"));
+const KassaDetail = lazy(() => import("../pages/admin/control/KassaDetail"));
+const ReportsKassa = lazy(() => import("../pages/admin/main/ReportsKassa"));
+const ReportsAttraction = lazy(
+  () => import("../pages/admin/main/ReportsAttraction"),
+);
+const ReportsEmployees = lazy(
+  () => import("../pages/admin/main/ReportsEmployees"),
+);
+const Settings = lazy(() => import("../pages/admin/Settings"));
+const Support = lazy(() => import("../pages/admin/Support"));
 const OperatorHome = lazy(() => import("../pages/forOperator/OperatorHome"));
 const OperatorPayment = lazy(
   () => import("../pages/forOperator/OperatorPayment"),
@@ -33,8 +50,9 @@ const OperatorProfile = lazy(
 const Login = lazy(() => import("../pages/Login"));
 const Unauthorized = lazy(() => import("../pages/Unauthorized"));
 const NotFound = lazy(() => import("../pages/NotFound"));
-const DevUI = lazy(() => import("../pages/DevUI"));
-const QrCode = lazy(() => import("../pages/QrCode"));
+const DevUI = lazy(() => import("../pages/admin/DevUI"));
+const QrCode = lazy(() => import("../pages/admin/control/QrCode"));
+const LockScreen = lazy(() => import("../pages/admin/LockScreen"));
 
 export const routes: RouteObject[] = [
   {
@@ -46,14 +64,19 @@ export const routes: RouteObject[] = [
     ),
     children: [
       { path: "/", element: <Dashboard /> },
-      { path: "/live-monitor", element: <LiveMonitor /> },
+      { path: "/live-monitor/kassa", element: <LiveMonitorKassa /> },
+      { path: "/live-monitor/attraction", element: <LiveMonitorAttraction /> },
+      { path: "/live-monitor/employees", element: <LiveMonitorEmployes /> },
       { path: "/employees", element: <Employees /> },
       { path: "/employee/:id", element: <EmployeeDetail /> },
       { path: "/attractions", element: <Attractions /> },
       { path: "/attraction/:id", element: <AttractionDetail /> },
       { path: "/kassa", element: <Kassa /> },
       { path: "/kassa/:id", element: <KassaDetail /> },
-      { path: "/reports", element: <Reports /> },
+      { path: "/reports", element: <Navigate to="/reports/kassa" replace /> },
+      { path: "/reports/kassa", element: <ReportsKassa /> },
+      { path: "/reports/attraction", element: <ReportsAttraction /> },
+      { path: "/reports/employees", element: <ReportsEmployees /> },
       { path: "/settings", element: <Settings /> },
       { path: "/support", element: <Support /> },
       { path: "/qrcode", element: <QrCode /> },
@@ -89,6 +112,7 @@ export const routes: RouteObject[] = [
     ],
   },
   { path: "/login", element: <Login /> },
+  { path: "/lock", element: <LockScreen /> },
   { path: "/unauthorized", element: <Unauthorized /> },
   { path: "*", element: <NotFound /> },
 ];

@@ -14,10 +14,49 @@ Park boshqaruv tizimi: admin dashboard + operator mobile UI. React + Vite + Type
 | Tailwind CSS | 3 (custom breakpoints) |
 | Recharts | 3 |
 | React Router | 7 |
+| TanStack Query | 5 |
+| Axios | latest |
 | react-icons | lucide set (`react-icons/lu`) |
 | dayjs | date formatting |
 | framer-motion | animations |
-| vite-plugin-pwa | PWA support | Chakra ui v3
+| vite-plugin-pwa | PWA support |
+| Chakra UI | v3 |
+
+---
+
+## Path Alias
+
+`@` → `src/` (configured in `vite.config.ts` + `tsconfig.json`).
+
+```ts
+// vite.config.ts
+resolve: { alias: { '@': path.resolve(__dirname, './src') } }
+
+// tsconfig.json
+"paths": { "@/*": ["./src/*"] }
+// No baseUrl needed with moduleResolution: bundler
+```
+
+Always import with `@/` — never use relative `../../../` paths across feature boundaries.
+
+---
+
+## API Config (`src/api-config/`)
+
+```
+axiosInstance.ts   → axios instance, baseURL = VITE_API_URL + /api/v1
+interceptors.ts    → Bearer token injector + 401 → redirect /login
+queryClient.ts     → TanStack QueryClient (staleTime 5min, retry 1)
+```
+
+`interceptors.ts` is imported once in `main.tsx` (side-effect only).  
+`queryClient` is provided via `<QueryClientProvider>` in `main.tsx`.
+
+### Env vars
+```
+VITE_API_URL=https://192.168.0.146:4050
+VITE_TOKEN_KEY=parkops_token   (optional, defaults to "parkops_token")
+```
 
 ---
 
@@ -27,16 +66,27 @@ Park boshqaruv tizimi: admin dashboard + operator mobile UI. React + Vite + Type
 | Path | Page |
 |------|------|
 | `/` | Dashboard |
-| `/live-monitor` | LiveMonitor |
+| `/live-monitor` | LiveMonitor (direct sub-routes, no separate redirect page) |
+| `/live-monitor/attraction` | LiveMonitorAttraction |
+| `/live-monitor/employees` | LiveMonitorEmployees |
+| `/live-monitor/kassa` | LiveMonitorKassa |
 | `/employees` | Employees table |
 | `/employee/:id` | EmployeeDetail |
 | `/attractions` | Attractions table |
 | `/attraction/:id` | AttractionDetail |
 | `/kassa` | Kassa list |
 | `/kassa/:id` | KassaDetail |
-| `/reports` | Reports |
+| `/reports/kassa` | ReportsKassa |
+| `/reports/employees` | ReportsEmployees |
+| `/reports/attractions` | ReportsAttractions |
 | `/settings` | Settings |
 | `/support` | Support |
+
+### Kassa (`KassaLayout` + `AuthGuard roles={["kassa"]}`)
+| Path | Page |
+|------|------|
+| `/rolekassa` | KassaHome |
+| `/rolekassa/stats` | KassaStats |
 
 ### Operator (`OperatorLayout` + `AuthGuard roles={["operator"]}`)
 | Path | Page |
@@ -49,6 +99,52 @@ Park boshqaruv tizimi: admin dashboard + operator mobile UI. React + Vite + Type
 - `/login` — Login
 - `/unauthorized` — Unauthorized
 - `*` — NotFound
+
+---
+
+## Auth System
+
+Login flow: `POST /auth/login` → JWT → decode `role_id` → `GET /roles` → map to role name → save to localStorage → navigate.
+
+All auth utilities live in `src/widgets/features/login/api/authApi.ts`:
+```ts
+UserRole = "superadmin" | "admin" | "operator" | "kassa"
+saveAuth(token, role)     // saves to localStorage
+getStoredToken()
+getStoredRole()
+clearAuth()
+decodeToken(token)        // atob JWT payload decode
+getRoleDefaultPath(role)  // admin→"/", operator→"/operator", kassa→"/rolekassa"
+```
+
+`AuthGuard` (`src/middleware/AuthGuard.tsx`) imports from `authApi.ts`.
+
+Phone format for login: `+998 XX XXX XX XX` (client display), stripped to `+998XXXXXXXXX` for API.
+
+---
+
+## FSD Widget Pattern
+
+All features live in `src/widgets/features/<role>/<feature>/` with:
+```
+api/          → <feature>Api.ts  (axios calls, inline endpoints — no central endpoints.ts)
+types/        → index.ts
+hooks/        → use<Feature>.ts
+components/   → sub-components
+modals/       → modal components (optional)
+Feature<Name>.tsx  → root export, thin composition
+```
+
+Pages (`src/pages/`) are thin wrappers:
+```tsx
+import Feature<Name> from "@/widgets/features/...";
+export default function Page() { return <Feature<Name> />; }
+```
+
+### Shared widgets (`src/widgets/shared-ui/`)
+```
+PageHeader.tsx   → title, highlight?, label?, subtitle?  (used on every admin page)
+```
 
 ---
 
@@ -130,49 +226,6 @@ className="p-4 tablet:p-6"
 
 // Tables always wrap
 <div className="overflow-x-auto"><table className="min-w-[600px]" /></div>
-```
-
----
-
-## Data Files (`src/data/`)
-
-### `attractions.ts`
-```ts
-interface Attraction {
-  id: number;
-  name: string;
-  images: string[];
-  rulesAttraction?: string[];
-  relationOperator: {
-    mainOperatorId?: number;
-    relationDay?: string;
-    helperOperatorIds?: { id: number; relationdate: string }[];
-    relationHistory?: { date: string; mainOperatorId: number };
-  };
-  statsVisitors?: { day: string; count: number }[];
-  statsRevenue?: { day: string; amount: number }[];
-}
-// Helpers: _s() _gv() _gr()
-```
-
-### `employees.ts`
-```ts
-interface Employee {
-  id: number; fullName: string; avatarUrl: string;
-  status: EmployeeStatus; currency: number; createdAt: string;
-}
-enum EmployeeStatus { Active, Inactive, OnLeave }
-```
-
-### `kassa.ts`
-```ts
-interface Kassa {
-  id: number; name: string; location: string;
-  status: 'active' | 'inactive' | 'maintenance';
-  cashierId: number; openedAt: string;
-  todayRevenue: number; todayTransactions: number;
-  lastActivity: string; note?: string;
-}
 ```
 
 ---

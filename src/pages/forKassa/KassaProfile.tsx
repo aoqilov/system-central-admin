@@ -15,6 +15,7 @@ import {
 import { useTheme } from "../../context/ThemeContext";
 import { useTranslation, type Lang } from "../../i18n/languageConfig";
 import { CusSwitch } from "../../components/ui/inputs/CusSwitch";
+import { clearAuth } from "@/widgets/features/login/api/authApi";
 import { employees, EmployeeRole, EmployeeStatus, type CashierStats } from "../../data/employees";
 import { kassaList } from "../../data/kassa";
 
@@ -135,8 +136,7 @@ export default function KassaProfile() {
   const roleStats = emp.statsUser?.roleStats as CashierStats | undefined;
 
   function handleLogout() {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("user_role");
+    clearAuth();
     navigate("/login", { replace: true });
   }
 

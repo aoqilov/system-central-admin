@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import type { IconType } from "react-icons";
 import {
   LuLayoutDashboard,
@@ -12,29 +13,86 @@ import {
   LuCircleCheck,
   LuClock,
   LuBanknote,
+  LuChevronDown,
 } from "react-icons/lu";
 import { IoQrCodeSharp } from "react-icons/io5";
 import { useTranslation } from "../../../../i18n/languageConfig";
 import { SiTestcafe } from "react-icons/si";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 interface NavItemDef {
+  labelKey: string;
+  icon: IconType;
+  to: string;
+  subItems?: never;
+}
+
+interface SubItemDef {
   labelKey: string;
   icon: IconType;
   to: string;
 }
 
+interface NavSubMenuDef {
+  labelKey: string;
+  icon: IconType;
+  to?: never;
+  subItems: SubItemDef[];
+}
+
+type NavEntry = NavItemDef | NavSubMenuDef;
+
 interface NavGroupDef {
   labelKey: string;
-  items: NavItemDef[];
+  items: NavEntry[];
 }
+
+// ─── Nav data ─────────────────────────────────────────────────────────────────
 
 const navGroups: NavGroupDef[] = [
   {
     labelKey: "main",
     items: [
       { labelKey: "dashboard", icon: LuLayoutDashboard, to: "/" },
-      { labelKey: "liveMonitor", icon: LuActivity, to: "/live-monitor" },
-      { labelKey: "reports", icon: LuChartBar, to: "/reports" },
+      {
+        labelKey: "liveMonitor",
+        icon: LuActivity,
+        subItems: [
+          {
+            labelKey: "liveKassa",
+            icon: LuBanknote,
+            to: "/live-monitor/kassa",
+          },
+          {
+            labelKey: "liveAttraction",
+            icon: LuFerrisWheel,
+            to: "/live-monitor/attraction",
+          },
+          {
+            labelKey: "liveEmployees",
+            icon: LuUsers,
+            to: "/live-monitor/employees",
+          },
+        ],
+      },
+      {
+        labelKey: "reports",
+        icon: LuChartBar,
+        subItems: [
+          { labelKey: "reportsKassa", icon: LuBanknote, to: "/reports/kassa" },
+          {
+            labelKey: "reportsAttraction",
+            icon: LuFerrisWheel,
+            to: "/reports/attraction",
+          },
+          {
+            labelKey: "reportsEmployees",
+            icon: LuUsers,
+            to: "/reports/employees",
+          },
+        ],
+      },
     ],
   },
   {
@@ -55,6 +113,8 @@ const systemItems: NavItemDef[] = [
     ? [{ labelKey: "test-UI", icon: SiTestcafe, to: "/test-ui" }]
     : []),
 ];
+
+// ─── NavItem ──────────────────────────────────────────────────────────────────
 
 function NavItem({
   item,
@@ -86,9 +146,7 @@ function NavItem({
           <item.icon
             size={16}
             style={{ color: isActive ? "#ffffff" : "var(--text-muted)" }}
-            className={
-              isActive ? "" : "group-hover:text-slate-300"
-            }
+            className={isActive ? "" : "group-hover:text-slate-300"}
           />
           {t(item.labelKey)}
         </>
@@ -96,6 +154,83 @@ function NavItem({
     </NavLink>
   );
 }
+
+// ─── NavSubMenu ───────────────────────────────────────────────────────────────
+
+function NavSubMenu({
+  item,
+  onNavClick,
+}: {
+  item: NavSubMenuDef;
+  onNavClick: () => void;
+}) {
+  const { t } = useTranslation("sidebar.");
+  const location = useLocation();
+  const isAnyActive = item.subItems.some((s) =>
+    location.pathname.startsWith(s.to),
+  );
+  const [open, setOpen] = useState(isAnyActive);
+  const ParentIcon = item.icon;
+
+  useEffect(() => {
+    if (isAnyActive) setOpen(true);
+  }, [isAnyActive]);
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 border border-transparent hover:bg-black/5 dark:hover:bg-white/5"
+        style={{ color: isAnyActive ? "var(--text-default)" : "var(--text-4)" }}
+      >
+        <ParentIcon
+          size={16}
+          style={{ color: isAnyActive ? "#60a5fa" : "var(--text-muted)" }}
+        />
+        <span className="flex-1 text-left">{t(item.labelKey)}</span>
+        <LuChevronDown
+          size={13}
+          className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          style={{ color: "var(--text-muted)" }}
+        />
+      </button>
+
+      {open && (
+        <div
+          className="ml-3 mt-0.5 space-y-0.5 pl-3 border-l"
+          style={{ borderColor: "var(--border-default)" }}
+        >
+          {item.subItems.map((sub) => {
+            const isActive = location.pathname === sub.to;
+            const SubIcon = sub.icon;
+            return (
+              <NavLink
+                key={sub.to}
+                to={sub.to}
+                onClick={onNavClick}
+                className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 border
+                  ${
+                    isActive
+                      ? "bg-blue-500 text-white border-blue-600"
+                      : "border-transparent hover:bg-black/5 dark:hover:bg-white/5"
+                  }`}
+                style={{ color: isActive ? "#ffffff" : "var(--text-4)" }}
+              >
+                <SubIcon
+                  size={13}
+                  style={{ color: isActive ? "#ffffff" : "var(--text-muted)" }}
+                />
+                {t(sub.labelKey)}
+              </NavLink>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── SidebarContent ───────────────────────────────────────────────────────────
 
 function SidebarContent({
   onClose,
@@ -158,9 +293,21 @@ function SidebarContent({
               {t(group.labelKey)}
             </p>
             <div className="space-y-1">
-              {group.items.map((item: NavItemDef) => (
-                <NavItem key={item.to} item={item} onNavClick={onNavClick} />
-              ))}
+              {group.items.map((entry) =>
+                entry.subItems ? (
+                  <NavSubMenu
+                    key={entry.labelKey}
+                    item={entry as NavSubMenuDef}
+                    onNavClick={onNavClick}
+                  />
+                ) : (
+                  <NavItem
+                    key={(entry as NavItemDef).to}
+                    item={entry as NavItemDef}
+                    onNavClick={onNavClick}
+                  />
+                ),
+              )}
             </div>
           </div>
         ))}
@@ -175,14 +322,14 @@ function SidebarContent({
           {t("system")}
         </p>
         <div className="space-y-1">
-          {systemItems.map((item: NavItemDef) => (
+          {systemItems.map((item) => (
             <NavItem key={item.to} item={item} onNavClick={onNavClick} />
           ))}
         </div>
       </nav>
 
-      {/* Status bar — sidebar ichida */}
-      <div
+      {/* Status bar */}
+      {/* <div
         className="px-4 py-3 flex flex-col gap-1 shrink-0"
         style={{ borderTop: "1px solid var(--border-default)" }}
       >
@@ -213,10 +360,12 @@ function SidebarContent({
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 interface SidebarProps {
   open: boolean;
@@ -227,7 +376,7 @@ interface SidebarProps {
 export default function Sidebar({ open, onClose, onNavClick }: SidebarProps) {
   return (
     <>
-      {/* Desktop: sticky flex child — joy egallaydi */}
+      {/* Desktop: sticky */}
       <aside
         className={`hidden desktop:block shrink-0 overflow-hidden sticky top-0 h-screen
           transition-[width] duration-300 ease-in-out
@@ -236,7 +385,7 @@ export default function Sidebar({ open, onClose, onNavClick }: SidebarProps) {
         <SidebarContent onClose={onClose} onNavClick={onNavClick} />
       </aside>
 
-      {/* Mobile / tablet: fixed overlay drawer */}
+      {/* Mobile / tablet: fixed overlay */}
       <div
         className={`fixed inset-y-0 left-0 z-50 desktop:hidden
           transition-transform duration-300 ease-in-out

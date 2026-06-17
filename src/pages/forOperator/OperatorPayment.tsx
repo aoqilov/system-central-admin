@@ -8,7 +8,7 @@ import {
   LuChevronRight,
   LuArrowRight,
 } from "react-icons/lu";
-import { useOperatorRounds } from "../../context/OperatorRoundsContext";
+import { useRounds } from "../../hooks/useRounds";
 import { employees, EmployeeRole } from "../../data/employees";
 import { attractions } from "../../data/attractions";
 
@@ -40,7 +40,7 @@ interface RoundOrder {
 }
 
 export default function OperatorPayment() {
-  const { addRound } = useOperatorRounds();
+  const { addRound } = useRounds();
   const att = DEMO_ATTRACTION;
   const maxSlots = att.rulesAttraction?.numberOfPlaceRound ?? 8;
 

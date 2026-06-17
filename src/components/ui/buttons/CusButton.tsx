@@ -1,7 +1,6 @@
 import { Button, Spinner } from "@chakra-ui/react";
-import { type ReactNode } from "react";
+import { forwardRef, type ReactNode } from "react";
 import type React from "react";
-import { LuLoader } from "react-icons/lu";
 
 type ButtonVariant =
   | "solid"
@@ -43,26 +42,30 @@ interface AppButtonProps {
   asChild?: boolean;
 }
 
-export const CusButton = ({
-  variant = "solid",
-  size = "md",
-  colorPalette = "blue",
-  rounded,
-  className,
-  style,
-  children,
-  leftIcon,
-  rightIcon,
-  isLoading = false,
-  isDisabled = false,
-  loadingText,
-  spinnerPlacement = "start",
-  customSpinner,
-  onClick,
-  asChild,
-}: AppButtonProps) => {
+export const CusButton = forwardRef<HTMLButtonElement, AppButtonProps>(function CusButton(
+  {
+    variant = "solid",
+    size = "md",
+    colorPalette = "blue",
+    rounded,
+    className,
+    style,
+    children,
+    leftIcon,
+    rightIcon,
+    isLoading = false,
+    isDisabled = false,
+    loadingText,
+    spinnerPlacement = "start",
+    customSpinner,
+    onClick,
+    asChild,
+  },
+  ref
+) {
   return (
     <Button
+      ref={ref}
       variant={variant}
       size={size}
       colorPalette={colorPalette}
@@ -84,7 +87,7 @@ export const CusButton = ({
       {rightIcon && !isLoading && rightIcon}
     </Button>
   );
-};
+});
 
 // export default function Page() {
 //   return (

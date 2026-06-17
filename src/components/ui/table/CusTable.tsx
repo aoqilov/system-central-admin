@@ -184,7 +184,7 @@ export function CusTable<T extends object>({
                     checked={allSelected}
                     indeterminate={someSelected}
                     onChange={() => toggleAll()}
-                    size="sm"
+                    size="lg"
                   />
                 </Table.ColumnHeader>
               )}
@@ -282,7 +282,7 @@ export function CusTable<T extends object>({
                           <CusCheckbox
                             checked={isSelected}
                             onChange={() => toggleRow(rowIdx)}
-                            size="sm"
+                            size="lg"
                           />
                         </div>
                       </Table.Cell>

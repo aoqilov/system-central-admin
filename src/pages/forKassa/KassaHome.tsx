@@ -18,7 +18,6 @@ import { CusInput } from "../../components/ui/inputs/CusInput";
 import { CusButton } from "../../components/ui/buttons/CusButton";
 import { CusSegment } from "../../components/ui/segment/CusSegment";
 import { CusDialog } from "../../components/ui/dialog/CusDialog";
-import { useKassa } from "../../context/KassaContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -293,7 +292,7 @@ function RelationPanel({ onSuccess }: { onSuccess: () => void }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function KassaHome() {
-  const { smena } = useKassa();
+  const smena = null;
   const navigate = useNavigate();
   const [qrInfo, setQrInfo] = useState<QrInfo>(EMPTY_QR);
   const [checked, setChecked] = useState(false);
