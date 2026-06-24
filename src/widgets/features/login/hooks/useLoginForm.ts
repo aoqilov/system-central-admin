@@ -30,17 +30,20 @@ export function useLoginForm() {
   const [showPw, setShowPw] = useState(false);
 
   const { mutate, isPending, error } = useMutation({
-    mutationFn: loginRequest,
-    onSuccess: async ({ data }) => {
+    mutationFn: async (payload: { phone_number: string; password: string }) => {
+      const { data } = await loginRequest(payload);
       const token = data.auth.accessToken;
       const decoded = decodeToken(token);
-      const roleId = decoded?.role_id ?? "1";
+      const roleId = decoded?.role_id ?? "";
 
-      saveAuth(token, ""); // token avval saqlansin, fetchRoleName ham Authorization headerdan foydalanishi uchun
+      // token avval saqlansin, /roles so'rovi Authorization headerdan foydalanishi uchun
+      saveAuth(token, "");
       const roleName = await fetchRoleName(roleId);
-      saveAuth(token, roleName); // role aniqlanganidan keyin qayta yoziladi
-      disablePinLock(); // yangi login — PIN lock qayta tiklanadi
-
+      saveAuth(token, roleName);
+      return { token, roleName };
+    },
+    onSuccess: ({ roleName }) => {
+      disablePinLock();
       const defaultPath = getRoleDefaultPath(roleName);
       const blocked = ["/login", "/unauthorized"];
       const safePath =

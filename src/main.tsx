@@ -1,4 +1,3 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ChakraProvider } from '@chakra-ui/react'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -11,13 +10,11 @@ import App from './App'
 
 const root = document.getElementById('root')!
 createRoot(root).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <ChakraProvider value={system}>
-          <App />
-        </ChakraProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  </StrictMode>
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
+      <ChakraProvider value={system}>
+        <App />
+      </ChakraProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
 )

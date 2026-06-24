@@ -8,7 +8,8 @@ const KassaLayout = lazy(
   () => import("../components/layout/kassa/KassaLayout"),
 );
 const KassaHome = lazy(() => import("../pages/forKassa/KassaHome"));
-const KassaStats = lazy(() => import("../pages/forKassa/KassaStats"));
+const KassaSmena = lazy(() => import("../pages/forKassa/KassaSmena"));
+const KassaOtchet = lazy(() => import("../pages/forKassa/KassaOtchet"));
 const OperatorLayout = lazy(
   () => import("../components/layout/operator/OperatorLayout"),
 );
@@ -107,7 +108,8 @@ export const routes: RouteObject[] = [
     ),
     children: [
       { path: "/rolekassa", element: <KassaHome /> },
-      { path: "/rolekassa/stats", element: <KassaStats /> },
+      { path: "/rolekassa/smena", element: <KassaSmena /> },
+      { path: "/rolekassa/otchet", element: <KassaOtchet /> },
       { path: "/rolekassa/profile", element: <KassaProfile /> },
     ],
   },

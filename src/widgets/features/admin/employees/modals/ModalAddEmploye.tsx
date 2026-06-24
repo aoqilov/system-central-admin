@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Drawer } from "@chakra-ui/react";
 import { LuCircleAlert } from "react-icons/lu";
+import { parseDate } from "@internationalized/date";
+import { CusCalendar } from "@/components/ui/calendar/CusCalendar";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -174,14 +176,26 @@ export default function ModalAddEmploye({ open, onClose }: Props) {
               })}
             />
           </Row2>
-          <CusInput
-            label="Дата рождения"
-            isRequired
-            type="date"
-            errorText={errors.date_of_birth?.message}
-            {...register("date_of_birth", {
-              required: "Укажите дату рождения",
-            })}
+          <Controller
+            control={control}
+            name="date_of_birth"
+            rules={{ required: "Укажите дату рождения" }}
+            render={({ field, fieldState }) => (
+              <CusCalendar
+                label="Дата рождения"
+                isRequired
+                errorText={fieldState.error?.message}
+                value={field.value ? [parseDate(field.value)] : undefined}
+                onValueChange={({ value }) => {
+                  const v = value[0];
+                  field.onChange(
+                    v
+                      ? `${v.year}-${String(v.month).padStart(2, "0")}-${String(v.day).padStart(2, "0")}`
+                      : ""
+                  );
+                }}
+              />
+            )}
           />
         </Section>
 

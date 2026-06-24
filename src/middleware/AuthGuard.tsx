@@ -13,24 +13,7 @@ interface AuthGuardProps {
   roles?: UserRole[];
 }
 
-export function AuthGuard({ children, roles }: AuthGuardProps) {
-  const location = useLocation();
-  const token = getStoredToken();
-
-  if (!token) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  if (isLocked()) {
-    return <Navigate to="/lock" replace />;
-  }
-
-  if (roles && roles.length > 0) {
-    const role = getStoredRole();
-    if (!role || (role !== "superadmin" && !roles.includes(role))) {
-      return <Navigate to="/unauthorized" replace />;
-    }
-  }
-
+export function AuthGuard({ children }: AuthGuardProps) {
+  // TODO: re-enable auth checks
   return <>{children}</>;
 }

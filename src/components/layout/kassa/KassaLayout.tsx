@@ -2,7 +2,6 @@ import { Suspense, useState, useEffect } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import {
   LuLayoutDashboard,
-  LuChartBar,
   LuLogOut,
   LuSun,
   LuMoon,
@@ -11,20 +10,27 @@ import {
   LuChevronDown,
   LuX,
   LuUser,
+  LuFileText,
 } from "react-icons/lu";
+import { TbReport } from "react-icons/tb";
 import dayjs from "dayjs";
 import { useTheme } from "../../../context/ThemeContext";
 import { CusPopover } from "../../ui/popover/CusPopover";
 import { clearAuth } from "@/widgets/features/login/api/authApi";
+import { SmenaProvider, useSmena } from "@/context/SmenaContext";
 
-const NAV = [
-  {
-    to: "/rolekassa",
-    label: "Tolov qilish",
-    icon: LuLayoutDashboard,
-    end: true,
-  },
-  { to: "/rolekassa/stats", label: "Smena", icon: LuChartBar },
+interface NavItem {
+  to: string;
+  label: string;
+  icon: React.ElementType;
+  end?: boolean;
+  requiresActive?: boolean;
+}
+
+const NAV: NavItem[] = [
+  { to: "/rolekassa", label: "Tolov qilish", icon: LuLayoutDashboard, end: true, requiresActive: true },
+  { to: "/rolekassa/smena", label: "Smena", icon: TbReport, requiresActive: true },
+  { to: "/rolekassa/otchet", label: "Otchet", icon: LuFileText },
   { to: "/rolekassa/profile", label: "Profil", icon: LuUser },
 ];
 
@@ -37,7 +43,7 @@ function LiveClock() {
     return () => clearInterval(id);
   }, []);
   return (
-    <span className="font-mono text-xl" style={{ color: "var(--text-3)" }}>
+    <span className="font-mono text-2xl font-bold" style={{ color: "var(--text-3)" }}>
       {dayjs(now).format("HH:mm")}
     </span>
   );
@@ -66,6 +72,7 @@ function SidebarContent({
 }) {
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
+  const { active } = useSmena();
 
   function handleLogout() {
     clearAuth();
@@ -86,7 +93,7 @@ function SidebarContent({
         className="flex items-center border-b shrink-0"
         style={{
           borderColor: "var(--border-default)",
-          height: 56,
+          height: 72,
           padding: collapsed ? "0 16px" : "0 16px",
           gap: 10,
         }}
@@ -96,21 +103,14 @@ function SidebarContent({
         </div>
         {!collapsed && (
           <div className="flex-1 min-w-0">
-            <p
-              className="font-semibold text-sm leading-none"
-              style={{ color: "var(--text-default)" }}
-            >
+            <p className="font-semibold text-sm leading-none" style={{ color: "var(--text-default)" }}>
               ParkOps
             </p>
-            <p
-              className="text-[10px] mt-0.5"
-              style={{ color: "var(--text-muted)" }}
-            >
+            <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
               Kassa Panel
             </p>
           </div>
         )}
-        {/* Close button — only on mobile overlay */}
         {!collapsed && (
           <button
             onClick={onClose}
@@ -124,42 +124,62 @@ function SidebarContent({
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-3 overflow-y-auto flex flex-col gap-0.5">
-        {NAV.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            onClick={onNavClick}
-            title={collapsed ? item.label : undefined}
-            className={({ isActive }) =>
-              `flex items-center rounded-lg text-sm font-medium transition-all duration-150 group
-              ${
-                isActive
-                  ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
-                  : "border border-transparent hover:bg-black/5 dark:hover:bg-white/5"
-              }`
-            }
-            style={({ isActive }) => ({
-              color: isActive ? undefined : "var(--text-4)",
-              gap: collapsed ? 0 : 10,
-              padding: collapsed ? "10px 20px" : "10px 12px",
-              justifyContent: collapsed ? "center" : "flex-start",
-            })}
-          >
-            {({ isActive }) => (
-              <>
-                <item.icon
-                  size={16}
-                  style={{
-                    color: isActive ? undefined : "var(--text-muted)",
-                    flexShrink: 0,
-                  }}
-                />
+        {NAV.map((item) => {
+          const isDisabled = item.requiresActive && !active;
+          if (isDisabled) {
+            return (
+              <div
+                key={item.to}
+                className="flex items-center rounded-lg text-base font-medium border border-transparent"
+                style={{
+                  color: "var(--text-4)",
+                  gap: collapsed ? 0 : 12,
+                  padding: collapsed ? "18px 20px" : "18px 16px",
+                  justifyContent: collapsed ? "center" : "flex-start",
+                  opacity: 0.35,
+                  cursor: "not-allowed",
+                }}
+                title={collapsed ? item.label : undefined}
+              >
+                <item.icon size={24} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
                 {!collapsed && item.label}
-              </>
-            )}
-          </NavLink>
-        ))}
+              </div>
+            );
+          }
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              onClick={onNavClick}
+              title={collapsed ? item.label : undefined}
+              className={({ isActive }) =>
+                `flex items-center rounded-lg text-base font-medium transition-all duration-150 group
+                ${
+                  isActive
+                    ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
+                    : "border border-transparent hover:bg-black/5 dark:hover:bg-white/5"
+                }`
+              }
+              style={({ isActive }) => ({
+                color: isActive ? undefined : "var(--text-4)",
+                gap: collapsed ? 0 : 12,
+                padding: collapsed ? "18px 20px" : "18px 16px",
+                justifyContent: collapsed ? "center" : "flex-start",
+              })}
+            >
+              {({ isActive }) => (
+                <>
+                  <item.icon
+                    size={24}
+                    style={{ color: isActive ? undefined : "var(--text-muted)", flexShrink: 0 }}
+                  />
+                  {!collapsed && item.label}
+                </>
+              )}
+            </NavLink>
+          );
+        })}
       </nav>
 
       {/* Bottom: theme + logout */}
@@ -169,31 +189,19 @@ function SidebarContent({
       >
         <button
           onClick={toggle}
-          title={
-            collapsed
-              ? theme === "dark"
-                ? "Yorug' rejim"
-                : "Qorong'u rejim"
-              : undefined
-          }
-          className="flex items-center rounded-lg text-sm font-medium transition-all duration-150 hover:bg-black/5 dark:hover:bg-white/5 border border-transparent"
+          title={collapsed ? (theme === "dark" ? "Yorug' rejim" : "Qorong'u rejim") : undefined}
+          className="flex items-center rounded-lg text-base font-medium transition-all duration-150 hover:bg-black/5 dark:hover:bg-white/5 border border-transparent"
           style={{
             color: "var(--text-4)",
-            gap: collapsed ? 0 : 10,
-            padding: collapsed ? "10px 20px" : "10px 12px",
+            gap: collapsed ? 0 : 12,
+            padding: collapsed ? "18px 20px" : "18px 16px",
             justifyContent: collapsed ? "center" : "flex-start",
           }}
         >
           {theme === "dark" ? (
-            <LuSun
-              size={16}
-              style={{ color: "var(--text-muted)", flexShrink: 0 }}
-            />
+            <LuSun size={24} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
           ) : (
-            <LuMoon
-              size={16}
-              style={{ color: "var(--text-muted)", flexShrink: 0 }}
-            />
+            <LuMoon size={24} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
           )}
           {!collapsed && (theme === "dark" ? "Yorug' rejim" : "Qorong'u rejim")}
         </button>
@@ -201,23 +209,21 @@ function SidebarContent({
         <button
           onClick={handleLogout}
           title={collapsed ? "Chiqish" : undefined}
-          className="flex items-center rounded-lg text-sm font-medium transition-all duration-150 border border-transparent"
+          className="flex items-center rounded-lg text-base font-medium transition-all duration-150 border border-transparent"
           style={{
             color: "#ef4444",
-            gap: collapsed ? 0 : 10,
-            padding: collapsed ? "10px 20px" : "10px 12px",
+            gap: collapsed ? 0 : 12,
+            padding: collapsed ? "18px 20px" : "18px 16px",
             justifyContent: collapsed ? "center" : "flex-start",
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background =
-              "rgba(239,68,68,0.08)";
+            (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.08)";
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background =
-              "transparent";
+            (e.currentTarget as HTMLButtonElement).style.background = "transparent";
           }}
         >
-          <LuLogOut size={16} style={{ flexShrink: 0 }} />
+          <LuLogOut size={24} style={{ flexShrink: 0 }} />
           {!collapsed && "Chiqish"}
         </button>
       </div>
@@ -225,9 +231,56 @@ function SidebarContent({
   );
 }
 
-// ─── Layout ───────────────────────────────────────────────────────────────────
+// ─── Bottom nav ───────────────────────────────────────────────────────────────
 
-export default function KassaLayout() {
+function BottomNav() {
+  const { active } = useSmena();
+  return (
+    <nav
+      className="tablet:hidden fixed bottom-0 left-0 right-0 z-30 flex items-stretch px-2 pb-2 pt-1.5 gap-1"
+      style={{
+        height: 88,
+        background: "var(--bg-main)",
+        borderTop: "1px solid var(--border-default)",
+      }}
+    >
+      {NAV.map((item) => {
+        const isDisabled = item.requiresActive && !active;
+        if (isDisabled) {
+          return (
+            <div
+              key={item.to}
+              className="flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl text-xs font-medium"
+              style={{ color: "var(--text-muted)", opacity: 0.35, cursor: "not-allowed" }}
+            >
+              <item.icon size={26} />
+              <span>{item.label}</span>
+            </div>
+          );
+        }
+        return (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className="flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl text-xs font-medium transition-all duration-150"
+            style={({ isActive }) => ({
+              color: isActive ? "#60a5fa" : "var(--text-muted)",
+              background: isActive ? "rgba(59,130,246,0.10)" : "transparent",
+            })}
+          >
+            <item.icon size={26} />
+            <span>{item.label}</span>
+          </NavLink>
+        );
+      })}
+    </nav>
+  );
+}
+
+// ─── Layout inner ─────────────────────────────────────────────────────────────
+
+function KassaLayoutBody() {
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -239,11 +292,8 @@ export default function KassaLayout() {
   }
 
   return (
-    <div
-      className="min-h-screen tablet:flex"
-      style={{ background: "var(--bg-main)" }}
-    >
-      {/* ── Mobile overlay backdrop ─────────────────────────── */}
+    <div className="min-h-screen tablet:flex" style={{ background: "var(--bg-main)" }}>
+      {/* Mobile overlay backdrop */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 tablet:hidden"
@@ -251,11 +301,11 @@ export default function KassaLayout() {
         />
       )}
 
-      {/* ── Desktop: sticky collapsible sidebar (icon-only when collapsed) ── */}
+      {/* Desktop sticky sidebar */}
       <aside
         className="hidden tablet:block shrink-0 sticky top-0 h-screen overflow-hidden"
         style={{
-          width: collapsed ? 64 : 224,
+          width: collapsed ? 72 : 260,
           transition: "width 300ms cubic-bezier(0.4,0,0.2,1)",
         }}
       >
@@ -266,7 +316,7 @@ export default function KassaLayout() {
         />
       </aside>
 
-      {/* ── Mobile: fixed overlay drawer ───────────────────── */}
+      {/* Mobile overlay drawer */}
       <div
         className={`fixed inset-y-0 left-0 z-50 tablet:hidden
           transition-transform duration-300 ease-in-out
@@ -279,26 +329,23 @@ export default function KassaLayout() {
         />
       </div>
 
-      {/* ── Right column ───────────────────────────────────── */}
+      {/* Right column */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Header */}
         <header
-          className="sticky top-0 z-40 h-14 flex items-center justify-between px-4 gap-3 shrink-0"
+          className="sticky top-0 z-40 h-[72px] flex items-center justify-between px-4 gap-3 shrink-0"
           style={{
             background: "var(--bg-main)",
             borderBottom: "1px solid var(--border-default)",
           }}
         >
-          {/* Logo — only on mobile */}
+          {/* Logo — mobile only */}
           <div className="flex tablet:hidden items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
               <span className="text-white font-bold text-xs">P</span>
             </div>
             <div>
-              <p
-                className="font-bold text-sm leading-none"
-                style={{ color: "var(--text-default)" }}
-              >
+              <p className="font-bold text-sm leading-none" style={{ color: "var(--text-default)" }}>
                 ParkOps
               </p>
               <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
@@ -307,29 +354,20 @@ export default function KassaLayout() {
             </div>
           </div>
 
-          {/* Sidebar toggle — only on desktop (tablet+) */}
+          {/* Sidebar toggle — desktop */}
           <button
             onClick={() => setCollapsed((o) => !o)}
             className="hidden tablet:flex p-2 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
             style={{ color: "var(--text-muted)" }}
           >
-            {collapsed ? (
-              <LuPanelLeft size={18} />
-            ) : (
-              <LuPanelLeftClose size={18} />
-            )}
+            {collapsed ? <LuPanelLeft size={18} /> : <LuPanelLeftClose size={18} />}
           </button>
 
           <div className="flex items-center gap-4">
-            {/* Live clock — both mobile and desktop */}
+            {/* Live clock */}
             <div className="flex items-center gap-2 ml-auto">
               <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
-              <span
-                className="text-xs font-mono"
-                style={{ color: "var(--text-4)" }}
-              >
-                Live
-              </span>
+              <span className="text-xs font-mono" style={{ color: "var(--text-4)" }}>Live</span>
               <LiveClock />
             </div>
 
@@ -347,16 +385,10 @@ export default function KassaLayout() {
                       K
                     </div>
                     <div className="text-left hidden tablet:block">
-                      <p
-                        className="text-xs font-medium leading-none"
-                        style={{ color: "var(--text-2)" }}
-                      >
+                      <p className="text-xs font-medium leading-none" style={{ color: "var(--text-2)" }}>
                         Kassir
                       </p>
-                      <p
-                        className="text-[10px] mt-0.5"
-                        style={{ color: "var(--text-muted)" }}
-                      >
+                      <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
                         kassa@park.io
                       </p>
                     </div>
@@ -371,22 +403,9 @@ export default function KassaLayout() {
                   </button>
                 )}
               >
-                <div
-                  className="px-4 py-3 border-b"
-                  style={{ borderColor: "var(--border-default)" }}
-                >
-                  <p
-                    className="text-xs font-semibold"
-                    style={{ color: "var(--text-default)" }}
-                  >
-                    Kassir
-                  </p>
-                  <p
-                    className="text-[11px] mt-0.5"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    kassa@park.io
-                  </p>
+                <div className="px-4 py-3 border-b" style={{ borderColor: "var(--border-default)" }}>
+                  <p className="text-xs font-semibold" style={{ color: "var(--text-default)" }}>Kassir</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>kassa@park.io</p>
                 </div>
                 <div className="p-1.5 space-y-0.5">
                   <button
@@ -397,10 +416,7 @@ export default function KassaLayout() {
                     {theme === "dark" ? (
                       <LuSun size={14} style={{ color: "var(--text-muted)" }} />
                     ) : (
-                      <LuMoon
-                        size={14}
-                        style={{ color: "var(--text-muted)" }}
-                      />
+                      <LuMoon size={14} style={{ color: "var(--text-muted)" }} />
                     )}
                     {theme === "dark" ? "Yorug' rejim" : "Qorong'u rejim"}
                   </button>
@@ -409,12 +425,10 @@ export default function KassaLayout() {
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors"
                     style={{ color: "#ef4444" }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.background =
-                        "rgba(239,68,68,0.08)";
+                      (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.08)";
                     }}
                     onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.background =
-                        "transparent";
+                      (e.currentTarget as HTMLButtonElement).style.background = "transparent";
                     }}
                   >
                     <LuLogOut size={14} />
@@ -434,33 +448,18 @@ export default function KassaLayout() {
         </main>
       </div>
 
-      {/* ── Mobile: bottom footer nav ───────────────────────── */}
-      <nav
-        className="tablet:hidden fixed bottom-0 left-0 right-0 z-30 flex items-stretch px-2 pb-2 pt-1.5 gap-1"
-        style={{
-          height: 72,
-          background: "var(--bg-main)",
-          borderTop: "1px solid var(--border-default)",
-        }}
-      >
-        {NAV.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            className="flex-1 flex flex-col items-center justify-center gap-1 rounded-xl text-[10px] font-medium transition-all duration-150"
-            style={({ isActive }) => ({
-              color: isActive ? "#60a5fa" : "var(--text-muted)",
-              background: isActive ? "rgba(59,130,246,0.10)" : "transparent",
-            })}
-          >
-            <item.icon size={20} />
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
-
-        {/* Logout tab — mobile only */}
-      </nav>
+      {/* Mobile bottom nav */}
+      <BottomNav />
     </div>
+  );
+}
+
+// ─── Layout (default export) ──────────────────────────────────────────────────
+
+export default function KassaLayout() {
+  return (
+    <SmenaProvider>
+      <KassaLayoutBody />
+    </SmenaProvider>
   );
 }

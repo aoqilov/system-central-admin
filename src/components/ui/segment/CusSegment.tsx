@@ -28,6 +28,7 @@ interface CusSegmentProps {
   size?: "xs" | "sm" | "md" | "lg";
   disabled?: boolean;
   className?: string;
+  layout?: "block" | "inline";
 }
 
 export const CusSegment = ({
@@ -39,6 +40,7 @@ export const CusSegment = ({
   size = "md",
   disabled,
   className,
+  layout = "block",
 }: CusSegmentProps) => {
   return (
     <>
@@ -58,7 +60,8 @@ export const CusSegment = ({
           padding: "3px",
           gap: "2px",
           border: "1px solid var(--border-default)",
-          display: "inline-flex",
+          display: layout === "block" ? "flex" : "inline-flex",
+          width: layout === "block" ? "100%" : undefined,
         }}
       >
         <SegmentGroup.Indicator
@@ -82,6 +85,8 @@ export const CusSegment = ({
                 fontWeight: 500,
                 transition: "color 0.15s ease",
                 cursor: item.disabled ? "not-allowed" : "pointer",
+                flex: layout === "block" ? 1 : undefined,
+                justifyContent: layout === "block" ? "center" : undefined,
               }}
             >
               <SegmentGroup.ItemText style={{ color: "inherit" }}>

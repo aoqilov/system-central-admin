@@ -54,7 +54,7 @@ export default function EmployeeInfoSidebar({ employee }: { employee: ApiEmploye
           value: dayjs(employee.date_of_birth).format("DD.MM.YYYY"),
         }
       : null,
-  ].filter((r): r is { icon: React.ElementType; label: string; value: string } => r !== null);
+  ].filter((r): r is NonNullable<typeof r> => r !== null);
 
   if (rows.length === 0) return null;
 

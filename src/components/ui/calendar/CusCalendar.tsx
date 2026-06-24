@@ -1,65 +1,42 @@
-import { DatePicker } from "@chakra-ui/react";
+import { useState } from "react";
+import { DatePicker, Field } from "@chakra-ui/react";
 import type { DateValue } from "@ark-ui/react/date-picker";
+import { parseDate } from "@internationalized/date";
+import { LuCalendar } from "react-icons/lu";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type SelectionMode  = "single" | "multiple" | "range";
-type DateView       = "day" | "month" | "year";
-type CalendarSize   = "xs" | "sm" | "md" | "lg" | "xl";
-type ColorPalette   =
+type SelectionMode = "single" | "multiple" | "range";
+type ColorPalette  =
   | "blue" | "green" | "red" | "orange" | "purple"
   | "yellow" | "cyan" | "teal" | "pink" | "gray";
 
 export interface CusCalendarProps {
-  /** Accent color of selected dates, today indicator, etc. */
+  // Input appearance
+  label?:       string;
+  placeholder?: string;
+  errorText?:   string;
+  isRequired?:  boolean;
+
+  // Accent color
   colorPalette?: ColorPalette;
-  // ── Value control ──────────────────────────────────────────────────────────
-  /** Controlled selected date(s). Always an array — single: [date], range: [from, to], multiple: [...dates] */
-  value?: DateValue[];
-  /** Initial selected date(s) for uncontrolled usage */
-  defaultValue?: DateValue[];
-  /** Fires when selection changes */
-  onValueChange?: (details: { value: DateValue[]; valueAsString: string[] }) => void;
 
-  // ── Selection behavior ─────────────────────────────────────────────────────
-  /** "single" (default) | "range" | "multiple" */
-  selectionMode?: SelectionMode;
-  /** Max selectable dates when selectionMode="multiple" */
-  maxSelectedDates?: number;
+  // Value control
+  value?:          DateValue[];
+  defaultValue?:   DateValue[];
+  onValueChange?:  (details: { value: DateValue[]; valueAsString: string[] }) => void;
 
-  // ── Date restrictions ──────────────────────────────────────────────────────
-  /** Earliest selectable date */
-  min?: DateValue;
-  /** Latest selectable date */
-  max?: DateValue;
-  /** Custom function to mark specific dates as unavailable */
+  // Selection / date restrictions
+  selectionMode?:     SelectionMode;
+  min?:               DateValue;
+  max?:               DateValue;
   isDateUnavailable?: (date: DateValue, locale: string) => boolean;
-  /** Allow clicking on days outside current month (outsideDaySelectable) */
-  outsideDaySelectable?: boolean;
 
-  // ── Display ────────────────────────────────────────────────────────────────
-  /** "xs" | "sm" | "md" (default) | "lg" | "xl" */
-  size?: CalendarSize;
-  /** Number of months to show side-by-side */
-  numOfMonths?: number;
-  /** Show ISO week numbers column */
-  showWeekNumbers?: boolean;
-
-  // ── Navigation ─────────────────────────────────────────────────────────────
-  /** Initial view: "day" (default) | "month" | "year" */
-  defaultView?: DateView;
-  /** Minimum zoom-out level (e.g. "month" prevents reaching year view) */
-  minView?: DateView;
-  /** Maximum zoom-out level */
-  maxView?: DateView;
-
-  // ── Localization ───────────────────────────────────────────────────────────
-  /** BCP 47 locale tag, e.g. "uz-UZ" | "ru-RU" | "en-US" (default) */
-  locale?: string;
-  /** IANA timezone string, e.g. "Asia/Tashkent" */
+  // Localisation
+  locale?:   string;
   timeZone?: string;
 
-  // ── State ──────────────────────────────────────────────────────────────────
+  // State
   disabled?: boolean;
   readOnly?: boolean;
 }
@@ -67,94 +44,154 @@ export interface CusCalendarProps {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function CusCalendar({
+  label,
+  placeholder = "КК.ОО.ГГГГ",
+  errorText,
+  isRequired,
   colorPalette = "blue",
   value,
   defaultValue,
   onValueChange,
   selectionMode = "single",
-  maxSelectedDates,
   min,
   max,
   isDateUnavailable,
-  outsideDaySelectable,
-  size = "md",
-  numOfMonths = 1,
-  showWeekNumbers,
-  defaultView,
-  minView,
-  maxView,
-  locale,
+  locale = "ru-RU",
   timeZone,
   disabled,
   readOnly,
 }: CusCalendarProps) {
+  const [open, setOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
+
+  const hasError = !!errorText;
+  const borderColor = hasError
+    ? "#ef4444"
+    : focused
+    ? "#3b82f6"
+    : "var(--border-default)";
+  const boxShadow = hasError
+    ? "0 0 0 1px #ef4444"
+    : focused
+    ? "0 0 0 1px #3b82f6"
+    : "none";
+
   return (
-    <DatePicker.Root
-      inline
-      open
-      colorPalette={colorPalette}
-      // value / selection
-      value={value}
-      defaultValue={defaultValue}
-      onValueChange={onValueChange}
-      selectionMode={selectionMode}
-      maxSelectedDates={maxSelectedDates}
-      // date bounds
-      min={min}
-      max={max}
-      isDateUnavailable={isDateUnavailable}
-      outsideDaySelectable={outsideDaySelectable}
-      // display
-      size={size}
-      numOfMonths={numOfMonths}
-      showWeekNumbers={showWeekNumbers}
-      // navigation
-      defaultView={defaultView}
-      minView={minView}
-      maxView={maxView}
-      // locale
-      locale={locale}
-      timeZone={timeZone}
-      // state
-      disabled={disabled}
-      readOnly={readOnly}
-    >
-      {/* Day view */}
-      <DatePicker.View view="day">
-        {numOfMonths > 1 ? (
-          <div
+    <Field.Root invalid={hasError} required={isRequired} width="100%">
+      {label && (
+        <Field.Label fontSize="sm" fontWeight="medium" mb="1" color="var(--text-3)">
+          {label}
+          <Field.RequiredIndicator color="#ef4444" ml="0.5" />
+        </Field.Label>
+      )}
+
+      <DatePicker.Root
+        width="100%"
+        open={open}
+        onOpenChange={({ open: o }) => setOpen(o)}
+        selectionMode={selectionMode}
+        value={value}
+        defaultValue={defaultValue}
+        onValueChange={onValueChange}
+        min={min}
+        max={max}
+        isDateUnavailable={isDateUnavailable}
+        locale={locale}
+        timeZone={timeZone}
+        disabled={disabled}
+        readOnly={readOnly}
+        colorPalette={colorPalette}
+        closeOnSelect
+        format={(v) =>
+          `${String(v.day).padStart(2, "0")}.${String(v.month).padStart(2, "0")}.${v.year}`
+        }
+        parse={(v) => {
+          const [d, m, y] = v.split(".");
+          if (!d || !m || y?.length !== 4) return undefined;
+          try {
+            return parseDate(
+              `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`
+            );
+          } catch {
+            return undefined;
+          }
+        }}
+      >
+        <DatePicker.Control style={{ position: "relative", width: "100%" }}>
+          <DatePicker.Input
+            placeholder={placeholder}
+            onClick={() => { if (!open) setOpen(true); }}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             style={{
+              width: "100%",
+              height: 40,
+              paddingLeft: 12,
+              paddingRight: 40,
+              background: "var(--bg-input)",
+              border: `1px solid ${borderColor}`,
+              borderRadius: 8,
+              color: "var(--text-default)",
+              fontSize: 14,
+              outline: "none",
+              boxShadow,
+              transition: "border-color 0.15s, box-shadow 0.15s",
+              opacity: disabled ? 0.5 : 1,
+              cursor: disabled ? "not-allowed" : "text",
+            }}
+          />
+          <DatePicker.Trigger
+            style={{
+              position: "absolute",
+              right: 10,
+              top: "50%",
+              transform: "translateY(-50%)",
               display: "flex",
-              gap: 24,
-              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "transparent",
+              border: "none",
+              cursor: disabled ? "not-allowed" : "pointer",
+              color: "var(--text-muted)",
+              padding: 4,
+              borderRadius: 4,
             }}
           >
-            {Array.from({ length: numOfMonths }, (_, i) => (
-              <div key={i}>
-                <DatePicker.Header offset={i} />
-                <DatePicker.DayTable offset={i} />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <>
-            <DatePicker.Header />
-            <DatePicker.DayTable />
-          </>
-        )}
-      </DatePicker.View>
+            <LuCalendar size={15} />
+          </DatePicker.Trigger>
+        </DatePicker.Control>
 
-      {/* Month view */}
-      <DatePicker.View view="month">
-        <DatePicker.Header />
-        <DatePicker.MonthTable />
-      </DatePicker.View>
+        <DatePicker.Positioner>
+          <DatePicker.Content
+            style={{
+              background: "var(--bg-second)",
+              border: "1px solid var(--border-default)",
+              borderRadius: 12,
+              padding: 12,
+              boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+            }}
+          >
+            <DatePicker.View view="day">
+              <DatePicker.Header />
+              <DatePicker.DayTable />
+            </DatePicker.View>
+            <DatePicker.View view="month">
+              <DatePicker.Header />
+              <DatePicker.MonthTable />
+            </DatePicker.View>
+            <DatePicker.View view="year">
+              <DatePicker.Header />
+              <DatePicker.YearTable />
+            </DatePicker.View>
+          </DatePicker.Content>
+        </DatePicker.Positioner>
+      </DatePicker.Root>
 
-      {/* Year view */}
-      <DatePicker.View view="year">
-        <DatePicker.Header />
-        <DatePicker.YearTable />
-      </DatePicker.View>
-    </DatePicker.Root>
+      {errorText && (
+        <Field.ErrorText fontSize="xs" color="#ef4444" mt="1">
+          {errorText}
+        </Field.ErrorText>
+      )}
+    </Field.Root>
   );
 }

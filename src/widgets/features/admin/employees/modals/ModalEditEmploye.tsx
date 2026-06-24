@@ -1,6 +1,8 @@
 import { useEffect, type ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { parseDate } from "@internationalized/date";
 import { LuCircleAlert } from "react-icons/lu";
+import { CusCalendar } from "@/components/ui/calendar/CusCalendar";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -66,11 +68,9 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
   });
 
   const {
-    register,
     control,
     handleSubmit,
     reset,
-    formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
       firstname: "",
@@ -201,35 +201,55 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
 
         <Section title="Личные данные">
           <Row2>
-            <CusInput
-              label="Имя"
-              isRequired
-              placeholder="Иван"
-              errorText={errors.firstname?.message}
-              {...register("firstname", {
-                required: "Обязательное поле",
-                minLength: { value: 2, message: "Минимум 2 символа" },
-              })}
+            <Controller
+              control={control}
+              name="firstname"
+              rules={{ required: "Обязательное поле", minLength: { value: 2, message: "Минимум 2 символа" } }}
+              render={({ field, fieldState }) => (
+                <CusInput
+                  label="Имя"
+                  isRequired
+                  placeholder="Иван"
+                  errorText={fieldState.error?.message}
+                  {...field}
+                />
+              )}
             />
-            <CusInput
-              label="Фамилия"
-              isRequired
-              placeholder="Иванов"
-              errorText={errors.lastname?.message}
-              {...register("lastname", {
-                required: "Обязательное поле",
-                minLength: { value: 2, message: "Минимум 2 символа" },
-              })}
+            <Controller
+              control={control}
+              name="lastname"
+              rules={{ required: "Обязательное поле", minLength: { value: 2, message: "Минимум 2 символа" } }}
+              render={({ field, fieldState }) => (
+                <CusInput
+                  label="Фамилия"
+                  isRequired
+                  placeholder="Иванов"
+                  errorText={fieldState.error?.message}
+                  {...field}
+                />
+              )}
             />
           </Row2>
-          <CusInput
-            label="Дата рождения"
-            isRequired
-            type="date"
-            errorText={errors.date_of_birth?.message}
-            {...register("date_of_birth", {
-              required: "Укажите дату рождения",
-            })}
+          <Controller
+            control={control}
+            name="date_of_birth"
+            rules={{ required: "Укажите дату рождения" }}
+            render={({ field, fieldState }) => (
+              <CusCalendar
+                label="Дата рождения"
+                isRequired
+                errorText={fieldState.error?.message}
+                value={field.value ? [parseDate(field.value.slice(0, 10))] : undefined}
+                onValueChange={({ value }) => {
+                  const v = value[0];
+                  field.onChange(
+                    v
+                      ? `${v.year}-${String(v.month).padStart(2, "0")}-${String(v.day).padStart(2, "0")}`
+                      : ""
+                  );
+                }}
+              />
+            )}
           />
         </Section>
 
@@ -259,22 +279,33 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
               />
             )}
           />
-          <CusInput
-            label="Telegram"
-            placeholder="@username"
-            {...register("telegram_username")}
+          <Controller
+            control={control}
+            name="telegram_username"
+            render={({ field }) => (
+              <CusInput
+                label="Telegram"
+                placeholder="@username"
+                {...field}
+              />
+            )}
           />
         </Section>
 
         <Section title="Доступ">
-          <CusInput
-            label="Новый пароль (необязательно)"
-            type="password"
-            placeholder="Минимум 6 символов"
-            errorText={errors.password?.message}
-            {...register("password", {
-              minLength: { value: 6, message: "Минимум 6 символов" },
-            })}
+          <Controller
+            control={control}
+            name="password"
+            rules={{ minLength: { value: 6, message: "Минимум 6 символов" } }}
+            render={({ field, fieldState }) => (
+              <CusInput
+                label="Новый пароль (необязательно)"
+                type="password"
+                placeholder="Минимум 6 символов"
+                errorText={fieldState.error?.message}
+                {...field}
+              />
+            )}
           />
         </Section>
 
@@ -300,11 +331,17 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
               )}
             />
           </div>
-          <CusInput
-            label="Оклад (UZS)"
-            placeholder="2 500 000"
-            type="number"
-            {...register("salary")}
+          <Controller
+            control={control}
+            name="salary"
+            render={({ field }) => (
+              <CusInput
+                label="Оклад (UZS)"
+                placeholder="2 500 000"
+                type="number"
+                {...field}
+              />
+            )}
           />
           <div>
             <Label text="Статус" />

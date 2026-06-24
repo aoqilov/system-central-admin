@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { LuActivity, LuCircleCheck, LuCircleX, LuClock } from "react-icons/lu";
 import {
   CusCard,
@@ -7,6 +8,7 @@ import {
   CusTable,
   type ColumnDef,
 } from "../../../../../../components/ui/table/CusTable";
+import CusSelect from "../../../../../../components/ui/select/CusSelect";
 
 type PaymentType = "Naqd" | "UzCard" | "Karta";
 type TxStatus = "success" | "pending" | "failed";
@@ -258,7 +260,17 @@ const columns: ColumnDef<Transaction>[] = [
   },
 ];
 
+const KASSA_OPTIONS = Array.from(new Set(transactions.map((t) => t.kassaName))).map(
+  (name) => ({ label: name, value: name })
+);
+
 export function KassaTransactionFeed() {
+  const [kassaFilter, setKassaFilter] = useState<string>("");
+
+  const filtered = kassaFilter
+    ? transactions.filter((t) => t.kassaName === kassaFilter)
+    : transactions;
+
   return (
     <CusCard>
       <CusCardHeader
@@ -266,19 +278,31 @@ export function KassaTransactionFeed() {
         title="Jonli tranzaksiyalar"
         iconColor="var(--color-green)"
         action={
-          <div className="flex items-center gap-1.5">
-            <span
-              className="w-2 h-2 rounded-full animate-pulse"
-              style={{ background: "var(--color-green)" }}
-            />
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Live
-            </span>
+          <div className="flex items-center gap-3">
+            <div style={{ width: 160 }}>
+              <CusSelect
+                options={KASSA_OPTIONS}
+                value={kassaFilter || undefined}
+                onChange={(v) => setKassaFilter(v as string)}
+                placeholder="Barcha kassalar"
+                size="sm"
+                clearable
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span
+                className="w-2 h-2 rounded-full animate-pulse"
+                style={{ background: "var(--color-green)" }}
+              />
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                Live
+              </span>
+            </div>
           </div>
         }
       />
       <CusTable<Transaction>
-        data={transactions}
+        data={filtered}
         maxH="400px"
         stickyHeader
         variant="outline"
