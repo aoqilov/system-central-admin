@@ -14,7 +14,7 @@ export interface ColumnDef<T> {
   render?: (row: T, index: number) => ReactNode;
 }
 
-interface CusTableProps<T extends object> {
+interface CusTableProps<T extends { id: number }> {
   data: T[];
   columns: ColumnDef<T>[];
 
@@ -34,10 +34,11 @@ interface CusTableProps<T extends object> {
 
   onRowClick?: (row: T, index: number) => void;
 
-  // Row selection
+  // Row selection — selectedRows va onSelectionChange endi row.id ishlatadi
   selectable?: boolean;
   selectedRows?: number[];
-  onSelectionChange?: (indices: number[]) => void;
+  onSelectionChange?: (ids: number[]) => void;
+  onSelectionRowsChange?: (rows: T[]) => void;
 
   // Header styling
   colorHeader?: string;
@@ -54,7 +55,7 @@ type SortDir = "asc" | "desc" | null;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function CusTable<T extends object>({
+export function CusTable<T extends { id: number }>({
   data,
   columns,
   variant = "line",
@@ -72,6 +73,7 @@ export function CusTable<T extends object>({
   selectable = false,
   selectedRows,
   onSelectionChange,
+  onSelectionRowsChange,
   colorHeader = "var(--bg-hover)",
   colorTextHeader,
   colorTextHeaderHover,
@@ -85,12 +87,15 @@ export function CusTable<T extends object>({
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>(null);
 
-  // internal selection state (uncontrolled fallback)
+  // internal selection state — endi row.id ishlatiladi
   const [internalSelected, setInternalSelected] = useState<number[]>([]);
   const selected = selectedRows ?? internalSelected;
-  const setSelected = (next: number[]) => {
-    setInternalSelected(next);
-    onSelectionChange?.(next);
+  const setSelected = (nextIds: number[]) => {
+    setInternalSelected(nextIds);
+    onSelectionChange?.(nextIds);
+    if (onSelectionRowsChange) {
+      onSelectionRowsChange(data.filter((r) => nextIds.includes(r.id)));
+    }
   };
 
   function handleSort(key: string) {
@@ -118,17 +123,19 @@ export function CusTable<T extends object>({
 
   const isEmpty = !isLoading && sorted.length === 0;
 
-  // selection helpers
+  // selection helpers — row.id asosida
   const allSelected =
-    sorted.length > 0 && sorted.every((_, i) => selected.includes(i));
+    sorted.length > 0 && sorted.every((row) => selected.includes(row.id));
   const someSelected = selected.length > 0 && !allSelected;
 
   function toggleAll() {
-    setSelected(allSelected ? [] : sorted.map((_, i) => i));
+    setSelected(allSelected ? [] : sorted.map((row) => row.id));
   }
-  function toggleRow(i: number) {
+  function toggleRow(rowId: number) {
     setSelected(
-      selected.includes(i) ? selected.filter((x) => x !== i) : [...selected, i],
+      selected.includes(rowId)
+        ? selected.filter((x) => x !== rowId)
+        : [...selected, rowId],
     );
   }
 
@@ -263,10 +270,10 @@ export function CusTable<T extends object>({
               </Table.Row>
             ) : (
               sorted.map((row, rowIdx) => {
-                const isSelected = selected.includes(rowIdx);
+                const isSelected = selected.includes(row.id);
                 return (
                   <Table.Row
-                    key={rowIdx}
+                    key={row.id}
                     onClick={
                       onRowClick ? () => onRowClick(row, rowIdx) : undefined
                     }
@@ -281,7 +288,7 @@ export function CusTable<T extends object>({
                         <div onClick={(e) => e.stopPropagation()}>
                           <CusCheckbox
                             checked={isSelected}
-                            onChange={() => toggleRow(rowIdx)}
+                            onChange={() => toggleRow(row.id)}
                             size="lg"
                           />
                         </div>

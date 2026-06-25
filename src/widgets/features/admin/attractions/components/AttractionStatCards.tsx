@@ -1,5 +1,7 @@
-import { LuLayoutGrid, LuCheck, LuWrench, LuBan } from "react-icons/lu";
-import { attractions } from "@/data/attractions";
+import type { ElementType } from "react";
+import { LuLayoutGrid, LuCircleCheck, LuCircleOff, LuWrench, LuBan } from "react-icons/lu";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAttractionStats } from "../api/attractionsApi";
 import { useTranslation } from "@/i18n/languageConfig";
 
 function StatCard({
@@ -7,11 +9,13 @@ function StatCard({
   value,
   icon: Icon,
   color,
+  loading,
 }: {
   label: string;
   value: number;
-  icon: React.ElementType;
+  icon: ElementType;
   color: string;
+  loading?: boolean;
 }) {
   return (
     <div
@@ -26,7 +30,11 @@ function StatCard({
       </div>
       <div>
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>{label}</p>
-        <p className="text-2xl font-semibold" style={{ color: "var(--text-default)" }}>{value}</p>
+        {loading ? (
+          <div className="h-8 w-12 rounded-md animate-pulse mt-0.5" style={{ background: "var(--bg-hover)" }} />
+        ) : (
+          <p className="text-2xl font-semibold" style={{ color: "var(--text-default)" }}>{value}</p>
+        )}
       </div>
     </div>
   );
@@ -34,18 +42,18 @@ function StatCard({
 
 export default function AttractionStatCards() {
   const { t } = useTranslation("attractions.");
-
-  const total = attractions.length;
-  const openCount = attractions.filter((a) => a.status === "open").length;
-  const maintenanceCount = attractions.filter((a) => a.status === "maintenance").length;
-  const closedCount = attractions.filter((a) => a.status === "closed").length;
+  const { data, isLoading } = useQuery({
+    queryKey: ["attraction-stats"],
+    queryFn: fetchAttractionStats,
+  });
 
   return (
-    <div className="grid grid-cols-2 desktop:grid-cols-4 gap-3">
-      <StatCard label={t("total")} value={total} icon={LuLayoutGrid} color="#3b82f6" />
-      <StatCard label={t("open")} value={openCount} icon={LuCheck} color="#22c55e" />
-      <StatCard label={t("maintenance")} value={maintenanceCount} icon={LuWrench} color="#f59e0b" />
-      <StatCard label={t("closed")} value={closedCount} icon={LuBan} color="#ef4444" />
+    <div className="grid grid-cols-2 desktop:grid-cols-5 gap-3">
+      <StatCard label={t("total")}       value={data?.attractions ?? 0} icon={LuLayoutGrid}   color="#3b82f6" loading={isLoading} />
+      <StatCard label={t("active")}      value={data?.active      ?? 0} icon={LuCircleCheck}  color="#22c55e" loading={isLoading} />
+      <StatCard label={t("inactive")}    value={data?.inactive    ?? 0} icon={LuCircleOff}    color="#6b7280" loading={isLoading} />
+      <StatCard label={t("maintenance")} value={data?.maintenance ?? 0} icon={LuWrench}       color="#f59e0b" loading={isLoading} />
+      <StatCard label={t("closed")}      value={data?.closed      ?? 0} icon={LuBan}          color="#ef4444" loading={isLoading} />
     </div>
   );
 }

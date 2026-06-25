@@ -17,6 +17,7 @@ import {
   LuToggleLeft,
   LuTable2,
   LuCalendar,
+  LuUpload,
 } from "react-icons/lu";
 import { CalendarDate } from "@internationalized/date";
 import type { DateValue } from "@ark-ui/react/date-picker";
@@ -31,6 +32,7 @@ import { CusTable } from "../../components/ui/table/CusTable";
 import type { ColumnDef } from "../../components/ui/table/CusTable";
 import { CusCard, CusCardHeader } from "../../components/shared/card/CusCard";
 import { CusCalendar } from "../../components/ui/calendar/CusCalendar";
+import { CusFileUpload } from "../../components/ui/inputs/CusFileUpload";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -130,6 +132,8 @@ export default function DevUI() {
   const [selectVal, setSelectVal] = useState("operator");
   const [inputVal, setInputVal] = useState("");
   const [tableSelected, setTableSelected] = useState<number[]>([]);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
   // Calendar state
   const [calColor, setCalColor] = useState<
@@ -390,6 +394,69 @@ export default function DevUI() {
         </div>
       </CusCard>
 
+      {/* ── CusFileUpload ── */}
+      <CusCard>
+        <CusCardHeader icon={LuUpload} title="CusFileUpload" />
+        <div className="p-4 space-y-6 max-w-sm">
+          <Section title='variant="button" (default) — 1 ta rasm'>
+            <CusFileUpload
+              label="Asosiy rasm"
+              sublabel="Asosiy rasm sayt va dashboardda ko'rsatiladi 1x"
+              isRequired
+              accept={{ "image/*": [".jpg", ".jpeg", ".png", ".webp"] }}
+              maxFiles={2}
+              maxFileSize={5 * 1024 * 1024}
+              helperText="JPG, PNG, WEBP · Max 5 MB"
+              onFileChange={(files) => setUploadedFile(files[0] ?? null)}
+            />
+            {uploadedFile && (
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                Tanlangan:{" "}
+                <strong style={{ color: "var(--text-2)" }}>
+                  {uploadedFile.name}
+                </strong>
+              </p>
+            )}
+          </Section>
+
+          <Section title='variant="dropzone" — bir nechta fayl'>
+            <CusFileUpload
+              label="Galereya rasmlari"
+              variant="dropzone"
+              accept={{ "image/*": [".jpg", ".jpeg", ".png", ".webp"] }}
+              maxFiles={5}
+              maxFileSize={10 * 1024 * 1024}
+              placeholder="Rasmlarni shu yerga tashlang"
+              helperText="Max 5 ta rasm · 10 MB gacha"
+              onFileChange={(files) => setUploadedFiles(files)}
+            />
+            {uploadedFiles.length > 0 && (
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {uploadedFiles.length} ta fayl tanlandi
+              </p>
+            )}
+          </Section>
+
+          <Section title="errorText holati">
+            <CusFileUpload
+              label="Hujjat"
+              isRequired
+              accept={{ "application/pdf": [".pdf"] }}
+              buttonText="PDF tanlash"
+              errorText="Fayl yuklanishi shart"
+            />
+          </Section>
+
+          <Section title="disabled">
+            <CusFileUpload
+              label="Faol emas"
+              disabled
+              buttonText="Fayl tanlash"
+            />
+          </Section>
+        </div>
+      </CusCard>
+
       {/* ── CusSelect ── */}
       <CusCard>
         <CusCardHeader icon={LuChevronDown} title="CusSelect" />
@@ -541,8 +608,12 @@ export default function DevUI() {
                   }}
                 />
               ))}
-              <span className="text-xs ml-1" style={{ color: "var(--text-muted)" }}>
-                Tanlangan: <strong style={{ color: "var(--text-2)" }}>{calColor}</strong>
+              <span
+                className="text-xs ml-1"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Tanlangan:{" "}
+                <strong style={{ color: "var(--text-2)" }}>{calColor}</strong>
               </span>
             </div>
             <div className="max-w-xs">
@@ -555,7 +626,10 @@ export default function DevUI() {
               />
             </div>
             <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
-              Tanlangan: <strong style={{ color: "var(--text-2)" }}>{fmtDate(singleVal)}</strong>
+              Tanlangan:{" "}
+              <strong style={{ color: "var(--text-2)" }}>
+                {fmtDate(singleVal)}
+              </strong>
             </p>
           </Section>
 
@@ -606,8 +680,20 @@ export default function DevUI() {
               <CusCalendar
                 label="min=bugun, max=30 kun keyin"
                 selectionMode="range"
-                min={new CalendarDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate())}
-                max={new CalendarDate(new Date().getFullYear(), new Date().getMonth() + 1, Math.min(new Date().getDate() + 30, 28))}
+                min={
+                  new CalendarDate(
+                    new Date().getFullYear(),
+                    new Date().getMonth() + 1,
+                    new Date().getDate(),
+                  )
+                }
+                max={
+                  new CalendarDate(
+                    new Date().getFullYear(),
+                    new Date().getMonth() + 1,
+                    Math.min(new Date().getDate() + 30, 28),
+                  )
+                }
               />
             </div>
           </Section>
@@ -615,8 +701,16 @@ export default function DevUI() {
           {/* locale */}
           <Section title="locale">
             <div className="grid grid-cols-1 desktop:grid-cols-2 gap-6">
-              <CusCalendar label='locale="uz-UZ"' selectionMode="single" locale="uz-UZ" />
-              <CusCalendar label='locale="ru-RU"' selectionMode="single" locale="ru-RU" />
+              <CusCalendar
+                label='locale="uz-UZ"'
+                selectionMode="single"
+                locale="uz-UZ"
+              />
+              <CusCalendar
+                label='locale="ru-RU"'
+                selectionMode="single"
+                locale="ru-RU"
+              />
             </div>
           </Section>
 
@@ -627,13 +721,25 @@ export default function DevUI() {
                 label="disabled"
                 selectionMode="single"
                 disabled
-                defaultValue={[new CalendarDate(new Date().getFullYear(), new Date().getMonth() + 1, 10)]}
+                defaultValue={[
+                  new CalendarDate(
+                    new Date().getFullYear(),
+                    new Date().getMonth() + 1,
+                    10,
+                  ),
+                ]}
               />
               <CusCalendar
                 label="readOnly"
                 selectionMode="single"
                 readOnly
-                defaultValue={[new CalendarDate(new Date().getFullYear(), new Date().getMonth() + 1, 15)]}
+                defaultValue={[
+                  new CalendarDate(
+                    new Date().getFullYear(),
+                    new Date().getMonth() + 1,
+                    15,
+                  ),
+                ]}
               />
             </div>
           </Section>
