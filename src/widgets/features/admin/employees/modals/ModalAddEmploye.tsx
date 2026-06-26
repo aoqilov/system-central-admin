@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Drawer } from "@chakra-ui/react";
 import { LuCircleAlert } from "react-icons/lu";
@@ -10,6 +10,8 @@ import { CusButton } from "@/components/ui/buttons/CusButton";
 import CusSelect from "@/components/ui/select/CusSelect";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchRoles, createEmployee } from "../api/employeesApi";
+import { uploadFile } from "@/widgets/api-global/files-route/filesApi";
+import { CusFileUpload } from "@/components/ui/inputs/CusFileUpload";
 import type { CreateEmployeePayload } from "../types";
 import { formatPhoneNumber } from "@/widgets/features/login/hooks/useLoginForm";
 
@@ -27,6 +29,7 @@ interface FormValues {
   password: string;
   role: string;
   salary: string;
+  file: File | null;
 }
 
 function getApiError(err: unknown): string {
@@ -36,6 +39,7 @@ function getApiError(err: unknown): string {
 
 export default function ModalAddEmploye({ open, onClose }: Props) {
   const qc = useQueryClient();
+  const [isUploading, setIsUploading] = useState(false);
 
   const { data: roles = [] } = useQuery({
     queryKey: ["roles"],
@@ -63,6 +67,7 @@ export default function ModalAddEmploye({ open, onClose }: Props) {
       password: "",
       role: "",
       salary: "",
+      file: null,
     },
   });
 
@@ -74,7 +79,27 @@ export default function ModalAddEmploye({ open, onClose }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  function onSubmit(data: FormValues) {
+  async function onSubmit(data: FormValues) {
+    console.group("🚀 onSubmit — ModalAddEmploye");
+    console.log("Form values:", data);
+    console.log("File field:", data.file ?? "null (no file selected)");
+
+    let fileId: number | null = null;
+    if (data.file) {
+      console.log("⏳ File tanlangan — upload boshlanmoqda...");
+      setIsUploading(true);
+      try {
+        fileId = await uploadFile(data.file);
+        console.log("✅ Upload muvaffaqiyatli! fileId =", fileId);
+      } catch (err) {
+        console.error("❌ Upload xatosi:", err);
+      } finally {
+        setIsUploading(false);
+      }
+    } else {
+      console.log("ℹ️ File yo'q — upload o'tkazib yuborildi");
+    }
+
     const payload: CreateEmployeePayload = {
       firstname: data.firstname.trim(),
       lastname: data.lastname.trim(),
@@ -84,7 +109,12 @@ export default function ModalAddEmploye({ open, onClose }: Props) {
       password: data.password,
       role: Number(data.role),
       salary: data.salary ? Number(data.salary) : null,
+      file: fileId,
     };
+
+    console.log("📦 API payload:", payload);
+    console.groupEnd();
+
     createMut.mutateAsync(payload, { onSuccess: onClose });
   }
 
@@ -113,7 +143,7 @@ export default function ModalAddEmploye({ open, onClose }: Props) {
             <CusButton
               variant="outline"
               size="sm"
-              isDisabled={createMut.isPending}
+              isDisabled={isUploading || createMut.isPending}
             >
               Отмена
             </CusButton>
@@ -123,9 +153,9 @@ export default function ModalAddEmploye({ open, onClose }: Props) {
             variant="solid"
             colorPalette="blue"
             onClick={handleSubmit(onSubmit)}
-            isDisabled={createMut.isPending}
+            isDisabled={isUploading || createMut.isPending}
           >
-            {createMut.isPending ? "Сохранение..." : "Сохранить"}
+            {isUploading ? "Загрузка фото..." : createMut.isPending ? "Сохранение..." : "Сохранить"}
           </CusButton>
         </div>
       }
@@ -154,6 +184,19 @@ export default function ModalAddEmploye({ open, onClose }: Props) {
         )}
 
         <Section title="Личные данные">
+          <Controller
+            control={control}
+            name="file"
+            render={({ field, fieldState }) => (
+              <CusFileUpload
+                label="Фото сотрудника"
+                accept={{ "image/*": [".jpg", ".jpeg", ".png", ".webp"] }}
+                maxFileSize={5 * 1024 * 1024}
+                errorText={fieldState.error?.message}
+                onFileChange={(files) => field.onChange(files[0] ?? null)}
+              />
+            )}
+          />
           <Row2>
             <CusInput
               label="Имя"

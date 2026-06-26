@@ -150,7 +150,7 @@ export default function AttractionTableCard() {
 
   // --- Derived
   const rows = data?.attractions ?? [];
-  const total = data?.pagination.total ?? 0;
+  const total = data?.pagination?.total ?? 0;
   const editAttraction = selectedAttractions[0];
   const categoryMap = Object.fromEntries(categories.map((c) => [c.id, c]));
 

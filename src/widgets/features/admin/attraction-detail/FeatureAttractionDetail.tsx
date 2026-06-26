@@ -1,41 +1,57 @@
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { LuArrowLeft } from "react-icons/lu";
-import { CusButton } from "../../../../components/ui/buttons/CusButton";
-import { useTranslation } from "../../../../i18n/languageConfig";
-import { useAttractionDetail } from "./hooks/useAttractionDetail";
+import { CusButton } from "@/components/ui/buttons/CusButton";
+import { fetchAttractionDetail } from "./api/apiAttractionDetail";
 import { AttractionCard } from "./components/AttractionCard";
-import { OperatorCard } from "./components/OperatorCard";
 import { VisitorsChart } from "./components/VisitorsChart";
 import { RevenueChart } from "./components/RevenueChart";
-import { AsideInfoCard } from "./components/AsideInfoCard";
 import { AssignOperatorModal } from "./modals/AssignOperatorModal";
 import { HistoryDrawer } from "./modals/HistoryDrawer";
+import { OperatorSection } from "./components/OperatorSection";
 
 export default function FeatureAttractionDetail() {
-  const { t } = useTranslation("attractionDetail.");
-  const {
-    attraction,
-    operator,
-    helpers,
-    visitorChartData,
-    revenueChartData,
-    connectedDate,
-    connectedDays,
-    assignCandidates,
-    assignOpen,
-    setAssignOpen,
-    historyOpen,
-    setHistoryOpen,
-    selectedEmp,
-    setSelectedEmp,
-    handleAssign,
-    navigate,
-  } = useAttractionDetail();
+  const { id } = useParams();
+  const navigate = useNavigate();
 
-  if (!attraction) {
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  const {
+    data: attraction,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["attraction-detail", id],
+    queryFn: () => fetchAttractionDetail(Number(id)),
+    enabled: !!id,
+  });
+
+  if (isLoading) {
     return (
-      <div className="p-6 flex flex-col items-center justify-center gap-3" style={{ minHeight: 400 }}>
-        <p className="text-base font-semibold" style={{ color: "var(--text-default)" }}>
-          {t("notFound")}
+      <div
+        className="p-6 flex items-center justify-center"
+        style={{ minHeight: 400 }}
+      >
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Загрузка...
+        </p>
+      </div>
+    );
+  }
+
+  if (isError || !attraction) {
+    return (
+      <div
+        className="p-6 flex flex-col items-center justify-center gap-3"
+        style={{ minHeight: 400 }}
+      >
+        <p
+          className="text-base font-semibold"
+          style={{ color: "var(--text-default)" }}
+        >
+          Аттракцион не найден
         </p>
         <CusButton
           size="sm"
@@ -43,11 +59,15 @@ export default function FeatureAttractionDetail() {
           leftIcon={<LuArrowLeft size={14} />}
           onClick={() => navigate("/attractions")}
         >
-          {t("backTo")}
+          Назад
         </CusButton>
       </div>
     );
   }
+
+  const operator = attraction.operator ?? null;
+  const visitorChartData: { day: string; visitors: number }[] = [];
+  const revenueChartData: { day: string; revenue: number }[] = [];
 
   return (
     <div className="p-4 tablet:p-6 space-y-4">
@@ -58,52 +78,37 @@ export default function FeatureAttractionDetail() {
         size="xs"
       >
         <LuArrowLeft size={14} />
-        {t("backTo")}
+        Назад к аттракционам
       </CusButton>
 
-      {/* Row 1: Attraction + Operator */}
-      <div className="grid grid-cols-1 desktop:grid-cols-[3fr_2fr] gap-4 items-stretch">
-        <AttractionCard
-          attraction={attraction}
-          onHistoryOpen={() => setHistoryOpen(true)}
-        />
-        <OperatorCard
-          operator={operator}
-          helpers={helpers}
-          connectedDate={connectedDate}
-          connectedDays={connectedDays}
-          onAssignOpen={() => setAssignOpen(true)}
-        />
-      </div>
+      {/* Hero card */}
+      <AttractionCard
+        attraction={attraction}
+        onHistoryOpen={() => setHistoryOpen(true)}
+      />
 
       {/* Body: Charts + Aside */}
       <div className="grid grid-cols-1 desktop:grid-cols-[3fr_1.2fr] gap-4 items-start">
-        <div className="space-y-4">
-          <VisitorsChart data={visitorChartData} />
-          <RevenueChart data={revenueChartData} />
+        <div className="space-y-4"></div>
+        <div>
+          <OperatorSection
+            operator={operator}
+            onAssignOperator={() => setAssignOpen(true)}
+            onAssignHelper={() => {}}
+          />
         </div>
-        <AsideInfoCard attraction={attraction} />
       </div>
 
       <HistoryDrawer
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
-        attraction={attraction}
         operator={operator}
-        helpers={helpers}
-        connectedDate={connectedDate}
       />
 
       <AssignOperatorModal
         open={assignOpen}
-        onClose={() => {
-          setAssignOpen(false);
-          setSelectedEmp(null);
-        }}
-        candidates={assignCandidates}
-        selectedEmp={selectedEmp}
-        onSelect={setSelectedEmp}
-        onConfirm={handleAssign}
+        attractionId={Number(id)}
+        onClose={() => setAssignOpen(false)}
       />
     </div>
   );

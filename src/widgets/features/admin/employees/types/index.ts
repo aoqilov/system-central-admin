@@ -9,6 +9,7 @@ export interface ApiEmployee {
   role: number;
   salary: number;
   status: string;
+  file?: number | null;
 }
 
 export interface Pagination {
@@ -58,8 +59,8 @@ export interface EmployeesParams {
   page?: number;
   limit?: number;
   search?: string;
-  roles?: number[];
-  statuses?: Array<"active" | "inactive" | "vacation" | "fired">;
+  roles?: number;
+  statuses?: "active" | "inactive" | "vacation" | "fired";
 }
 
 export interface CreateEmployeePayload {

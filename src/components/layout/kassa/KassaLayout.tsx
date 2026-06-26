@@ -83,7 +83,7 @@ function SidebarContent({
     <div
       className="h-full w-full flex flex-col"
       style={{
-        background: "var(--bg-main)",
+        background: "#fff",
         borderRight: "1px solid var(--border-default)",
         overflow: "hidden",
       }}
@@ -335,7 +335,7 @@ function KassaLayoutBody() {
         <header
           className="sticky top-0 z-40 h-[72px] flex items-center justify-between px-4 gap-3 shrink-0"
           style={{
-            background: "var(--bg-main)",
+            background: "#fff",
             borderBottom: "1px solid var(--border-default)",
           }}
         >

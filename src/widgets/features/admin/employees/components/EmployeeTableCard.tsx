@@ -28,6 +28,8 @@ import {
   deleteEmployees,
 } from "../api/employeesApi";
 import type { ApiEmployee } from "../types";
+import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
+import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
 import ModalAddEmploye from "../modals/ModalAddEmploye";
 import ModalEditEmploye from "../modals/ModalEditEmploye";
 
@@ -79,11 +81,9 @@ export default function EmployeeTableCard() {
         page,
         limit: PAGE_SIZE,
         search: debouncedSearch || undefined,
-        roles: roleFilter ? [Number(roleFilter)] : undefined,
+        roles: roleFilter ? Number(roleFilter) : undefined,
         statuses: statusFilter
-          ? ([statusFilter] as Array<
-              "active" | "inactive" | "vacation" | "fired"
-            >)
+          ? (statusFilter as "active" | "inactive" | "vacation" | "fired")
           : undefined,
       }),
   });
@@ -147,29 +147,47 @@ export default function EmployeeTableCard() {
           : null;
         return (
           <div className="flex items-center gap-3">
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: "50%",
-                background: "var(--bg-hover)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-                fontSize: 13,
-                fontWeight: 600,
-                color: "var(--text-muted)",
-              }}
-            >
-              {row.firstname?.[0]?.toUpperCase() ?? "?"}
-            </div>
+            {row.file ? (
+              <CusImagePreview
+                src={getFileUrl(row.file)}
+                alt={row.firstname}
+                width={52}
+                height={52}
+                borderRadius="20%"
+              />
+            ) : (
+              <div
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: "50%",
+                  background: "var(--bg-hover)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
+                }}
+              >
+                {row.firstname?.[0]?.toUpperCase() ?? "?"}
+              </div>
+            )}
             <div>
               <p
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/employee/${row.id}`);
+                }}
+                className="text-[var(--text-default)] hover:text-blue-500 transition-colors duration-150"
                 style={{
                   fontWeight: 500,
-                  color: "var(--text-default)",
                   fontSize: 13,
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  textDecorationColor: "var(--border-default)",
+                  textUnderlineOffset: 3,
                 }}
               >
                 {row.lastname} {row.firstname}
@@ -513,7 +531,6 @@ export default function EmployeeTableCard() {
             selectable
             selectedRows={selectedRows}
             onSelectionChange={setSelected}
-            onRowClick={(row) => navigate(`/employee/${row.id}`)}
             emptyText="Сотрудники не найдены"
           />
         )}

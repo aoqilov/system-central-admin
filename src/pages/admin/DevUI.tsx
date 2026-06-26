@@ -18,6 +18,7 @@ import {
   LuTable2,
   LuCalendar,
   LuUpload,
+  LuImage,
 } from "react-icons/lu";
 import { CalendarDate } from "@internationalized/date";
 import type { DateValue } from "@ark-ui/react/date-picker";
@@ -33,6 +34,7 @@ import type { ColumnDef } from "../../components/ui/table/CusTable";
 import { CusCard, CusCardHeader } from "../../components/shared/card/CusCard";
 import { CusCalendar } from "../../components/ui/calendar/CusCalendar";
 import { CusFileUpload } from "../../components/ui/inputs/CusFileUpload";
+import { CusImagePreview } from "../../components/ui/image/CusImagePreview";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -453,6 +455,75 @@ export default function DevUI() {
               disabled
               buttonText="Fayl tanlash"
             />
+          </Section>
+        </div>
+      </CusCard>
+
+      {/* ── CusImagePreview ── */}
+      <CusCard>
+        <CusCardHeader icon={LuImage} title="CusImagePreview" />
+        <div className="p-4 space-y-6">
+          <Section title="objectFit">
+            <div className="flex flex-wrap gap-4">
+              {(["cover", "contain", "fill"] as const).map((fit) => (
+                <div key={fit} className="flex flex-col gap-1">
+                  <CusImagePreview
+                    src="https://picsum.photos/seed/park1/400/300"
+                    alt="demo"
+                    width={160}
+                    height={110}
+                    objectFit={fit}
+                    borderRadius={8}
+                    preview={false}
+
+                  />
+                  <span className="text-[11px] text-center" style={{ color: "var(--text-muted)" }}>
+                    {fit}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Section>
+
+          <Section title="borderRadius">
+            <div className="flex flex-wrap gap-4">
+              {([0, 8, 16, 9999] as const).map((r) => (
+                <div key={r} className="flex flex-col gap-1">
+                  <CusImagePreview
+                    src="https://picsum.photos/seed/park2/200/200"
+                    alt="demo"
+                    width={80}
+                    height={80}
+                    objectFit="cover"
+                    borderRadius={r}
+                  />
+                  <span className="text-[11px] text-center" style={{ color: "var(--text-muted)" }}>
+                    {r === 9999 ? "круг" : `${r}px`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Section>
+
+          <Section title="objectPosition">
+            <div className="flex flex-wrap gap-4">
+              {(["top", "center", "bottom"] as const).map((pos) => (
+                <div key={pos} className="flex flex-col gap-1">
+                  <CusImagePreview
+                    src="https://picsum.photos/seed/park3/400/600"
+                    alt="demo"
+                    width={120}
+                    height={90}
+                    objectFit="cover"
+                    objectPosition={pos}
+                    borderRadius={8}
+                  />
+                  <span className="text-[11px] text-center" style={{ color: "var(--text-muted)" }}>
+                    {pos}
+                  </span>
+                </div>
+              ))}
+            </div>
           </Section>
         </div>
       </CusCard>
