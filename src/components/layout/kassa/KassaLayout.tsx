@@ -18,6 +18,7 @@ import { useTheme } from "../../../context/ThemeContext";
 import { CusPopover } from "../../ui/popover/CusPopover";
 import { clearAuth } from "@/widgets/features/login/api/authApi";
 import { SmenaProvider, useSmena } from "@/context/SmenaContext";
+import RoleSwitch from "@/components/shared/RoleSwitch";
 
 interface NavItem {
   to: string;
@@ -380,7 +381,7 @@ function KassaLayoutBody() {
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Header */}
         <header
-          className="sticky top-0 z-40 h-[72px] flex items-center justify-between px-4 gap-3 shrink-0"
+          className="sticky top-0 z-40 h-[72px] flex items-center px-4 gap-3 shrink-0"
           style={{
             background: "var(--bg-main)",
             borderBottom: "1px solid var(--border-default)",
@@ -417,7 +418,9 @@ function KassaLayoutBody() {
             )}
           </button>
 
-          <div className="flex items-center gap-4">
+          <RoleSwitch />
+
+          <div className="flex items-center gap-4 ml-auto">
             {/* Live clock */}
             <div className="flex items-center gap-2 ml-auto">
               <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />

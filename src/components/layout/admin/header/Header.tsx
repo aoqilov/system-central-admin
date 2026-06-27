@@ -16,6 +16,7 @@ import { CusPopover } from "../../../ui/popover/CusPopover";
 import { useTheme } from "../../../../context/ThemeContext";
 import { clearAuth } from "@/widgets/features/login/api/authApi";
 import { isPinEnabled, lockApp } from "@/utils/pinLock";
+import RoleSwitch from "@/components/shared/RoleSwitch";
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -59,7 +60,7 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
 
   return (
     <header
-      className="sticky top-0 z-40 h-14 flex items-center justify-between px-4 gap-3"
+      className="sticky top-0 z-40 h-14 flex items-center px-4 gap-3"
       style={{
         background: "var(--bg-main)",
         borderBottom: "1px solid var(--border-default)",
@@ -78,6 +79,8 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
           <LuPanelLeft size={18} className="hidden desktop:block" />
         )}
       </button>
+
+      <RoleSwitch />
 
       <div className="flex items-center gap-2 ml-auto">
         {/* Live indicator — tablet+ */}
