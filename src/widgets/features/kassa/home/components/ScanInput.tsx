@@ -71,7 +71,7 @@ export const ScanInput = forwardRef<ScanInputHandle, ScanInputProps>(
             onFocus={() => setActive(true)}
             onBlur={() => setActive(false)}
             placeholder="Skanerlang yoki qo'lda kiriting..."
-            className="w-full bg-transparent outline-none px-4 py-5 pr-10 text-sm"
+            className="w-full bg-transparent outline-none px-4 py-3 pr-10 text-sm"
             style={{
               color: "var(--text-default)",
               caretColor: "var(--color-blue)",

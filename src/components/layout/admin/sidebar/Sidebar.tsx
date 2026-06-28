@@ -14,6 +14,9 @@ import {
   LuClock,
   LuBanknote,
   LuChevronDown,
+  LuFileCheck,
+  LuFileOutput,
+  LuFileInput,
 } from "react-icons/lu";
 import { IoQrCodeSharp } from "react-icons/io5";
 import { useTranslation } from "../../../../i18n/languageConfig";
@@ -101,6 +104,54 @@ const navGroups: NavGroupDef[] = [
       { labelKey: "employees", icon: LuUsers, to: "/employees" },
       { labelKey: "attractions", icon: LuFerrisWheel, to: "/attractions" },
       { labelKey: "kassa", icon: LuBanknote, to: "/kassa" },
+      {
+        labelKey: "kassaZReport",
+        icon: LuFileCheck,
+        subItems: [
+          {
+            labelKey: "kassaIncoming",
+            icon: LuFileCheck,
+            to: "/rolekassa-main/incoming",
+          },
+          {
+            labelKey: "kassaExport",
+            icon: LuFileOutput,
+            to: "/rolekassa-main/export",
+          },
+        ],
+      },
+      {
+        labelKey: "operatorZReport",
+        icon: LuFileCheck,
+        subItems: [
+          {
+            labelKey: "operatorIncoming",
+            icon: LuFileCheck,
+            to: "/roleoperator-main/incoming",
+          },
+          {
+            labelKey: "operatorExport",
+            icon: LuFileOutput,
+            to: "/roleoperator-main/export",
+          },
+        ],
+      },
+      {
+        labelKey: "buxZReport",
+        icon: LuFileInput,
+        subItems: [
+          {
+            labelKey: "buxIncomingKassa",
+            icon: LuFileInput,
+            to: "/rolebux-main/incoming-kassa",
+          },
+          {
+            labelKey: "buxIncomingOperator",
+            icon: LuFileInput,
+            to: "/rolebux-main/incoming-operator",
+          },
+        ],
+      },
       { labelKey: "qrCode", icon: IoQrCodeSharp, to: "/qrcode" },
     ],
   },

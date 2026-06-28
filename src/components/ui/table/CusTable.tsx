@@ -12,6 +12,7 @@ export interface ColumnDef<T> {
   align?: "left" | "center" | "right";
   sortable?: boolean;
   render?: (row: T, index: number) => ReactNode;
+  children?: ColumnDef<T>[];
 }
 
 interface CusTableProps<T extends { id: number }> {
@@ -34,24 +35,46 @@ interface CusTableProps<T extends { id: number }> {
 
   onRowClick?: (row: T, index: number) => void;
 
-  // Row selection — selectedRows va onSelectionChange endi row.id ishlatadi
   selectable?: boolean;
   selectedRows?: number[];
   onSelectionChange?: (ids: number[]) => void;
   onSelectionRowsChange?: (rows: T[]) => void;
 
-  // Header styling
   colorHeader?: string;
   colorTextHeader?: string;
   colorTextHeaderHover?: string;
   colorHeaderHover?: string;
 
-  // Body row styling
   colorBody?: string;
   colorBodyHover?: string;
 }
 
 type SortDir = "asc" | "desc" | null;
+
+// ─── Tree helpers ─────────────────────────────────────────────────────────────
+
+function getLeafCount<T>(col: ColumnDef<T>): number {
+  if (!col.children?.length) return 1;
+  return col.children.reduce((s, c) => s + getLeafCount(c), 0);
+}
+
+function getTreeDepth<T>(col: ColumnDef<T>): number {
+  if (!col.children?.length) return 1;
+  return 1 + Math.max(...col.children.map(getTreeDepth));
+}
+
+function getColumnsAtLevel<T>(cols: ColumnDef<T>[], level: number): ColumnDef<T>[] {
+  if (level === 0) return cols;
+  return cols.flatMap((c) =>
+    c.children?.length ? getColumnsAtLevel(c.children, level - 1) : [],
+  );
+}
+
+function getLeafColumns<T>(cols: ColumnDef<T>[]): ColumnDef<T>[] {
+  return cols.flatMap((c) =>
+    c.children?.length ? getLeafColumns(c.children) : [c],
+  );
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -87,9 +110,9 @@ export function CusTable<T extends { id: number }>({
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>(null);
 
-  // internal selection state — endi row.id ishlatiladi
   const [internalSelected, setInternalSelected] = useState<number[]>([]);
   const selected = selectedRows ?? internalSelected;
+
   const setSelected = (nextIds: number[]) => {
     setInternalSelected(nextIds);
     onSelectionChange?.(nextIds);
@@ -98,15 +121,18 @@ export function CusTable<T extends { id: number }>({
     }
   };
 
+  // ── Derived ────────────────────────────────────────────────────────────────
+
+  const maxDepth   = columns.length ? Math.max(...columns.map(getTreeDepth)) : 1;
+  const leafCols   = getLeafColumns(columns);
+  const colSpanTotal = leafCols.length + (selectable ? 1 : 0);
+
+  // ── Sort ───────────────────────────────────────────────────────────────────
+
   function handleSort(key: string) {
-    if (sortKey !== key) {
-      setSortKey(key);
-      setSortDir("asc");
-    } else if (sortDir === "asc") setSortDir("desc");
-    else {
-      setSortKey(null);
-      setSortDir(null);
-    }
+    if (sortKey !== key) { setSortKey(key); setSortDir("asc"); }
+    else if (sortDir === "asc") setSortDir("desc");
+    else { setSortKey(null); setSortDir(null); }
   }
 
   const sorted = [...data].sort((a, b) => {
@@ -115,46 +141,34 @@ export function CusTable<T extends { id: number }>({
     const bVal = (b as Record<string, unknown>)[sortKey];
     if (aVal == null) return 1;
     if (bVal == null) return -1;
-    const cmp = String(aVal).localeCompare(String(bVal), undefined, {
-      numeric: true,
-    });
+    const cmp = String(aVal).localeCompare(String(bVal), undefined, { numeric: true });
     return sortDir === "asc" ? cmp : -cmp;
   });
 
   const isEmpty = !isLoading && sorted.length === 0;
 
-  // selection helpers — row.id asosida
-  const allSelected =
-    sorted.length > 0 && sorted.every((row) => selected.includes(row.id));
+  // ── Selection ──────────────────────────────────────────────────────────────
+
+  const allSelected  = sorted.length > 0 && sorted.every((r) => selected.includes(r.id));
   const someSelected = selected.length > 0 && !allSelected;
 
   function toggleAll() {
-    setSelected(allSelected ? [] : sorted.map((row) => row.id));
+    setSelected(allSelected ? [] : sorted.map((r) => r.id));
   }
-  function toggleRow(rowId: number) {
-    setSelected(
-      selected.includes(rowId)
-        ? selected.filter((x) => x !== rowId)
-        : [...selected, rowId],
-    );
+  function toggleRow(id: number) {
+    setSelected(selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]);
   }
 
-  const colSpanTotal = columns.length + (selectable ? 1 : 0);
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <>
       {label && (
-        <p
-          style={{
-            fontSize: 15,
-            fontWeight: 600,
-            color: "var(--text-default)",
-            marginBottom: 8,
-          }}
-        >
+        <p style={{ fontSize: 15, fontWeight: 600, color: "var(--text-default)", marginBottom: 8 }}>
           {label}
         </p>
       )}
+
       <style>{`
         .${scope} th { ${colorHeader ? `background:${colorHeader} !important;` : ""} ${colorTextHeader ? `color:${colorTextHeader};` : ""} }
         .${scope} th:hover { ${colorHeaderHover ? `background:${colorHeaderHover};` : ""} ${colorTextHeaderHover ? `color:${colorTextHeaderHover};` : ""} }
@@ -162,12 +176,7 @@ export function CusTable<T extends { id: number }>({
         .${scope} tbody tr:hover { ${colorBodyHover ? `background:${colorBodyHover} !important;` : ""} }
       `}</style>
 
-      <Table.ScrollArea
-        maxH={maxH}
-        borderRadius="md"
-        style={{ width: "100%" }}
-        className={scope}
-      >
+      <Table.ScrollArea maxH={maxH} borderRadius="md" style={{ width: "100%" }} className={scope}>
         <Table.Root
           variant={variant}
           size={size}
@@ -184,87 +193,82 @@ export function CusTable<T extends { id: number }>({
 
           {/* ── Header ── */}
           <Table.Header>
-            <Table.Row>
-              {selectable && (
-                <Table.ColumnHeader width={14} style={{}}>
-                  <CusCheckbox
-                    checked={allSelected}
-                    indeterminate={someSelected}
-                    onChange={() => toggleAll()}
-                    size="lg"
-                  />
-                </Table.ColumnHeader>
-              )}
-              {columns.map((col) => (
-                <Table.ColumnHeader
-                  key={col.key}
-                  width={col.width}
-                  textAlign={col.align ?? "left"}
-                  style={{
-                    cursor: col.sortable ? "pointer" : undefined,
-                    userSelect: col.sortable ? "none" : undefined,
-                    color: "var(--text-muted)",
-                    fontSize: 11,
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}
-                  onClick={col.sortable ? () => handleSort(col.key) : undefined}
-                >
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 4,
-                    }}
+            {Array.from({ length: maxDepth }, (_, level) => (
+              <Table.Row key={level}>
+                {/* Checkbox — only first header row, spans all rows */}
+                {level === 0 && selectable && (
+                  <Table.ColumnHeader
+                    width={14}
+                    rowSpan={maxDepth}
                   >
-                    {col.header}
-                    {col.sortable && (
-                      <span style={{ opacity: 0.5, display: "flex" }}>
-                        {sortKey === col.key ? (
-                          sortDir === "asc" ? (
-                            <LuArrowUp size={11} />
-                          ) : (
-                            <LuArrowDown size={11} />
-                          )
-                        ) : (
-                          <LuArrowUpDown size={11} />
+                    <CusCheckbox
+                      checked={allSelected}
+                      indeterminate={someSelected}
+                      onChange={() => toggleAll()}
+                      size="lg"
+                    />
+                  </Table.ColumnHeader>
+                )}
+
+                {getColumnsAtLevel(columns, level).map((col) => {
+                  const isLeaf   = !col.children?.length;
+                  const colSpan  = getLeafCount(col);
+                  const rowSpan  = isLeaf ? maxDepth - level : 1;
+                  const isSortable = isLeaf && !!col.sortable;
+
+                  return (
+                    <Table.ColumnHeader
+                      key={`${col.key}-${level}`}
+                      width={isLeaf ? col.width : undefined}
+                      textAlign={col.align ?? (isLeaf ? "left" : "center")}
+                      colSpan={colSpan > 1 ? colSpan : undefined}
+                      rowSpan={rowSpan > 1 ? rowSpan : undefined}
+                      style={{
+                        cursor:      isSortable ? "pointer" : undefined,
+                        userSelect:  isSortable ? "none"    : undefined,
+                        color:       "var(--text-muted)",
+                        fontSize:    11,
+                        fontWeight:  600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                        verticalAlign: "middle",
+                      }}
+                      onClick={isSortable ? () => handleSort(col.key) : undefined}
+                    >
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        {col.header}
+                        {isSortable && (
+                          <span style={{ opacity: 0.5, display: "flex" }}>
+                            {sortKey === col.key ? (
+                              sortDir === "asc"
+                                ? <LuArrowUp size={11} />
+                                : <LuArrowDown size={11} />
+                            ) : (
+                              <LuArrowUpDown size={11} />
+                            )}
+                          </span>
                         )}
                       </span>
-                    )}
-                  </span>
-                </Table.ColumnHeader>
-              ))}
-            </Table.Row>
+                    </Table.ColumnHeader>
+                  );
+                })}
+              </Table.Row>
+            ))}
           </Table.Header>
 
           {/* ── Body ── */}
           <Table.Body>
             {isLoading ? (
               <Table.Row>
-                <Table.Cell
-                  colSpan={colSpanTotal}
-                  textAlign="center"
-                  style={{
-                    padding: "40px 0",
-                    color: "var(--text-muted)",
-                    fontSize: 13,
-                  }}
-                >
+                <Table.Cell colSpan={colSpanTotal} textAlign="center"
+                  style={{ padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
                   Yuklanmoqda...
                 </Table.Cell>
               </Table.Row>
             ) : isEmpty ? (
               <Table.Row>
-                <Table.Cell
-                  colSpan={colSpanTotal}
-                  textAlign="center"
-                  style={{
-                    padding: "40px 0",
-                    color: "var(--text-muted)",
-                    fontSize: 13,
-                  }}
-                >
+                <Table.Cell colSpan={colSpanTotal} textAlign="center"
+                  style={{ padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
                   {emptyText}
                 </Table.Cell>
               </Table.Row>
@@ -274,12 +278,10 @@ export function CusTable<T extends { id: number }>({
                 return (
                   <Table.Row
                     key={row.id}
-                    onClick={
-                      onRowClick ? () => onRowClick(row, rowIdx) : undefined
-                    }
+                    onClick={onRowClick ? () => onRowClick(row, rowIdx) : undefined}
                     style={{
-                      cursor: onRowClick ? "pointer" : undefined,
-                      color: "var(--text-default)",
+                      cursor:     onRowClick ? "pointer" : undefined,
+                      color:      "var(--text-default)",
                       background: isSelected ? "var(--bg-hover)" : undefined,
                     }}
                   >
@@ -294,17 +296,12 @@ export function CusTable<T extends { id: number }>({
                         </div>
                       </Table.Cell>
                     )}
-                    {columns.map((col) => (
-                      <Table.Cell
-                        key={col.key}
-                        textAlign={col.align ?? "left"}
-                        style={{ fontSize: 13 }}
-                      >
+                    {/* Use only leaf columns for body cells */}
+                    {leafCols.map((col) => (
+                      <Table.Cell key={col.key} textAlign={col.align ?? "left"} style={{ fontSize: 13 }}>
                         {col.render
                           ? col.render(row, rowIdx)
-                          : String(
-                              (row as Record<string, unknown>)[col.key] ?? "—",
-                            )}
+                          : String((row as Record<string, unknown>)[col.key] ?? "—")}
                       </Table.Cell>
                     ))}
                   </Table.Row>

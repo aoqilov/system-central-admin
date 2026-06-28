@@ -1,52 +1,52 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
-import path from 'path'
+import path from "path";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icons/*.svg'],
+      registerType: "autoUpdate",
+      includeAssets: ["favicon.svg", "icons/*.svg"],
       manifest: {
-        name: 'ParkOps Control Center',
-        short_name: 'ParkOps',
+        name: "ParkOps Control Center",
+        short_name: "ParkOps",
         description: "Park operatsiyalarini boshqarish tizimi",
-        theme_color: '#0b0f17',
-        background_color: '#0b0f17',
-        display: 'standalone',
-        orientation: 'any',
-        scope: '/',
-        start_url: '/',
+        theme_color: "#0b0f17",
+        background_color: "#0b0f17",
+        display: "standalone",
+        orientation: "any",
+        scope: "/",
+        start_url: "/",
         icons: [
           {
-            src: '/icons/icon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
+            src: "/icons/icon.svg",
+            sizes: "any",
+            type: "image/svg+xml",
           },
           {
-            src: '/icons/icon-maskable.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
-            purpose: 'maskable',
+            src: "/icons/icon-maskable.svg",
+            sizes: "any",
+            type: "image/svg+xml",
+            purpose: "maskable",
           },
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,woff2}'],
-        navigateFallback: '/index.html',
+        globPatterns: ["**/*.{js,css,html,svg,woff2}"],
+        navigateFallback: "/index.html",
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
-            handler: 'CacheFirst',
+            handler: "CacheFirst",
             options: {
-              cacheName: 'google-fonts',
+              cacheName: "google-fonts",
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365,
@@ -57,4 +57,4 @@ export default defineConfig({
       },
     }),
   ],
-})
+});

@@ -67,35 +67,11 @@ interface DemoRow {
 }
 
 const TABLE_DATA: DemoRow[] = [
-  {
-    id: 1,
-    name: "Alisher Karimov",
-    role: "Operator",
-    status: "Faol",
-    score: 94,
-  },
-  {
-    id: 2,
-    name: "Dilnoza Yusupova",
-    role: "Kassir",
-    status: "Ta'tilda",
-    score: 88,
-  },
-  {
-    id: 3,
-    name: "Bobur Toshmatov",
-    role: "Security",
-    status: "Faol",
-    score: 76,
-  },
-  { id: 4, name: "Kamola Nazarova", role: "Admin", status: "Faol", score: 99 },
-  {
-    id: 5,
-    name: "Jasur Mirzayev",
-    role: "Cleaner",
-    status: "Nofaol",
-    score: 61,
-  },
+  { id: 1, name: "Alisher Karimov",  role: "Operator", status: "Faol",     score: 94 },
+  { id: 2, name: "Dilnoza Yusupova", role: "Kassir",   status: "Ta'tilda", score: 88 },
+  { id: 3, name: "Bobur Toshmatov",  role: "Security", status: "Faol",     score: 76 },
+  { id: 4, name: "Kamola Nazarova",  role: "Admin",    status: "Faol",     score: 99 },
+  { id: 5, name: "Jasur Mirzayev",   role: "Cleaner",  status: "Nofaol",   score: 61 },
 ];
 
 const TABLE_COLS: ColumnDef<DemoRow>[] = [
@@ -107,13 +83,7 @@ const TABLE_COLS: ColumnDef<DemoRow>[] = [
     header: "Status",
     render: (r) => (
       <CusBadge
-        colorPalette={
-          r.status === "Faol"
-            ? "green"
-            : r.status === "Ta'tilda"
-              ? "yellow"
-              : "gray"
-        }
+        colorPalette={r.status === "Faol" ? "green" : r.status === "Ta'tilda" ? "yellow" : "gray"}
         variant="subtle"
         size="sm"
       >
@@ -122,6 +92,62 @@ const TABLE_COLS: ColumnDef<DemoRow>[] = [
     ),
   },
   { key: "score", header: "KPI", width: 70, align: "center", sortable: true },
+];
+
+// ─── Grouped table demo ───────────────────────────────────────────────────────
+
+interface GroupedRow {
+  id: number;
+  name: string;
+  role: string;
+  startTime: string;
+  endTime: string;
+  naqd: number;
+  uzcard: number;
+  humo: number;
+  kpi: number;
+}
+
+const GROUPED_DATA: GroupedRow[] = [
+  { id: 1, name: "Alisher K.", role: "Kassir", startTime: "09:00", endTime: "18:45", naqd: 265_000, uzcard: 180_000, humo: 110_000, kpi: 94 },
+  { id: 2, name: "Dilnoza Y.", role: "Kassir", startTime: "08:30", endTime: "18:30", naqd: 312_000, uzcard: 220_000, humo: 95_000,  kpi: 88 },
+  { id: 3, name: "Bobur T.",   role: "Kassir", startTime: "09:00", endTime: "19:00", naqd: 198_000, uzcard: 145_000, humo: 88_000,  kpi: 76 },
+  { id: 4, name: "Kamola N.",  role: "Admin",  startTime: "08:00", endTime: "19:30", naqd: 445_000, uzcard: 310_000, humo: 125_000, kpi: 99 },
+];
+
+const GROUPED_COLS: ColumnDef<GroupedRow>[] = [
+  { key: "id", header: "#", width: 40 },
+  {
+    key: "xodim", header: "Xodim",
+    children: [
+      { key: "name", header: "Ism",      sortable: true },
+      { key: "role", header: "Lavozim" },
+    ],
+  },
+  {
+    key: "smena", header: "Smena",
+    children: [
+      { key: "startTime", header: "Boshlash", align: "center" },
+      { key: "endTime",   header: "Yopish",   align: "center" },
+    ],
+  },
+  {
+    key: "tollov", header: "To'lovlar",
+    children: [
+      {
+        key: "naqd", header: "Naqd", align: "right",
+        render: (r) => r.naqd.toLocaleString(),
+      },
+      {
+        key: "karta", header: "Kartalar",
+        children: [
+          { key: "uzcard", header: "UzCard", align: "right", render: (r) => r.uzcard.toLocaleString() },
+          { key: "humo",   header: "Humo",   align: "right", render: (r) => r.humo.toLocaleString() },
+        ],
+      },
+    ],
+  },
+  { key: "kpi", header: "KPI", width: 60, align: "center", sortable: true },
 ];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -144,6 +170,8 @@ export default function DevUI() {
   const [singleVal, setSingleVal] = useState<DateValue[]>([]);
   const [rangeVal, setRangeVal] = useState<DateValue[]>([]);
   const [multiVal, setMultiVal] = useState<DateValue[]>([]);
+  const [fromVal, setFromVal] = useState<DateValue[]>([]);
+  const [toVal, setToVal] = useState<DateValue[]>([]);
 
   const CAL_COLORS = [
     { key: "blue", bg: "#3b82f6" },
@@ -617,6 +645,17 @@ export default function DevUI() {
               </p>
             )}
           </Section>
+
+          <Section title="Grouped columns (children)">
+            <CusTable<GroupedRow>
+              data={GROUPED_DATA}
+              columns={GROUPED_COLS}
+              showColumnBorder
+              striped
+              stickyHeader
+              maxH="300px"
+            />
+          </Section>
         </div>
       </CusCard>
 
@@ -705,19 +744,62 @@ export default function DevUI() {
           </Section>
 
           {/* selectionMode */}
-          <Section title="selectionMode">
+          <Section title="selectionMode — single / range / multiple">
+            <div className="grid grid-cols-1 desktop:grid-cols-3 gap-6">
+              <div className="space-y-1">
+                <CusCalendar
+                  label="single (default)"
+                  selectionMode="single"
+                  value={singleVal}
+                  onValueChange={({ value }) => setSingleVal(value)}
+                />
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  {fmtDate(singleVal) || "—"}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <CusCalendar
+                  label="range"
+                  selectionMode="range"
+                  value={rangeVal}
+                  onValueChange={({ value }) => setRangeVal(value)}
+                />
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  {fmtDate(rangeVal) || "—"}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <CusCalendar
+                  label="multiple"
+                  selectionMode="multiple"
+                  value={multiVal}
+                  onValueChange={({ value }) => setMultiVal(value)}
+                />
+                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  {multiVal.length > 0 ? `${multiVal.length} ta tanlandi` : "—"}
+                </p>
+              </div>
+            </div>
+          </Section>
+
+          {/* placeholder + defaultValue */}
+          <Section title="placeholder & defaultValue">
             <div className="grid grid-cols-1 desktop:grid-cols-2 gap-6">
               <CusCalendar
-                label="single (default)"
+                label="placeholder o'zgartirilgan"
+                placeholder="DD/MM/YYYY"
                 selectionMode="single"
-                value={singleVal}
-                onValueChange={({ value }) => setSingleVal(value)}
               />
               <CusCalendar
-                label="range"
-                selectionMode="range"
-                value={rangeVal}
-                onValueChange={({ value }) => setRangeVal(value)}
+                label="defaultValue (controlled emas)"
+                selectionMode="single"
+                defaultValue={[
+                  new CalendarDate(
+                    new Date().getFullYear(),
+                    new Date().getMonth() + 1,
+                    1,
+                  ),
+                ]}
               />
             </div>
           </Section>
@@ -771,7 +853,7 @@ export default function DevUI() {
 
           {/* locale */}
           <Section title="locale">
-            <div className="grid grid-cols-1 desktop:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 desktop:grid-cols-3 gap-6">
               <CusCalendar
                 label='locale="uz-UZ"'
                 selectionMode="single"
@@ -782,7 +864,62 @@ export default function DevUI() {
                 selectionMode="single"
                 locale="ru-RU"
               />
+              <CusCalendar
+                label='locale="en-US"'
+                selectionMode="single"
+                locale="en-US"
+              />
             </div>
+          </Section>
+
+          {/* timeZone */}
+          <Section title="timeZone">
+            <div className="grid grid-cols-1 desktop:grid-cols-3 gap-6">
+              <CusCalendar
+                label='Asia/Tashkent (+5)'
+                selectionMode="single"
+                timeZone="Asia/Tashkent"
+              />
+              <CusCalendar
+                label='Europe/Moscow (+3)'
+                selectionMode="single"
+                timeZone="Europe/Moscow"
+              />
+              <CusCalendar
+                label='America/New_York (-5)'
+                selectionMode="single"
+                timeZone="America/New_York"
+              />
+            </div>
+          </Section>
+
+          {/* from / to */}
+          <Section title="Dan / Gacha (from → to)">
+            <div className="grid grid-cols-1 desktop:grid-cols-2 gap-6 max-w-xl">
+              <CusCalendar
+                label="Dan"
+                selectionMode="single"
+                value={fromVal}
+                onValueChange={({ value }) => {
+                  setFromVal(value);
+                  if (toVal[0] && value[0] && toVal[0].compare(value[0]) < 0)
+                    setToVal([]);
+                }}
+                max={toVal[0]}
+              />
+              <CusCalendar
+                label="Gacha"
+                selectionMode="single"
+                value={toVal}
+                onValueChange={({ value }) => setToVal(value)}
+                min={fromVal[0]}
+              />
+            </div>
+            {(fromVal[0] || toVal[0]) && (
+              <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                {fmtDate(fromVal) || "?"} → {fmtDate(toVal) || "?"}
+              </p>
+            )}
           </Section>
 
           {/* disabled / readOnly */}

@@ -26,7 +26,16 @@
     "liveEmployees": "Xodimlar",
     "reportsKassa": "Kassa",
     "reportsAttraction": "Attraksion",
-    "reportsEmployees": "Xodimlar"
+    "reportsEmployees": "Xodimlar",
+    "kassaZReport": "Z-Otchetlar",
+    "kassaIncoming": "Z-otchet qabul",
+    "kassaExport": "Buxgalterga yuborish",
+    "operatorZReport": "Operator hisobotlari",
+    "operatorIncoming": "Kunlik hisobot",
+    "operatorExport": "Hisobotni eksport",
+    "buxZReport": "Buxgalter hisobotlari",
+    "buxIncomingKassa": "Kassa hisobotlari",
+    "buxIncomingOperator": "Operator hisobotlari"
   },
   "employees": {
     "breadcrumb": "Staff",

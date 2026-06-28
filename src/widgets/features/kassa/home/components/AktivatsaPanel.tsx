@@ -44,7 +44,7 @@ function NumKey({
       onPointerDown={(e) => { e.preventDefault(); onPress(label); }}
       className="flex items-center justify-center rounded-xl font-bold select-none"
       style={{
-        height: 92,
+        height: 68,
         background: bgBase,
         border: red
           ? "1px solid color-mix(in srgb, var(--color-red) 22%, transparent)"
@@ -106,7 +106,8 @@ export function AktivatsaPanel({ onSuccess }: Props) {
   const display = summa ? formatSumma(summa) : "0";
 
   return (
-    <div className="flex flex-col gap-3 flex-1">
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto flex flex-col gap-3">
       {/* Amount display */}
       <div
         className="flex items-end justify-end gap-2 px-4 py-3 rounded-2xl"
@@ -154,10 +155,12 @@ export function AktivatsaPanel({ onSuccess }: Props) {
         </div>
       </div>
 
-      {/* Submit */}
-      <div className="mt-auto pt-1">
+      </div>
+
+      {/* Submit — always visible at bottom */}
+      <div className="shrink-0 pt-3">
         <CusButton
-        size="2xl"
+          size="2xl"
           colorPalette="blue"
           variant="solid"
           className="w-full"

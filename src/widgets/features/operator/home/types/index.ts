@@ -1,10 +1,18 @@
+export interface CardCounts {
+  jami: number;
+  asosiy: number;
+  online: number;
+  vip: number;
+  mehmon: number;
+  parkXodim: number;
+}
+
 export interface Round {
   id: string;
   time: string;
   num: number;
-  online: number;
-  karta: number;
-  clientCount: number;
+  cards: CardCounts;
+  price: number;
   total: number;
 }
 

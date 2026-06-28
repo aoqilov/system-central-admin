@@ -26,7 +26,16 @@
     "liveEmployees": "Сотрудники",
     "reportsKassa": "Касса",
     "reportsAttraction": "Аттракцион",
-    "reportsEmployees": "Сотрудники"
+    "reportsEmployees": "Сотрудники",
+    "kassaZReport": "Z-Отчёты",
+    "kassaIncoming": "Приём Z-отчётов",
+    "kassaExport": "Экспорт в бухгалтерию",
+    "operatorZReport": "Отчёты операторов",
+    "operatorIncoming": "Ежедневный отчёт",
+    "operatorExport": "Экспорт отчёта",
+    "buxZReport": "Отчёты бухгалтерии",
+    "buxIncomingKassa": "Входящие кассовые",
+    "buxIncomingOperator": "Входящие операторские"
   },
   "employees": {
     "breadcrumb": "Персонал",

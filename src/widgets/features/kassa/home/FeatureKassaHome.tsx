@@ -39,7 +39,7 @@ export default function FeatureKassaHome() {
     pending,
     removeToast,
     handleScan,
-    handleClear,
+    handleNewOperation,
     handlePark,
     handleRestorePending,
     handleRemovePending,
@@ -69,95 +69,113 @@ export default function FeatureKassaHome() {
       <div className="flex flex-col desktop:flex-row flex-1 desktop:min-h-0 desktop:overflow-hidden">
         {/* Col 1 — Scan */}
         <div
-          className="w-full desktop:w-2/6 p-4 tablet:p-6 flex flex-col gap-4 desktop:overflow-y-auto desktop:shrink-0 border-b desktop:border-b-0 desktop:border-r"
+          className="w-full desktop:w-2/6 flex flex-col desktop:shrink-0 border-b desktop:border-b-0 desktop:border-r"
           style={{ borderColor: "var(--border-default)" }}
         >
-          <ScanInput ref={scanRef} onScan={handleScan} />
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto p-4 tablet:p-6 flex flex-col gap-3">
+            <ScanInput ref={scanRef} onScan={handleScan} />
 
-          {qrInfo.status && (
-            <div
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl"
-              style={{
-                background:
-                  qrInfo.status === "active" ? "#22c55e18" : "#6b728018",
-                border: `1px solid ${qrInfo.status === "active" ? "#22c55e40" : "#6b728040"}`,
-              }}
-            >
+            {qrInfo.status && (
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl"
                 style={{
                   background:
-                    qrInfo.status === "active" ? "#22c55e25" : "#6b728025",
+                    qrInfo.status === "active" ? "#22c55e18" : "#6b728018",
+                  border: `1px solid ${qrInfo.status === "active" ? "#22c55e40" : "#6b728040"}`,
                 }}
               >
-                {qrInfo.status === "active" ? (
-                  <LuCircleCheck size={20} style={{ color: "#22c55e" }} />
-                ) : (
-                  <LuClock size={20} style={{ color: "#6b7280" }} />
-                )}
-              </div>
-              <div>
-                <p
-                  className="font-bold text-base leading-none"
+                <div
+                  className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
                   style={{
-                    color: qrInfo.status === "active" ? "#22c55e" : "#6b7280",
+                    background:
+                      qrInfo.status === "active" ? "#22c55e25" : "#6b728025",
                   }}
                 >
-                  {qrInfo.status === "active" ? "Aktiv" : "Nofaol"}
-                </p>
-                <p
-                  className="text-xs mt-0.5"
-                  style={{
-                    color:
-                      qrInfo.status === "active" ? "#4ade8099" : "#9ca3af99",
-                  }}
-                >
-                  {qrInfo.status === "active"
-                    ? "QR kod faol holatda"
-                    : "QR kod faol emas"}
-                </p>
+                  {qrInfo.status === "active" ? (
+                    <LuCircleCheck size={16} style={{ color: "#22c55e" }} />
+                  ) : (
+                    <LuClock size={16} style={{ color: "#6b7280" }} />
+                  )}
+                </div>
+                <div>
+                  <p
+                    className="font-bold text-sm leading-none"
+                    style={{
+                      color: qrInfo.status === "active" ? "#22c55e" : "#6b7280",
+                    }}
+                  >
+                    {qrInfo.status === "active" ? "Aktiv" : "Nofaol"}
+                  </p>
+                  <p
+                    className="text-xs mt-0.5"
+                    style={{
+                      color:
+                        qrInfo.status === "active" ? "#4ade8099" : "#9ca3af99",
+                    }}
+                  >
+                    {qrInfo.status === "active"
+                      ? "QR kod faol holatda"
+                      : "QR kod faol emas"}
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div
-            className="rounded-2xl border p-4 flex flex-col gap-3"
-            style={{
-              background: "var(--bg-second)",
-              borderColor: "var(--border-default)",
-            }}
-          >
-            <p
-              className="text-xs font-semibold uppercase tracking-wider"
-              style={{ color: "var(--text-muted)" }}
+            <div
+              className="rounded-2xl border p-3 flex flex-col gap-2"
+              style={{
+                background: "var(--bg-second)",
+                borderColor: "var(--border-default)",
+              }}
             >
-              Karta ma'lumotlari
-            </p>
-            <QrInfoRow icon={LuHash} label="Raqam" value={qrInfo.raqam} />
-            <QrInfoRow icon={LuQrCode} label="Token" value={qrInfo.token} />
-            <QrInfoRow icon={LuLayers} label="Partiya" value={qrInfo.partiya} />
-            <QrInfoRow
-              icon={LuBanknote}
-              label="Summa"
-              value={qrInfo.amount ? `${qrInfo.amount} so'm` : ""}
+              <p
+                className="text-[10px] font-semibold uppercase tracking-wider"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Karta ma'lumotlari
+              </p>
+              <QrInfoRow icon={LuHash} label="Raqam" value={qrInfo.raqam} />
+              <QrInfoRow icon={LuQrCode} label="Token" value={qrInfo.token} />
+              <QrInfoRow
+                icon={LuLayers}
+                label="Partiya"
+                value={qrInfo.partiya}
+              />
+              <QrInfoRow
+                icon={LuBanknote}
+                label="Summa"
+                value={qrInfo.amount ? `${qrInfo.amount} so'm` : ""}
+              />
+            </div>
+
+            <PendingList
+              items={pending}
+              onRestore={(id) => {
+                handleRestorePending(id);
+                scanRef.current?.focus();
+              }}
+              onRemove={handleRemovePending}
             />
           </div>
 
-          <PendingList
-            items={pending}
-            onRestore={(id) => {
-              handleRestorePending(id);
-              scanRef.current?.focus();
+          {/* Sticky bottom buttons */}
+          <div
+            className="shrink-0 px-4 tablet:px-6 py-3 border-t flex gap-2"
+            style={{
+              borderColor: "var(--border-default)",
+              background: "var(--bg-main)",
             }}
-            onRemove={handleRemovePending}
-          />
-
-          <div className="mt-auto flex gap-2 pt-2">
+          >
             <CusButton
+              size="xl"
               colorPalette="red"
-              variant="outline"
+              variant="solid"
               onClick={() => {
-                handleClear();
+                handleNewOperation();
+                setPayType("naqd");
+                setKartaType("uzcard");
+                setProvider("payme");
                 scanRef.current?.focus();
               }}
               className="flex-1"
@@ -166,6 +184,7 @@ export default function FeatureKassaHome() {
               Tozalash
             </CusButton>
             <CusButton
+            size="xl"
               colorPalette="orange"
               variant="solid"
               isDisabled={!qrInfo.raqam}
@@ -176,7 +195,7 @@ export default function FeatureKassaHome() {
               className="flex-1"
             >
               <LuPause size={16} />
-              Kutishga qo'yish
+              Kutish
             </CusButton>
           </div>
         </div>
@@ -267,8 +286,8 @@ export default function FeatureKassaHome() {
         </div>
 
         {/* Col 3 — To'lov paneli */}
-        <div className="w-full desktop:w-2/6 flex flex-col desktop:overflow-y-auto">
-          <div className="flex-1 p-4 tablet:p-6 flex flex-col">
+        <div className="w-full desktop:w-2/6 flex flex-col desktop:overflow-hidden">
+          <div className="flex-1 p-4 tablet:p-6 flex flex-col desktop:overflow-hidden">
             {rightMode === "aktivatsa" && (
               <AktivatsaPanel
                 key={panelKey}

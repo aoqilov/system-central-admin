@@ -54,6 +54,12 @@ const NotFound = lazy(() => import("../pages/NotFound"));
 const DevUI = lazy(() => import("../pages/admin/DevUI"));
 const QrCode = lazy(() => import("../pages/admin/control/QrCode"));
 const LockScreen = lazy(() => import("../pages/admin/LockScreen"));
+const RoleKassaMainIncoming = lazy(() => import("../pages/admin/main/RoleKassaMainIncoming"));
+const RoleKassaMainExport = lazy(() => import("../pages/admin/main/RoleKassaMainExport"));
+const RoleOperatorMainIncoming    = lazy(() => import("../pages/admin/main/RoleOperatorMainIncoming"));
+const RoleOperatorMainExport      = lazy(() => import("../pages/admin/main/RoleOperatorMainExport"));
+const RoleBuxMainIncomingKassa    = lazy(() => import("../pages/admin/main/RoleBuxMainIncomingKassa"));
+const RoleBuxMainIncomingOperator = lazy(() => import("../pages/admin/main/RoleBuxMainIncomingOperator"));
 
 export const routes: RouteObject[] = [
   {
@@ -81,6 +87,12 @@ export const routes: RouteObject[] = [
       { path: "/settings", element: <Settings /> },
       { path: "/support", element: <Support /> },
       { path: "/qrcode", element: <QrCode /> },
+      { path: "/rolekassa-main/incoming", element: <RoleKassaMainIncoming /> },
+      { path: "/rolekassa-main/export", element: <RoleKassaMainExport /> },
+      { path: "/roleoperator-main/incoming",    element: <RoleOperatorMainIncoming />    },
+      { path: "/roleoperator-main/export",      element: <RoleOperatorMainExport />      },
+      { path: "/rolebux-main/incoming-kassa",    element: <RoleBuxMainIncomingKassa />    },
+      { path: "/rolebux-main/incoming-operator", element: <RoleBuxMainIncomingOperator /> },
       ...(import.meta.env.DEV
         ? [{ path: "/test-ui", element: <DevUI /> }]
         : []),
