@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
   LuBell,
   LuChevronDown,
@@ -11,12 +12,16 @@ import {
   LuSun,
   LuMoon,
   LuLock,
+  LuPhone,
 } from "react-icons/lu";
 import { CusPopover } from "../../../ui/popover/CusPopover";
+import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
 import { useTheme } from "../../../../context/ThemeContext";
-import { clearAuth } from "@/widgets/features/login/api/authApi";
+import { clearAuth, getStoredEmployeeId } from "@/widgets/features/login/api/authApi";
 import { isPinEnabled, lockApp } from "@/utils/pinLock";
 import RoleSwitch from "@/components/shared/RoleSwitch";
+import { fetchEmployee } from "@/widgets/features/admin/employees/api/employeesApi";
+import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -30,6 +35,18 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
   const [pinEnabled, setPinEnabled] = useState(() => isPinEnabled());
   const navigate = useNavigate();
   const location = useLocation();
+
+  const employeeId = getStoredEmployeeId();
+  const { data: me } = useQuery({
+    queryKey: ["me", employeeId],
+    queryFn: () => fetchEmployee(employeeId!),
+    enabled: employeeId !== null,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const fullName = me ? `${me.lastname} ${me.firstname}` : "—";
+  const initial  = me?.firstname?.[0]?.toUpperCase() ?? "?";
+  const avatarUrl = me?.file ? getFileUrl(me.file) : null;
 
   useEffect(() => {
     const tick = () =>
@@ -122,28 +139,37 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
         {/* User menu */}
         <CusPopover
           placement="bottom-end"
-          width={220}
+          width={240}
           trigger={(open) => (
             <button
               className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5 border"
               style={{ borderColor: "var(--border-default)" }}
             >
-              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
-                O
-              </div>
+              {/* Avatar */}
+              {avatarUrl ? (
+                <CusImagePreview
+                  src={avatarUrl}
+                  alt={fullName}
+                  width={24}
+                  height={24}
+                  borderRadius="50%"
+                  preview={false}
+                />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                  {initial}
+                </div>
+              )}
+
               <div className="text-left hidden tablet:block">
-                <p
-                  className="text-xs font-medium leading-none"
-                  style={{ color: "var(--text-2)" }}
-                >
-                  Owner
+                <p className="text-xs font-medium leading-none" style={{ color: "var(--text-2)" }}>
+                  {fullName}
                 </p>
-                <p
-                  className="text-[10px] mt-0.5"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  admin@park.io
-                </p>
+                {me?.phone_number && (
+                  <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                    {me.phone_number}
+                  </p>
+                )}
               </div>
               <LuChevronDown
                 size={12}
@@ -158,15 +184,33 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
         >
           {/* User info */}
           <div
-            className="px-4 py-3 border-b"
+            className="px-4 py-3 border-b flex items-center gap-3"
             style={{ borderColor: "var(--border-default)" }}
           >
-            <p className="text-xs font-semibold" style={{ color: "var(--text-default)" }}>
-              Owner
-            </p>
-            <p className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
-              admin@park.io
-            </p>
+            {avatarUrl ? (
+              <CusImagePreview
+                src={avatarUrl}
+                alt={fullName}
+                width={40}
+                height={40}
+                borderRadius="50%"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                {initial}
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="text-xs font-semibold truncate" style={{ color: "var(--text-default)" }}>
+                {fullName}
+              </p>
+              {me?.phone_number && (
+                <p className="flex items-center gap-1 text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  <LuPhone size={10} />
+                  {me.phone_number}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Menu items */}

@@ -47,7 +47,8 @@ export default function LoginCard() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="••••••••"
+          placeholder="••••••"
+          maxLength={6}
           autoComplete="current-password"
           leftElement={<LuLock size={14} style={{ color: "var(--text-muted)" }} />}
           rightElement={

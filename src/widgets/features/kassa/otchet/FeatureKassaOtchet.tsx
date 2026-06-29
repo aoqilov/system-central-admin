@@ -247,6 +247,9 @@ export default function FeatureKassaOtchet() {
   const [pauseTargetId, setPauseTargetId] = useState<string | null>(null);
   const [pauseReason, setPauseReason] = useState("");
   const [openXDialog, setOpenXDialog] = useState(false);
+
+  const hasClosedX = list.some((item) => item.status === "closed");
+  const canCloseZ = hasClosedX && !active;
   const [selectedKassir, setSelectedKassir] = useState<string>(KASSIR_OPTIONS[0].value);
   const [zDialog, setZDialog] = useState(false);
 
@@ -302,15 +305,17 @@ export default function FeatureKassaOtchet() {
               ({date})
             </span>
           </p>
-          <CusButton
-            colorPalette="red"
-            variant="outline"
-            size="sm"
-            isDisabled={!active}
-            onClick={() => setZDialog(true)}
-          >
-            <LuPrinter size={14} /> Z-otchetni yopish
-          </CusButton>
+          {list.length > 0 && (
+            <CusButton
+              colorPalette="red"
+              variant="outline"
+              size="sm"
+              isDisabled={!canCloseZ}
+              onClick={() => setZDialog(true)}
+            >
+              <LuPrinter size={14} /> Z-otchetni yopish
+            </CusButton>
+          )}
         </div>
         <div className="overflow-x-auto px-4 pb-4 pt-4">
           <div className="flex gap-3">

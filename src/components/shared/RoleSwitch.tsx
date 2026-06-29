@@ -1,14 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { LuLayoutDashboard, LuBanknote, LuUser } from "react-icons/lu";
 import { getStoredRole, getRoleDefaultPath } from "@/widgets/features/login/api/authApi";
+import { RoleTypes } from "@/const/constData";
 
 const ROLE_COOKIE = "parkops_role";
 const AUTH_TTL_HOURS = 20;
 
 const ROLES = [
-  { id: "admin",    label: "Admin",    icon: LuLayoutDashboard },
-  { id: "kassa",    label: "Kassa",    icon: LuBanknote },
-  { id: "operator", label: "Operator", icon: LuUser },
+  { id: RoleTypes.SUPERADMIN, label: "Admin",    icon: LuLayoutDashboard },
+  { id: RoleTypes.CASHIER,    label: "Kassa",    icon: LuBanknote },
+  { id: RoleTypes.OPERATOR,   label: "Operator", icon: LuUser },
 ] as const;
 
 function setRoleCookie(role: string) {

@@ -119,16 +119,14 @@ export default function EmployeeTableCard() {
   }
 
   function openEdit() {
-    const emp = employees[selectedRows[0]];
-    console.log("Selected employee for edit:", emp);
+    const emp = employees.find((e) => e.id === selectedRows[0]);
     if (!emp) return;
     setEditEmployee(emp);
     setEditOpen(true);
   }
 
   function handleDelete() {
-    const ids = selectedRows.map((idx) => employees[idx].id);
-    deleteMut.mutate(ids, {
+    deleteMut.mutate(selectedRows, {
       onSuccess: () => {
         setSelected([]);
         setDeleteConfirmOpen(false);

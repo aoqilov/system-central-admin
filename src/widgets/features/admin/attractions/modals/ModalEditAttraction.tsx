@@ -133,7 +133,8 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
         });
         if (result.main_file != null) fileIds.main_file = result.main_file;
         if (result.dashboard_file != null) fileIds.dashboard_file = result.dashboard_file;
-        if (result.files.length > 0) fileIds.files = result.files;
+        if (result.files.length > 0)
+          fileIds.files = [...remainingFileIds, ...result.files];
       } catch {
         setIsUploading(false);
         return;
@@ -274,7 +275,7 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
             render={({ field, fieldState }) => (
               <CusFileUpload
                 label="Galereya"
-                sublabel="Yangi rasm yuklasangiz eski galereya almashadi"
+                sublabel="Mavjud rasmlarni X bilan o'chirishingiz yoki yangi qo'shishingiz mumkin"
                 currentImageUrls={
                   remainingFileIds.length > 0
                     ? remainingFileIds.map((id) => getFileUrl(id))

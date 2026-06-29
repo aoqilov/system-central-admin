@@ -25,10 +25,10 @@ api.interceptors.response.use(
     console.error("API error:", error);
     const url = error.config?.url ?? "";
     const isLoginFlow = url.includes("/auth/") || url.includes("/roles");
-    // if (error.response?.status === 401 && !isLoginFlow) {
-    //   clearAuth();
-    //   window.location.href = "/login";
-    // }
+    if (error.response?.status === 401 && !isLoginFlow) {
+      clearAuth();
+      window.location.href = "/login";
+    }
     return Promise.reject(error);
   },
 );

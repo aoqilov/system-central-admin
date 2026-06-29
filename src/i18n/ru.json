@@ -27,15 +27,15 @@
     "reportsKassa": "Касса",
     "reportsAttraction": "Аттракцион",
     "reportsEmployees": "Сотрудники",
-    "kassaZReport": "Z-Отчёты",
+    "kassaZReport": "Z-отчёты кассиров",
     "kassaIncoming": "Приём Z-отчётов",
-    "kassaExport": "Экспорт в бухгалтерию",
-    "operatorZReport": "Отчёты операторов",
-    "operatorIncoming": "Ежедневный отчёт",
-    "operatorExport": "Экспорт отчёта",
-    "buxZReport": "Отчёты бухгалтерии",
-    "buxIncomingKassa": "Входящие кассовые",
-    "buxIncomingOperator": "Входящие операторские"
+    "kassaExport": "Выгрузка в бухгалтерию",
+    "operatorZReport": "Z-отчёты операторов",
+    "operatorIncoming": "Суточный отчёт",
+    "operatorExport": "Выгрузка отчёта",
+    "buxZReport": "Бухгалтерские ведомости",
+    "buxIncomingKassa": "Сводная по кассирам",
+    "buxIncomingOperator": "Сводная по операторам"
   },
   "employees": {
     "breadcrumb": "Персонал",
@@ -202,6 +202,8 @@
     },
     "statuses": {
       "all": "Все статусы",
+      "active": "Активен",
+      "inactive": "Неактивен",
       "open": "Открыт",
       "maintenance": "Обслуживание",
       "closed": "Закрыт"

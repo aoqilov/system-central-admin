@@ -28,21 +28,12 @@ export interface RestrictionRow {
 
 // ─── API types ────────────────────────────────────────────────────────────────
 
-export interface AssistantOperator {
+export interface AttractionOperatorItem {
   id: number;
   firstname: string;
   lastname: string;
-  file: number | null;
-}
-
-export interface AttractionOperatorDetail {
-  id: number;
-  attraction: number;
-  firstname: string;
-  lastname: string;
-  status: string;
-  file: number | null;
-  assistant_operators: AssistantOperator[];
+  file: number;
+  type: "main" | "assistant";
 }
 
 export type AttractionStatus = "active" | "inactive" | "maintenance" | "closed";
@@ -63,7 +54,7 @@ export interface AttractionDetail {
   min_height: number;
   max_weight: number;
   description: string;
-  operator: AttractionOperatorDetail;
+  operators: AttractionOperatorItem[];
 }
 
 export interface AttractionDetailResponse {

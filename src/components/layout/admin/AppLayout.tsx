@@ -11,17 +11,17 @@ import { useTranslation } from "../../../i18n/languageConfig";
 
 const SECTION_MAP: Record<string, { key: string; parentPath?: string }> = {
   "live-monitor": { key: "sidebar.liveMonitor" },
-  employees:      { key: "sidebar.employees" },
-  employee:       { key: "sidebar.employees",  parentPath: "/employees" },
-  attractions:    { key: "sidebar.attractions" },
-  attraction:     { key: "sidebar.attractions", parentPath: "/attractions" },
-  kassa:          { key: "sidebar.kassa",       parentPath: "/kassa" },
-  reports:        { key: "sidebar.reports" },
-  settings:          { key: "sidebar.settings" },
-  support:           { key: "sidebar.support" },
-  "rolekassa-main":      { key: "sidebar.kassaZReport"    },
-  "roleoperator-main":   { key: "sidebar.operatorZReport" },
-  "rolebux-main":        { key: "sidebar.buxZReport"      },
+  employees: { key: "sidebar.employees" },
+  employee: { key: "sidebar.employees", parentPath: "/employees" },
+  attractions: { key: "sidebar.attractions" },
+  attraction: { key: "sidebar.attractions", parentPath: "/attractions" },
+  kassa: { key: "sidebar.kassa", parentPath: "/kassa" },
+  reports: { key: "sidebar.reports" },
+  settings: { key: "sidebar.settings" },
+  support: { key: "sidebar.support" },
+  "rolekassa-main": { key: "sidebar.kassaZReport" },
+  "roleoperator-main": { key: "sidebar.operatorZReport" },
+  "rolebux-main": { key: "sidebar.buxZReport" },
 };
 
 function useBreadcrumbs(): BreadCrumbItem[] {

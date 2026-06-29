@@ -19,6 +19,7 @@ import {
 import ModalAddAttraction from "../modals/ModalAddAttraction";
 import ModalEditAttraction from "../modals/ModalEditAttraction";
 import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
 import type { Attraction } from "../types";
 
 const PAGE_SIZE = 10;
@@ -263,33 +264,49 @@ export default function AttractionTableCard() {
       header: t("columns.mainOperator"),
       sortable: false,
       render: (row) => {
-        const op = row.operator;
-        if (!op?.firstname)
+        const mains = (row.operators ?? []).filter((o) => o.type === "main");
+        if (mains.length === 0)
           return <span style={{ color: "var(--text-muted)" }}>—</span>;
+        const first = mains[0];
+        const extra = mains.length - 1;
         return (
           <div className="flex items-center gap-2">
-            <img
-              src={
-                op.file
-                  ? getFileUrl(op.file)
-                  : `https://i.pravatar.cc/150?u=${op.id}`
-              }
-              alt={op.firstname}
-              style={{
-                width: 22,
-                height: 22,
-                borderRadius: "50%",
-                objectFit: "cover",
-                flexShrink: 0,
-              }}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src =
-                  `https://i.pravatar.cc/150?u=${op.id}`;
-              }}
-            />
+            {first.file ? (
+              <CusImagePreview
+                src={getFileUrl(first.file)}
+                alt={first.firstname}
+                width={22}
+                height={22}
+                borderRadius="50%"
+                objectFit="cover"
+                preview={false}
+              />
+            ) : (
+              <div
+                style={{
+                  width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
+                  background: "var(--bg-hover)", display: "flex",
+                  alignItems: "center", justifyContent: "center",
+                  fontSize: 10, fontWeight: 600, color: "var(--text-muted)",
+                }}
+              >
+                {first.firstname?.charAt(0)?.toUpperCase() ?? "?"}
+              </div>
+            )}
             <span style={{ fontSize: 12, color: "var(--text-2)" }}>
-              {op.firstname} {op.lastname}
+              {first.firstname} {first.lastname}
             </span>
+            {extra > 0 && (
+              <span
+                style={{
+                  fontSize: 10, fontWeight: 600, color: "var(--text-muted)",
+                  background: "var(--bg-hover)", borderRadius: 4,
+                  padding: "1px 5px", flexShrink: 0,
+                }}
+              >
+                +{extra}
+              </span>
+            )}
           </div>
         );
       },

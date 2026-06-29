@@ -27,15 +27,15 @@
     "reportsKassa": "Kassa",
     "reportsAttraction": "Attraksion",
     "reportsEmployees": "Xodimlar",
-    "kassaZReport": "Z-Otchetlar",
-    "kassaIncoming": "Z-otchet qabul",
-    "kassaExport": "Buxgalterga yuborish",
-    "operatorZReport": "Operator hisobotlari",
-    "operatorIncoming": "Kunlik hisobot",
-    "operatorExport": "Hisobotni eksport",
-    "buxZReport": "Buxgalter hisobotlari",
-    "buxIncomingKassa": "Kassa hisobotlari",
-    "buxIncomingOperator": "Operator hisobotlari"
+    "kassaZReport": "Kassirlar Z-hisoboti",
+    "kassaIncoming": "Z-hisobotlarni qabul",
+    "kassaExport": "Buxgalteriyaga yuklash",
+    "operatorZReport": "Operatorlar Z-hisoboti",
+    "operatorIncoming": "Kunlik yig'ma hisobot",
+    "operatorExport": "Hisobotni yuklash",
+    "buxZReport": "Buxgalteriya jadvallari",
+    "buxIncomingKassa": "Kassirlar bo'yicha",
+    "buxIncomingOperator": "Operatorlar bo'yicha"
   },
   "employees": {
     "breadcrumb": "Staff",
@@ -202,6 +202,8 @@
     },
     "statuses": {
       "all": "Barcha statuslar",
+      "active": "Faol",
+      "inactive": "Nofaol",
       "open": "Ochiq",
       "maintenance": "Ta'mirda",
       "closed": "Yopiq"

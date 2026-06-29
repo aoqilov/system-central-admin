@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { LuArrowLeft } from "react-icons/lu";
 import { CusButton } from "@/components/ui/buttons/CusButton";
-import { fetchAttractionDetail } from "./api/apiAttractionDetail";
+import { fetchAttractionDetail, removeAttractionOperator } from "./api/apiAttractionDetail";
 import { AttractionCard } from "./components/AttractionCard";
 import { VisitorsChart } from "./components/VisitorsChart";
 import { RevenueChart } from "./components/RevenueChart";
@@ -14,9 +14,23 @@ import { OperatorSection } from "./components/OperatorSection";
 export default function FeatureAttractionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [assignOpen, setAssignOpen] = useState(false);
+  const [assignHelperOpen, setAssignHelperOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [removingHelperIds, setRemovingHelperIds] = useState<number[]>([]);
+
+  const removeMutation = useMutation({
+    mutationFn: (operatorId: number) =>
+      removeAttractionOperator(Number(id), operatorId),
+    onMutate: (operatorId) =>
+      setRemovingHelperIds((prev) => [...prev, operatorId]),
+    onSettled: (_, __, operatorId) => {
+      setRemovingHelperIds((prev) => prev.filter((i) => i !== operatorId));
+      queryClient.invalidateQueries({ queryKey: ["attraction-detail", id] });
+    },
+  });
 
   const {
     data: attraction,
@@ -65,7 +79,9 @@ export default function FeatureAttractionDetail() {
     );
   }
 
-  const operator = attraction.operator ?? null;
+  const mainOperators = attraction.operators.filter((o) => o.type === "main");
+  const helpers = attraction.operators.filter((o) => o.type === "assistant");
+  const assignedOperatorIds = attraction.operators.map((o) => o.id);
   const visitorChartData: { day: string; visitors: number }[] = [];
   const revenueChartData: { day: string; revenue: number }[] = [];
 
@@ -92,9 +108,13 @@ export default function FeatureAttractionDetail() {
         <div className="space-y-4"></div>
         <div>
           <OperatorSection
-            operator={operator}
+            mainOperators={mainOperators}
+            helpers={helpers}
             onAssignOperator={() => setAssignOpen(true)}
-            onAssignHelper={() => {}}
+            onAssignHelper={() => setAssignHelperOpen(true)}
+            onRemoveOperator={(operatorId) => removeMutation.mutate(operatorId)}
+            onRemoveHelper={(operatorId) => removeMutation.mutate(operatorId)}
+            removingIds={removingHelperIds}
           />
         </div>
       </div>
@@ -102,13 +122,22 @@ export default function FeatureAttractionDetail() {
       <HistoryDrawer
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
-        operator={operator}
+        mainOperators={mainOperators}
+        helpers={helpers}
       />
 
       <AssignOperatorModal
         open={assignOpen}
         attractionId={Number(id)}
+        assignedIds={assignedOperatorIds}
         onClose={() => setAssignOpen(false)}
+      />
+      <AssignOperatorModal
+        open={assignHelperOpen}
+        attractionId={Number(id)}
+        type="assistant"
+        assignedIds={assignedOperatorIds}
+        onClose={() => setAssignHelperOpen(false)}
       />
     </div>
   );

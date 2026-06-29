@@ -60,12 +60,20 @@ export const CusCheckbox = forwardRef<HTMLInputElement, CusCheckboxProps>(
       : checked;
     const resolvedDisabled = disabled || (inGroup ? group.disabled : false);
 
+    const isControlled = checked !== undefined;
+
     const handleGroupToggle = () => {
       if (!group || value === undefined) return;
       const next = group.value.includes(value)
         ? group.value.filter((v) => v !== value)
         : [...group.value, value];
       group.onChange(next);
+    };
+
+    const handleControlledChange = () => {
+      if (onChange) {
+        onChange({ target: { checked: !resolvedChecked } } as React.ChangeEvent<HTMLInputElement>);
+      }
     };
 
     return (
@@ -81,11 +89,17 @@ export const CusCheckbox = forwardRef<HTMLInputElement, CusCheckboxProps>(
           name={name}
           value={value}
           size={size}
-          onCheckedChange={inGroup ? handleGroupToggle : undefined}
+          onCheckedChange={
+            inGroup
+              ? handleGroupToggle
+              : isControlled
+                ? handleControlledChange
+                : undefined
+          }
         >
           <Checkbox.HiddenInput
             ref={ref}
-            onChange={inGroup ? undefined : onChange}
+            onChange={inGroup || isControlled ? undefined : onChange}
             onBlur={onBlur}
           />
 

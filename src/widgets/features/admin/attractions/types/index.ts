@@ -15,21 +15,12 @@ export interface AttractionStatsResponse {
 }
 
 // --- List
-export interface AssistantOperator {
+export interface AttractionOperatorItem {
   id: number;
   firstname: string;
   lastname: string;
   file: number;
-}
-
-export interface AttractionOperator {
-  id: number;
-  attraction: number;
-  firstname: string;
-  lastname: string;
-  status: string;
-  file: number;
-  assistant_operators: AssistantOperator[];
+  type: "main" | "assistant";
 }
 
 export interface Attraction {
@@ -48,7 +39,7 @@ export interface Attraction {
   min_height: number;
   max_weight: number;
   description: string;
-  operator: AttractionOperator;
+  operators: AttractionOperatorItem[];
 }
 
 export interface PaginationSchema {

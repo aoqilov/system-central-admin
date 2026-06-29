@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { parseDate } from "@internationalized/date";
 import { LuCircleAlert } from "react-icons/lu";
@@ -6,11 +6,13 @@ import { CusCalendar } from "@/components/ui/calendar/CusCalendar";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusButton } from "@/components/ui/buttons/CusButton";
+import { CusFileUpload } from "@/components/ui/inputs/CusFileUpload";
 import CusSelect from "@/components/ui/select/CusSelect";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchRoles, updateEmployee } from "../api/employeesApi";
 import type { ApiEmployee, UpdateEmployeePayload } from "../types";
 import { formatPhoneNumber } from "@/widgets/features/login/hooks/useLoginForm";
+import { uploadFile, getFileUrl } from "@/widgets/api-global/files-route/filesApi";
 
 interface Props {
   open: boolean;
@@ -28,6 +30,7 @@ interface FormValues {
   role: string;
   salary: string;
   status: string;
+  new_file: File | null;
 }
 
 function phoneToDisplay(raw: string): string {
@@ -50,6 +53,7 @@ const STATUS_OPTIONS = [
 
 export default function ModalEditEmploye({ open, onClose, employee }: Props) {
   const qc = useQueryClient();
+  const [isUploading, setIsUploading] = useState(false);
 
   const { data: roles = [] } = useQuery({
     queryKey: ["roles"],
@@ -82,6 +86,7 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
       role: "",
       salary: "",
       status: "active",
+      new_file: null,
     },
   });
 
@@ -97,16 +102,28 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
         role: String(employee.role),
         salary: employee.salary ? String(employee.salary) : "",
         status: employee.status ?? "active",
+        new_file: null,
       });
       updateMut.reset();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, employee.id]);
 
-  function onSubmit(data: FormValues) {
+  async function onSubmit(data: FormValues) {
     const rawPhone = data.phone.replace(/\D/g, "");
     const apiPhone = employee.phone_number.replace(/\D/g, "");
     const payload: UpdateEmployeePayload = {};
+
+    if (data.new_file) {
+      setIsUploading(true);
+      try {
+        payload.file = await uploadFile(data.new_file);
+      } catch {
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
 
     if (data.firstname.trim() !== employee.firstname)
       payload.firstname = data.firstname.trim();
@@ -140,6 +157,9 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
     value: String(r.id),
   }));
 
+  const isPending = isUploading || updateMut.isPending;
+  const loadingText = isUploading ? "Фото загружается..." : "Сохранение...";
+
   return (
     <CusDrawer
       open={open}
@@ -159,7 +179,7 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
           <CusButton
             variant="outline"
             size="sm"
-            isDisabled={updateMut.isPending}
+            isDisabled={isPending}
             onClick={onClose}
           >
             Отмена
@@ -169,9 +189,10 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
             variant="solid"
             colorPalette="blue"
             onClick={handleSubmit(onSubmit)}
-            isDisabled={updateMut.isPending}
+            isLoading={isPending}
+            loadingText={loadingText}
           >
-            {updateMut.isPending ? "Сохранение..." : "Сохранить"}
+            Сохранить
           </CusButton>
         </div>
       }
@@ -198,6 +219,26 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
             </span>
           </div>
         )}
+
+        <Section title="Фото">
+          <Controller
+            control={control}
+            name="new_file"
+            render={({ field, fieldState }) => (
+              <CusFileUpload
+                label="Фото сотрудника"
+                sublabel={employee.file ? "Загрузите новое фото, чтобы заменить текущее" : undefined}
+                currentImageUrl={employee.file ? getFileUrl(employee.file) : undefined}
+                accept={{ "image/*": [".jpg", ".jpeg", ".png", ".webp"] }}
+                maxFiles={1}
+                maxFileSize={10 * 1024 * 1024}
+                helperText="JPG, PNG, WEBP · Max 10 MB"
+                errorText={fieldState.error?.message}
+                onFileChange={(files) => field.onChange(files[0] ?? null)}
+              />
+            )}
+          />
+        </Section>
 
         <Section title="Личные данные">
           <Row2>

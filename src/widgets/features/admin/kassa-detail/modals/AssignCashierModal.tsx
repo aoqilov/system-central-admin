@@ -7,36 +7,29 @@ import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
 import { fetchEmployees } from "@/widgets/features/admin/employees/api/employeesApi";
-import { assignAttractionOperator } from "../api/apiAttractionDetail";
+import { assignOperatorToCashbox } from "../api/apiKassaDetail";
 import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
 import { EmployeeStatusTypes } from "@/const/constData";
 import type { ApiEmployee } from "@/widgets/features/admin/employees/types";
 
 interface Props {
   open: boolean;
-  attractionId: number;
-  type?: "main" | "assistant";
-  assignedIds?: number[];
+  cashboxId: number;
+  assignedId?: number[];
   onClose: () => void;
 }
 
-export function AssignOperatorModal({
-  open,
-  attractionId,
-  type = "main",
-  assignedIds = [],
-  onClose,
-}: Props) {
+export function AssignCashierModal({ open, cashboxId, assignedId = [], onClose }: Props) {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [selectedEmp, setSelectedEmp] = useState<number | null>(null);
 
   const mutation = useMutation({
     mutationFn: () =>
-      assignAttractionOperator(attractionId, { operator: selectedEmp!, type }),
+      assignOperatorToCashbox(cashboxId, { operator: selectedEmp!, type: "main" }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["attraction-detail", String(attractionId)],
+        queryKey: ["cashbox-detail", String(cashboxId)],
       });
       handleClose();
     },
@@ -49,8 +42,8 @@ export function AssignOperatorModal({
   }
 
   const { data, isLoading } = useQuery({
-    queryKey: ["employees-assign"],
-    queryFn: () => fetchEmployees({ limit: 100, roles: 4 }),
+    queryKey: ["employees-assign-cashier"],
+    queryFn: () => fetchEmployees({ limit: 100, roles: 2 }),
     enabled: open,
   });
 
@@ -68,10 +61,8 @@ export function AssignOperatorModal({
     <CusDialog
       open={open}
       onClose={handleClose}
-      title={
-        type === "assistant" ? "Добавить помощника" : "Назначить оператора"
-      }
-      description="Выберите сотрудника для аттракциона"
+      title="Назначить кассира"
+      description="Выберите сотрудника для кассы"
       size="md"
       footer={
         <>
@@ -115,7 +106,7 @@ export function AssignOperatorModal({
           <div className="space-y-1.5 max-h-72 overflow-y-auto">
             {filtered.map((emp) => {
               const isSelected = selectedEmp === emp.id;
-              const isAssigned = assignedIds.includes(emp.id);
+              const isAssigned = assignedId.includes(emp.id);
               return (
                 <button
                   key={emp.id}
@@ -163,10 +154,7 @@ export function AssignOperatorModal({
                     >
                       {emp.firstname} {emp.lastname}
                     </p>
-                    <p
-                      className="text-xs"
-                      style={{ color: "var(--text-muted)" }}
-                    >
+                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                       {emp.phone_number}
                     </p>
                   </div>
@@ -175,16 +163,10 @@ export function AssignOperatorModal({
                       Назначен
                     </CusBadge>
                   ) : (
-                    <CusBadge
-                      status={emp.status as EmployeeStatusTypes}
-                      size="sm"
-                    />
+                    <CusBadge status={emp.status as EmployeeStatusTypes} size="sm" />
                   )}
                   {isSelected && (
-                    <LuCheck
-                      size={16}
-                      style={{ color: "#22c55e", flexShrink: 0 }}
-                    />
+                    <LuCheck size={16} style={{ color: "#22c55e", flexShrink: 0 }} />
                   )}
                 </button>
               );

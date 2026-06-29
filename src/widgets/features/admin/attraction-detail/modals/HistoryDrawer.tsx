@@ -1,15 +1,16 @@
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
 import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
-import type { AttractionOperatorDetail } from "../types";
+import type { AttractionOperatorItem } from "../types";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  operator: AttractionOperatorDetail | null;
+  mainOperators: AttractionOperatorItem[];
+  helpers: AttractionOperatorItem[];
 }
 
-export function HistoryDrawer({ open, onClose, operator }: Props) {
+export function HistoryDrawer({ open, onClose, mainOperators, helpers }: Props) {
   return (
     <CusDrawer open={open} onClose={onClose} title="История операторов" placement="end" size="md">
       <div className="space-y-6">
@@ -29,35 +30,39 @@ export function HistoryDrawer({ open, onClose, operator }: Props) {
               <p className="text-xs font-medium mb-3" style={{ color: "var(--text-muted)" }}>
                 Основной оператор
               </p>
-              {operator ? (
-                <div className="flex items-center gap-2">
-                  {operator.file ? (
-                    <CusImagePreview
-                      src={getFileUrl(operator.file)}
-                      alt={`${operator.firstname} ${operator.lastname}`}
-                      width={28}
-                      height={28}
-                      borderRadius="50%"
-                      objectFit="cover"
-                      preview={false}
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        width: 28, height: 28, borderRadius: "50%",
-                        background: "var(--bg-input)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)" }}>
-                        {operator.firstname?.charAt(0)?.toUpperCase() ?? "?"}
-                      </span>
+              {mainOperators.length > 0 ? (
+                <div className="space-y-2">
+                  {mainOperators.map((op) => (
+                    <div key={op.id} className="flex items-center gap-2">
+                      {op.file ? (
+                        <CusImagePreview
+                          src={getFileUrl(op.file)}
+                          alt={`${op.firstname} ${op.lastname}`}
+                          width={28}
+                          height={28}
+                          borderRadius="50%"
+                          objectFit="cover"
+                          preview={false}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: 28, height: 28, borderRadius: "50%",
+                            background: "var(--bg-input)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)" }}>
+                            {op.firstname?.charAt(0)?.toUpperCase() ?? "?"}
+                          </span>
+                        </div>
+                      )}
+                      <p className="text-sm font-medium leading-tight" style={{ color: "var(--text-default)" }}>
+                        {op.firstname} {op.lastname}
+                      </p>
                     </div>
-                  )}
-                  <p className="text-sm font-medium leading-tight" style={{ color: "var(--text-default)" }}>
-                    {operator.firstname} {operator.lastname}
-                  </p>
+                  ))}
                 </div>
               ) : (
                 <p className="text-sm" style={{ color: "var(--text-muted)" }}>
@@ -74,9 +79,9 @@ export function HistoryDrawer({ open, onClose, operator }: Props) {
               <p className="text-xs font-medium mb-3" style={{ color: "var(--text-muted)" }}>
                 Помощники
               </p>
-              {(operator?.assistant_operators?.length ?? 0) > 0 ? (
+              {helpers.length > 0 ? (
                 <div className="space-y-3">
-                  {operator!.assistant_operators.map((a) => (
+                  {helpers.map((a) => (
                     <div key={a.id} className="flex items-center gap-2">
                       {a.file ? (
                         <CusImagePreview

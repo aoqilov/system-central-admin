@@ -24,3 +24,10 @@ export async function assignAttractionOperator(
   );
   return data.data["attraction-operator"];
 }
+
+export async function removeAttractionOperator(
+  attractionId: number,
+  operatorId: number,
+): Promise<void> {
+  await api.delete(`/attractions/${attractionId}/operators/${operatorId}`);
+}

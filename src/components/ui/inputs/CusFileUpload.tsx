@@ -214,9 +214,8 @@ export function CusFileUpload({
                   marginTop: acceptedFiles.length > 0 || currentImageUrl ? 8 : 0,
                 }}
               >
-                {/* Current images — multiple (galereya) */}
-                {acceptedFiles.length === 0 &&
-                  currentImageUrls &&
+                {/* Current images — multiple (galereya) — har doim ko'rinadi */}
+                {currentImageUrls &&
                   currentImageUrls.map((url, i) => (
                     <div
                       key={url}
