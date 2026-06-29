@@ -1,28 +1,43 @@
 import { useEffect, useRef, useState } from "react";
 import { LuSearch } from "react-icons/lu";
-import { CusInput } from "../../../components/ui/inputs/CusInput";
-import CusSelect from "../../../components/ui/select/CusSelect";
-import { QR_STATUS_META, type QrStatus } from "../qr.types";
+import { CusInput } from "@/components/ui/inputs/CusInput";
+import CusSelect from "@/components/ui/select/CusSelect";
+import { CARD_STATUS_META, type CardStatus } from "../nfc.types";
 
 interface Filters {
-  status: QrStatus | "all";
+  status: CardStatus | "all";
   search: string;
+  batch: number | null;
 }
 
 interface Props {
   filters: Filters;
   onChange: (next: Partial<Filters>) => void;
+  pageSize: number;
+  onPageSizeChange: (size: number) => void;
 }
 
 const STATUS_OPTIONS = [
   { value: "all", label: "Barchasi" },
-  ...Object.entries(QR_STATUS_META).map(([key, meta]) => ({
+  ...Object.entries(CARD_STATUS_META).map(([key, meta]) => ({
     value: key,
     label: meta.label,
   })),
 ];
 
-export function QrFilters({ filters, onChange }: Props) {
+const PAGE_SIZE_OPTIONS = [
+  { value: "10", label: "10 ta" },
+  { value: "20", label: "20 ta" },
+  { value: "50", label: "50 ta" },
+  { value: "100", label: "100 ta" },
+];
+
+export function NfcFilters({
+  filters,
+  onChange,
+  pageSize,
+  onPageSizeChange,
+}: Props) {
   const [localSearch, setLocalSearch] = useState(filters.search);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
@@ -36,9 +51,9 @@ export function QrFilters({ filters, onChange }: Props) {
 
   return (
     <div className="flex flex-wrap gap-2 items-end">
-      <div className="flex-1 min-w-[200px]">
+      <div className="flex-1 min-w-[100px]">
         <CusInput
-          placeholder="Token yoki partiya nomi..."
+          placeholder="Karta kodi yoki qidirish..."
           leftElement={<LuSearch size={14} />}
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
@@ -47,7 +62,7 @@ export function QrFilters({ filters, onChange }: Props) {
       <div className="w-44">
         <CusSelect
           value={filters.status}
-          onChange={(v) => onChange({ status: v as QrStatus | "all" })}
+          onChange={(v) => onChange({ status: v as CardStatus | "all" })}
           options={STATUS_OPTIONS}
         />
       </div>

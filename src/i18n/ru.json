@@ -21,6 +21,8 @@
     "parkOpen": "Парк открыт",
     "parkHours": "09:00 — 22:00 сегодня",
     "qrCode": "QR Код",
+    "generateCards": "Создать карты",
+    "nfcCards": "NFC карты",
     "liveKassa": "Касса",
     "liveAttraction": "Аттракцион",
     "liveEmployees": "Сотрудники",

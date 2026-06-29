@@ -1,4 +1,18 @@
-import type { QrCode } from "../pages/qr-code/qr.types";
+interface QrCode {
+  id: string;
+  token: string;
+  status: "no-active" | "user-active" | "active";
+  batchId: string;
+  batchSerial: number;
+  order: number;
+  partia: string;
+  amount: number;
+  validFrom: string | null;
+  validUntil: string | null;
+  userId: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export const INITIAL_BATCH_COUNTER = 4;
 

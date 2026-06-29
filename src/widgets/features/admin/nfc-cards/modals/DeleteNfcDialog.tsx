@@ -1,39 +1,43 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Dialog } from "@chakra-ui/react";
 import { LuTriangleAlert } from "react-icons/lu";
-import { CusDialog } from "../../../components/ui/dialog/CusDialog";
-import { CusButton } from "../../../components/ui/buttons/CusButton";
-import type { QrCode } from "../qr.types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { CusDialog } from "@/components/ui/dialog/CusDialog";
+import { CusButton } from "@/components/ui/buttons/CusButton";
+import { deleteCards } from "../api/nfcApi";
+import type { Card } from "../nfc.types";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  codes: QrCode[];
-  onConfirm: (ids: string[]) => Promise<void>;
+  cards: Card[];
 }
 
-export function DeleteConfirmDialog({ open, onClose, codes, onConfirm }: Props) {
-  const [loading, setLoading] = useState(false);
+export function DeleteNfcDialog({ open, onClose, cards }: Props) {
+  const qc = useQueryClient();
 
-  const lastCodes = useRef<QrCode[]>([]);
-  if (codes.length > 0) lastCodes.current = codes;
-  const list = lastCodes.current;
+  const lastCards = useRef<Card[]>([]);
+  if (cards.length > 0) lastCards.current = cards;
+  const list = lastCards.current;
 
   const isBulk = list.length > 1;
 
-  async function handleConfirm() {
-    if (list.length === 0) return;
-    setLoading(true);
-    try {
-      await onConfirm(list.map((c) => c.id));
+  const deleteMut = useMutation({
+    mutationFn: (ids: number[]) => deleteCards({ cardIDs: ids }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["nfc-cards"] });
+      void qc.invalidateQueries({ queryKey: ["nfc-cards-stats"] });
       onClose();
-    } finally {
-      setLoading(false);
-    }
+    },
+  });
+
+  function handleConfirm() {
+    if (list.length === 0) return;
+    deleteMut.mutate(list.map((c) => c.id));
   }
 
   function handleClose() {
-    if (loading) return;
+    if (deleteMut.isPending) return;
     onClose();
   }
 
@@ -41,16 +45,16 @@ export function DeleteConfirmDialog({ open, onClose, codes, onConfirm }: Props) 
     <CusDialog
       open={open}
       onClose={handleClose}
-      title={isBulk ? `${list.length} ta kodni o'chirish` : "Kodni o'chirish"}
+      title={isBulk ? `${list.length} ta kartani o'chirish` : "Kartani o'chirish"}
       size="sm"
-      closeOnBackdrop={!loading}
+      closeOnBackdrop={!deleteMut.isPending}
       footer={
         <>
           <Dialog.ActionTrigger asChild>
             <CusButton
               variant="outline"
               colorPalette="gray"
-              isDisabled={loading}
+              isDisabled={deleteMut.isPending}
               onClick={handleClose}
             >
               Bekor qilish
@@ -58,7 +62,7 @@ export function DeleteConfirmDialog({ open, onClose, codes, onConfirm }: Props) 
           </Dialog.ActionTrigger>
           <CusButton
             colorPalette="red"
-            isLoading={loading}
+            isLoading={deleteMut.isPending}
             onClick={handleConfirm}
           >
             O'chirish
@@ -78,22 +82,19 @@ export function DeleteConfirmDialog({ open, onClose, codes, onConfirm }: Props) 
             {isBulk ? (
               <>
                 <p className="text-sm font-medium" style={{ color: "var(--text-default)" }}>
-                  {list.length} ta kodni o'chirasizmi?
+                  {list.length} ta kartani o'chirasizmi?
                 </p>
                 <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-                  Tanlangan barcha kodlar o'chirib tashlanadi.
+                  Tanlangan barcha kartalar o'chirib tashlanadi.
                 </p>
               </>
             ) : (
               <>
                 <p className="text-sm font-medium" style={{ color: "var(--text-default)" }}>
-                  Ushbu kodni o'chirasizmi?
+                  Ushbu kartani o'chirasizmi?
                 </p>
                 <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-                  Token:{" "}
-                  <span className="font-mono">{list[0].token.slice(0, 8)}…</span>
-                  {" · "}
-                  Partiya: <strong>{list[0].partia}</strong>
+                  Kod: <span className="font-mono">{list[0].code}</span>
                 </p>
               </>
             )}

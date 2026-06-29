@@ -1,4 +1,6 @@
 export type RightMode = "aktivatsa" | "karta" | "relation";
+export type CardScanStatus = "empty" | "scanning" | "active" | "blocked" | "expired" | "error";
+export type PayType = "naqd" | "karta" | "online";
 export type KartaType = "uzcard" | "humo";
 
 export interface QrInfo {

@@ -60,7 +60,7 @@ const Login = lazy(() => import("../pages/Login"));
 const Unauthorized = lazy(() => import("../pages/Unauthorized"));
 const NotFound = lazy(() => import("../pages/NotFound"));
 const DevUI = lazy(() => import("../pages/admin/DevUI"));
-const QrCode = lazy(() => import("../pages/admin/control/QrCode"));
+const NfcCards = lazy(() => import("../pages/admin/control/NfcCards"));
 const LockScreen = lazy(() => import("../pages/admin/LockScreen"));
 const RoleKassaMainIncoming = lazy(
   () => import("../pages/admin/main/RoleKassaMainIncoming"),
@@ -148,7 +148,11 @@ export const routes: RouteObject[] = [
       },
       { path: "/settings", element: <Settings /> },
       { path: "/support", element: <Support /> },
-      { path: "/qrcode", element: rg(<QrCode />, [SUPERADMIN, HEAD_CASHIER]) },
+
+      {
+        path: "/nfc-cards",
+        element: rg(<NfcCards />, [SUPERADMIN, HEAD_CASHIER]),
+      },
       {
         path: "/rolekassa-main/incoming",
         element: rg(<RoleKassaMainIncoming />, [SUPERADMIN, HEAD_CASHIER]),
@@ -205,7 +209,11 @@ export const routes: RouteObject[] = [
       </AuthGuard>
     ),
     children: [
-      { index: true, path: "/rolekassa", element: <Navigate to="/rolekassa/otchet" replace /> },
+      {
+        index: true,
+        path: "/rolekassa",
+        element: <Navigate to="/rolekassa/otchet" replace />,
+      },
       { path: "/rolekassa/smena", element: <KassaSmena /> },
       { path: "/rolekassa/otchet", element: <KassaOtchet /> },
       { path: "/rolekassa/profile", element: <KassaProfile /> },

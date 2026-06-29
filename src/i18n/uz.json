@@ -21,6 +21,8 @@
     "parkOpen": "Park ochiq",
     "parkHours": "09:00 — 22:00 bugun",
     "qrCode": "QR Kod",
+    "generateCards": "Karta yaratish",
+    "nfcCards": "NFC kartalar",
     "liveKassa": "Kassa",
     "liveAttraction": "Attraksion",
     "liveEmployees": "Xodimlar",

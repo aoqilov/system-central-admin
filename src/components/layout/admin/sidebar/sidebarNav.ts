@@ -11,10 +11,11 @@ import {
   LuFileCheck,
   LuFileOutput,
   LuFileInput,
+  LuCreditCard,
 } from "react-icons/lu";
-import { IoQrCodeSharp } from "react-icons/io5";
 import { SiTestcafe } from "react-icons/si";
 import { RoleTypes } from "@/const/constData";
+import { LiaIdCardSolid } from "react-icons/lia";
 
 // в”Ђв”Ђв”Ђ Types в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
@@ -193,17 +194,16 @@ export const navGroups: NavGroupDef[] = [
           },
         ],
       },
+
       {
-        labelKey: "qrCode",
-        icon: IoQrCodeSharp,
-        to: "/qrcode",
+        labelKey: "nfcCards",
+        icon: LuCreditCard,
+        to: "/nfc-cards",
         roles: [RoleTypes.SUPERADMIN, RoleTypes.HEAD_CASHIER],
       },
     ],
   },
 ];
-
-// в”Ђв”Ђв”Ђ System items в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const systemItems: NavItemDef[] = [
   {
@@ -229,4 +229,3 @@ export const systemItems: NavItemDef[] = [
       ]
     : []),
 ];
-
