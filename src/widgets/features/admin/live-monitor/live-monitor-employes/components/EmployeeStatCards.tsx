@@ -83,37 +83,37 @@ export function EmployeeStatCards() {
   return (
     <div className="grid grid-cols-2 tablet:grid-cols-3 desktop:grid-cols-6 gap-4">
       <StatCard
-        label="Jami xodimlar"
+        label="Всего сотрудников"
         value={String(employees.length)}
-        sub="ro'yxatda"
+        sub="в списке"
         color="var(--color-blue)"
         icon={LuUsers}
       />
       <StatCard
-        label="Faol"
+        label="Активные"
         value={String(activeCount)}
-        sub="bugun ishda"
+        sub="сегодня на работе"
         color="var(--color-green)"
         icon={LuUserCheck}
       />
       <StatCard
-        label="Ta'tilda"
+        label="В отпуске"
         value={String(vacationCount)}
-        sub="xodim"
+        sub="сотрудник"
         color="var(--color-yellow)"
         icon={LuUmbrellaOff}
       />
       <StatCard
-        label="Nofaol"
+        label="Неактивные"
         value={String(inactiveCount)}
-        sub="xodim"
+        sub="сотрудник"
         color="var(--color-gray)"
         icon={LuUserX}
       />
       <StatCard
-        label="Operatorlar"
+        label="Операторы"
         value={String(operatorCount)}
-        sub="attraksion"
+        sub="аттракцион"
         color="var(--color-cyan)"
         icon={LuFerrisWheel}
       />
@@ -124,7 +124,7 @@ export function EmployeeStatCards() {
             className="text-xs font-medium"
             style={{ color: "var(--text-muted)" }}
           >
-            Samaradorlik
+            Эффективность
           </span>
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center"

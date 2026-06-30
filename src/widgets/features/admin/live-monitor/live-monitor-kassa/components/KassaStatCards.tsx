@@ -47,7 +47,7 @@ function StatCard({
 }
 
 const fmt = (v: number) =>
-  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)} mln` : v.toLocaleString();
+  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)} млн` : v.toLocaleString();
 
 const NAQD      = 4_200_000;
 const UZCARD    = 3_150_000;
@@ -61,19 +61,19 @@ export function KassaStatCards() {
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>
-        Bugungi statistika
+        Статистика за сегодня
       </p>
       <div className="overflow-x-auto -mx-4 tablet:-mx-6 px-4 tablet:px-6 pb-1">
         <div className="flex gap-3">
-          <StatCard label="Bugungi daromad"       value={fmt(TOTAL)}    sub="so'm"                                        color="var(--color-blue)"   icon={LuBanknote}   />
-          <StatCard label="Naqd"                  value={fmt(NAQD)}     sub={`${Math.round((NAQD     / TOTAL) * 100)}%`}  color="var(--color-green)"  icon={LuWallet}     />
+          <StatCard label="Выручка за сегодня"    value={fmt(TOTAL)}    sub="сум"                                         color="var(--color-blue)"   icon={LuBanknote}   />
+          <StatCard label="Наличные"              value={fmt(NAQD)}     sub={`${Math.round((NAQD     / TOTAL) * 100)}%`}  color="var(--color-green)"  icon={LuWallet}     />
           <StatCard label="UzCard"                value={fmt(UZCARD)}   sub={`${Math.round((UZCARD   / TOTAL) * 100)}%`}  color="var(--color-blue)"   icon={LuCreditCard} />
           <StatCard label="Humo"                  value={fmt(HUMO)}     sub={`${Math.round((HUMO     / TOTAL) * 100)}%`}  color="var(--color-purple)" icon={LuCreditCard} />
           <StatCard label="UzumBank"              value={fmt(UZUMBANK)} sub={`${Math.round((UZUMBANK / TOTAL) * 100)}%`}  color="var(--color-cyan)"   icon={LuSmartphone} />
           <StatCard label="Click"                 value={fmt(CLICK)}    sub={`${Math.round((CLICK    / TOTAL) * 100)}%`}  color="#f97316"             icon={LuSmartphone} />
           <StatCard label="Payme"                 value={fmt(PAYME)}    sub={`${Math.round((PAYME    / TOTAL) * 100)}%`}  color="#ef4444"             icon={LuSmartphone} />
-          <StatCard label="Karta sotildi"         value="54"            sub="bugun"                                       color="var(--color-yellow)" icon={LuTrendingUp} />
-          <StatCard label="Karta registratsiya"   value="31"            sub="bugun"                                       color="var(--color-cyan)"   icon={LuUserCheck}  />
+          <StatCard label="Карт продано"          value="54"            sub="сегодня"                                     color="var(--color-yellow)" icon={LuTrendingUp} />
+          <StatCard label="Регистрация карт"      value="31"            sub="сегодня"                                     color="var(--color-cyan)"   icon={LuUserCheck}  />
         </div>
       </div>
     </div>

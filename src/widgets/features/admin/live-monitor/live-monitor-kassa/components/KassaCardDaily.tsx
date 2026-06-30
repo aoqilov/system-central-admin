@@ -17,13 +17,13 @@ export interface KassaReport {
 }
 
 const STATUS_CFG = {
-  active:   { label: "Faol",              color: "var(--color-green)"  },
-  inactive: { label: "Nofaol",            color: "var(--color-red)"    },
-  stop:     { label: "To'xtatildi",       color: "var(--color-yellow)" },
+  active:   { label: "Активна",      color: "var(--color-green)"  },
+  inactive: { label: "Неактивна",    color: "var(--color-red)"    },
+  stop:     { label: "Остановлена",  color: "var(--color-yellow)" },
 } as const;
 
 const fmt = (v: number) =>
-  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)} mln` : v.toLocaleString();
+  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)} млн` : v.toLocaleString();
 
 function Row({
   label,
@@ -56,7 +56,7 @@ export function KassaCardDaily({ data }: { data: KassaReport }) {
     <CusCard className="overflow-hidden">
       <CusCardHeader
         icon={LuBanknote}
-        title={`Kassa #${data.kassaNumber}`}
+        title={`Касса #${data.kassaNumber}`}
         iconColor="var(--color-blue)"
         action={
           <span
@@ -99,8 +99,8 @@ export function KassaCardDaily({ data }: { data: KassaReport }) {
         <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: "var(--text-muted)" }}>
           Оплаты
         </p>
-        <Row label="Наличные" value={`${fmt(data.payments.naxt)} so'm`} color="var(--color-green)" />
-        <Row label="Карта" value={`${fmt(data.payments.karta)} so'm`} color="var(--color-purple)" />
+        <Row label="Наличные" value={`${fmt(data.payments.naxt)} сум`} color="var(--color-green)" />
+        <Row label="Карта" value={`${fmt(data.payments.karta)} сум`} color="var(--color-purple)" />
 
         <div className="my-2 border-t" style={{ borderColor: "var(--border-default)" }} />
 
@@ -108,9 +108,9 @@ export function KassaCardDaily({ data }: { data: KassaReport }) {
         <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: "var(--text-muted)" }}>
           Платёжные системы
         </p>
-        <Row label="UzumBank" value={`${fmt(data.providers.uzumBank)} so'm`} color="#f97316" />
-        <Row label="Click" value={`${fmt(data.providers.click)} so'm`} color="#1a73e8" />
-        <Row label="Payme" value={`${fmt(data.providers.payme)} so'm`} color="#1fce6b" />
+        <Row label="UzumBank" value={`${fmt(data.providers.uzumBank)} сум`} color="#f97316" />
+        <Row label="Click" value={`${fmt(data.providers.click)} сум`} color="#1a73e8" />
+        <Row label="Payme" value={`${fmt(data.providers.payme)} сум`} color="#1fce6b" />
 
         <div className="my-2 border-t" style={{ borderColor: "var(--border-default)" }} />
 
@@ -222,10 +222,10 @@ export function KassaCardDailyList() {
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>
-          Kassalar kunlik holati
+          Состояние касс за сегодня
         </p>
         <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-          {KASSAS.length} ta kassa
+          {KASSAS.length} касс
         </span>
       </div>
       <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory">

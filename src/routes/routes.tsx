@@ -14,6 +14,7 @@ function rg(element: JSX.Element, roles: RoleTypes[]) {
 const KassaLayout = lazy(
   () => import("../components/layout/kassa/KassaLayout"),
 );
+const KassaHome = lazy(() => import("../pages/forKassa/KassaHome"));
 const KassaSmena = lazy(() => import("../pages/forKassa/KassaSmena"));
 const KassaOtchet = lazy(() => import("../pages/forKassa/KassaOtchet"));
 const OperatorLayout = lazy(
@@ -209,11 +210,7 @@ export const routes: RouteObject[] = [
       </AuthGuard>
     ),
     children: [
-      {
-        index: true,
-        path: "/rolekassa",
-        element: <Navigate to="/rolekassa/otchet" replace />,
-      },
+      { path: "/rolekassa", element: <KassaHome /> },
       { path: "/rolekassa/smena", element: <KassaSmena /> },
       { path: "/rolekassa/otchet", element: <KassaOtchet /> },
       { path: "/rolekassa/profile", element: <KassaProfile /> },

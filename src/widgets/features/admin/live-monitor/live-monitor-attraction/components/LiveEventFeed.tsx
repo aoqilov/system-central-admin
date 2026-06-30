@@ -21,11 +21,11 @@ interface LiveEvent {
 }
 
 const EVENT_CFG: Record<EventType, { label: string; color: string; icon: React.ElementType }> = {
-  round_start: { label: "Tur boshlandi", color: "var(--color-green)", icon: LuCircleCheck },
-  round_end: { label: "Tur yakunlandi", color: "var(--color-cyan)", icon: LuCircleCheck },
-  stop: { label: "To'xtatildi", color: "var(--color-yellow)", icon: LuClock },
-  incident: { label: "Hodisa", color: "var(--color-red)", icon: LuTriangleAlert },
-  resume: { label: "Qayta ishga", color: "var(--color-blue)", icon: LuActivity },
+  round_start: { label: "Тур начался",    color: "var(--color-green)",  icon: LuCircleCheck  },
+  round_end:   { label: "Тур завершён",   color: "var(--color-cyan)",   icon: LuCircleCheck  },
+  stop:        { label: "Остановлен",     color: "var(--color-yellow)", icon: LuClock        },
+  incident:    { label: "Происшествие",   color: "var(--color-red)",    icon: LuTriangleAlert },
+  resume:      { label: "Возобновлён",    color: "var(--color-blue)",   icon: LuActivity     },
 };
 
 const STATUS_DOT: Record<"ok" | "warning" | "error", string> = {
@@ -55,7 +55,7 @@ const liveEvents: LiveEvent[] = [
 const columns: ColumnDef<LiveEvent>[] = [
   {
     key: "time",
-    header: "Vaqt",
+    header: "Время",
     render: (ev) => (
       <span className="font-mono text-xs" style={{ color: "var(--text-muted)" }}>
         {ev.time}
@@ -64,19 +64,19 @@ const columns: ColumnDef<LiveEvent>[] = [
   },
   {
     key: "attractionName",
-    header: "Attraksion",
+    header: "Аттракцион",
     render: (ev) => (
       <span style={{ fontWeight: 500, color: "var(--text-2)" }}>{ev.attractionName}</span>
     ),
   },
   {
     key: "operator",
-    header: "Operator",
+    header: "Оператор",
     render: (ev) => <span style={{ color: "var(--text-3)" }}>{ev.operator}</span>,
   },
   {
     key: "eventType",
-    header: "Hodisa",
+    header: "Событие",
     render: (ev) => {
       const cfg = EVENT_CFG[ev.eventType];
       const Icon = cfg.icon;
@@ -98,7 +98,7 @@ const columns: ColumnDef<LiveEvent>[] = [
   },
   {
     key: "visitors",
-    header: "Tashrif",
+    header: "Посет.",
     align: "right",
     render: (ev) =>
       ev.visitors > 0 ? (
@@ -111,7 +111,7 @@ const columns: ColumnDef<LiveEvent>[] = [
   },
   {
     key: "status",
-    header: "Holat",
+    header: "Статус",
     render: (ev) => (
       <span
         style={{
@@ -132,7 +132,7 @@ export function LiveEventFeed() {
     <CusCard>
       <CusCardHeader
         icon={LuActivity}
-        title="Jonli hodisalar"
+        title="Живые события"
         iconColor="var(--color-cyan)"
         action={
           <div className="flex items-center gap-1.5">

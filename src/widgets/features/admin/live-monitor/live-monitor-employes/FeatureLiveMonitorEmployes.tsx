@@ -14,7 +14,7 @@ const FeatureLiveMonitorEmployes = () => {
           style={{ color: "var(--text-default)" }}
         >
           Live Monitor{" "}
-          <span style={{ color: "var(--color-blue)" }}>Xodimlar</span>
+          <span style={{ color: "var(--color-blue)" }}>Сотрудники</span>
         </h1>
       </div>
 

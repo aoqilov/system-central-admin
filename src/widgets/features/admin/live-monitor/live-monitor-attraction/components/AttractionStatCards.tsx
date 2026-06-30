@@ -38,12 +38,12 @@ const CARDS: {
   color: string;
   icon: React.ElementType;
 }[] = [
-  { label: "Bugungi tashrifchilar", value: totalVisitors.toLocaleString(), sub: "kishi",   color: "#3b82f6", icon: LuUsers      },
-  { label: "Faol attraksionlar",    value: String(openCount),              sub: `${openCount + maintenanceCount + closedCount} ta jami`, color: "#22c55e", icon: LuFerrisWheel },
-  { label: "Ta'mirlashda",          value: String(maintenanceCount),       sub: "attraksion", color: "#eab308", icon: LuWrench    },
-  { label: "Yopiq",                 value: String(closedCount),            sub: "attraksion", color: "#6b7280", icon: LuCircleX   },
-  { label: "Jami turlar",           value: totalRounds.toLocaleString(),   sub: "bugun",   color: "#06b6d4", icon: LuTrendingUp  },
-  { label: "Bugungi daromad",       value: `${(totalRevenue / 1_000_000).toFixed(2)} mln`, sub: "so'm", color: "#8b5cf6", icon: LuBanknote },
+  { label: "Посетители за сегодня", value: totalVisitors.toLocaleString(), sub: "чел.",    color: "#3b82f6", icon: LuUsers      },
+  { label: "Активные аттракционы",  value: String(openCount),              sub: `${openCount + maintenanceCount + closedCount} всего`, color: "#22c55e", icon: LuFerrisWheel },
+  { label: "На обслуживании",       value: String(maintenanceCount),       sub: "аттракцион", color: "#eab308", icon: LuWrench  },
+  { label: "Закрытые",              value: String(closedCount),            sub: "аттракцион", color: "#6b7280", icon: LuCircleX  },
+  { label: "Туров всего",           value: totalRounds.toLocaleString(),   sub: "сегодня", color: "#06b6d4", icon: LuTrendingUp  },
+  { label: "Выручка за сегодня",    value: `${(totalRevenue / 1_000_000).toFixed(2)} млн`, sub: "сум", color: "#8b5cf6", icon: LuBanknote },
 ];
 
 export function AttractionStatCards() {

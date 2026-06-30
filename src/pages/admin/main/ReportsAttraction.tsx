@@ -44,15 +44,15 @@ function _s(n: number) {
 }
 
 const fmtM = (v: number) =>
-  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)} mln` : v.toLocaleString();
+  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)} млн` : v.toLocaleString();
 
 const fmtK = (v: number) =>
   v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v);
 
 const PRESETS = [
-  { label: "Bugun", days: 1 },
-  { label: "7 kun", days: 7 },
-  { label: "30 kun", days: 30 },
+  { label: "Сегодня", days: 1 },
+  { label: "7 дней", days: 7 },
+  { label: "30 дней", days: 30 },
 ] as const;
 
 // ─── Category config ──────────────────────────────────────────────────────────
@@ -67,12 +67,12 @@ const CAT_COLOR: Record<AttractionCategory, string> = {
 };
 
 const CAT_LABEL: Record<AttractionCategory, string> = {
-  thrill: "Ekstremal",
-  family: "Oilaviy",
-  kids: "Bolalar",
-  water: "Suv",
-  playground: "Maydonchat",
-  entertainment: "Ko'ngilochar",
+  thrill: "Экстрим",
+  family: "Семейные",
+  kids: "Детские",
+  water: "Водные",
+  playground: "Площадка",
+  entertainment: "Развлечения",
 };
 
 const CATEGORIES: AttractionCategory[] = [
@@ -85,9 +85,9 @@ const CATEGORIES: AttractionCategory[] = [
 ];
 
 const STATUS_CFG: Record<AttractionStatus, { label: string; color: string }> = {
-  open: { label: "Ochiq", color: "var(--color-green)" },
-  maintenance: { label: "Ta'mirda", color: "var(--color-yellow)" },
-  closed: { label: "Yopiq", color: "var(--color-red)" },
+  open: { label: "Открыт", color: "var(--color-green)" },
+  maintenance: { label: "На ремонте", color: "var(--color-yellow)" },
+  closed: { label: "Закрыт", color: "var(--color-red)" },
 };
 
 // ─── Data generators ──────────────────────────────────────────────────────────
@@ -145,7 +145,7 @@ function VisitorTip({ active, payload, label }: TipProps) {
         {label}
       </p>
       <div className="flex items-center justify-between gap-4">
-        <span style={{ color: "var(--text-muted)" }}>Tashrif</span>
+        <span style={{ color: "var(--text-muted)" }}>Посещений</span>
         <span
           className="font-semibold tabular-nums"
           style={{ color: "var(--color-cyan)" }}
@@ -198,12 +198,12 @@ function CatTip({ active, payload, label }: TipProps) {
         className="flex justify-between pt-1 border-t"
         style={{ borderColor: "var(--border-2)" }}
       >
-        <span style={{ color: "var(--text-muted)" }}>Jami</span>
+        <span style={{ color: "var(--text-muted)" }}>Итого</span>
         <span
           className="font-semibold tabular-nums"
           style={{ color: "var(--text-default)" }}
         >
-          {(total / 1_000_000).toFixed(2)} mln
+          {(total / 1_000_000).toFixed(2)} млн
         </span>
       </div>
     </div>
@@ -344,18 +344,18 @@ const ReportsAttraction = () => {
   // Excel export
   const exportExcel = () => {
     const rows = summary.map((a) => ({
-      Attraksion: a.name,
-      Kategoriya: CAT_LABEL[a.category],
-      Holat: STATUS_CFG[a.status].label,
-      "Narx (so'm)": a.price,
-      Tashrif: a.visitors,
-      Turlar: a.rounds,
-      "Daromad (so'm)": a.revenue,
+      Аттракцион: a.name,
+      Категория: CAT_LABEL[a.category],
+      Статус: STATUS_CFG[a.status].label,
+      "Цена (сум)": a.price,
+      Посещений: a.visitors,
+      Раундов: a.rounds,
+      "Выручка (сум)": a.revenue,
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
     ws["!cols"] = [28, 16, 12, 14, 12, 10, 18].map((w) => ({ wch: w }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Attraksion hisoboti");
+    XLSX.utils.book_append_sheet(wb, ws, "Отчёт аттракционов");
     XLSX.writeFile(wb, `attraksion-hisobot-${dateFrom}-${dateTo}.xlsx`);
   };
 
@@ -377,7 +377,7 @@ const ReportsAttraction = () => {
   const columns: ColumnDef<AttractionSummary>[] = [
     {
       key: "name",
-      header: "Attraksion",
+      header: "Аттракцион",
       render: (row) => (
         <div>
           <p
@@ -405,7 +405,7 @@ const ReportsAttraction = () => {
     },
     {
       key: "status",
-      header: "Holat",
+      header: "Статус",
       render: (row) => {
         const cfg = STATUS_CFG[row.status];
         return (
@@ -435,7 +435,7 @@ const ReportsAttraction = () => {
     },
     {
       key: "price",
-      header: "Narx",
+      header: "Цена",
       align: "right",
       render: (row) => (
         <span
@@ -448,7 +448,7 @@ const ReportsAttraction = () => {
     },
     {
       key: "visitors",
-      header: "Tashrif",
+      header: "Посещений",
       align: "right",
       render: (row) => (
         <span
@@ -461,7 +461,7 @@ const ReportsAttraction = () => {
     },
     {
       key: "rounds",
-      header: "Turlar",
+      header: "Раундов",
       align: "right",
       render: (row) => (
         <span
@@ -474,7 +474,7 @@ const ReportsAttraction = () => {
     },
     {
       key: "revenue",
-      header: "Daromad",
+      header: "Выручка",
       align: "right",
       render: (row) =>
         row.revenue > 0 ? (
@@ -500,8 +500,8 @@ const ReportsAttraction = () => {
           className="text-2xl font-semibold"
           style={{ color: "var(--text-default)" }}
         >
-          Hisobotlar{" "}
-          <span style={{ color: "var(--color-blue)" }}>Attraksion</span>
+          Отчёты{" "}
+          <span style={{ color: "var(--color-blue)" }}>Аттракционы</span>
         </h1>
       </div>
       <div className="space-y-4">
@@ -592,7 +592,7 @@ const ReportsAttraction = () => {
               leftIcon={<LuDownload size={14} />}
               onClick={exportExcel}
             >
-              Excel yuklab olish
+              Скачать Excel
             </CusButton>
           </div>
         </CusCard>
@@ -601,30 +601,30 @@ const ReportsAttraction = () => {
         <div className="grid grid-cols-2 desktop:grid-cols-4 gap-4">
           <StatCard
             icon={LuBanknote}
-            label="Jami daromad"
+            label="Выручка за период"
             value={fmtM(totalRevenue)}
-            sub={`${dates.length} kun davomida`}
+            sub={`${dates.length} дней`}
             color="var(--color-blue)"
           />
           <StatCard
             icon={LuUsers}
-            label="Jami tashrif"
+            label="Всего посещений"
             value={totalVisitors.toLocaleString()}
-            sub="mehmon"
+            sub="гостей"
             color="var(--color-cyan)"
           />
           <StatCard
             icon={LuRefreshCw}
-            label="Jami turlar"
+            label="Всего раундов"
             value={totalRounds.toLocaleString()}
-            sub="attraksion turi"
+            sub="аттракционов"
             color="var(--color-purple)"
           />
           <StatCard
             icon={LuFerrisWheel}
-            label="Ochiq"
+            label="Открытых"
             value={String(openCount)}
-            sub={`${attractions.length} tadan`}
+            sub={`из ${attractions.length}`}
             color="var(--color-green)"
           />
         </div>
@@ -635,7 +635,7 @@ const ReportsAttraction = () => {
           <CusCard>
             <CusCardHeader
               icon={LuUsers}
-              title="Kunlik tashrif tendensiyasi"
+              title="Динамика посещений по дням"
               iconColor="var(--color-cyan)"
               action={
                 <span
@@ -702,7 +702,7 @@ const ReportsAttraction = () => {
           <CusCard>
             <CusCardHeader
               icon={LuTrendingUp}
-              title="Kategoriya bo'yicha daromad"
+              title="Выручка по категориям"
               iconColor="var(--color-blue)"
               action={
                 <span
@@ -783,7 +783,7 @@ const ReportsAttraction = () => {
         <CusCard>
           <CusCardHeader
             icon={LuFerrisWheel}
-            title="Attraksionlar bo'yicha tafsilot"
+            title="Детализация по аттракционам"
             iconColor="var(--color-cyan)"
             action={
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>
@@ -801,7 +801,7 @@ const ReportsAttraction = () => {
             colorBodyHover="var(--bg-hover)"
             interactive
             size="sm"
-            emptyText="Ma'lumot topilmadi"
+            emptyText="Нет данных"
           />
         </CusCard>
       </div>

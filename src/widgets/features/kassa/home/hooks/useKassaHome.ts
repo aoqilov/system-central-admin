@@ -1,31 +1,55 @@
 import { useState } from "react";
-import { type RightMode, type KartaType, type QrInfo, type PendingItem, EMPTY_QR } from "../types";
+import {
+  type RightMode,
+  type KartaType,
+  type QrInfo,
+  type PendingItem,
+  type NfcCard,
+  EMPTY_QR,
+} from "../types";
 import { useToast } from "./useToast";
+import { checkNfc } from "../api/apiKassaHomePay";
 
 export function useKassaHome() {
-  const [qrInfo, setQrInfo] = useState<QrInfo>(EMPTY_QR);
-  const [rightMode, setRightMode] = useState<RightMode>("aktivatsa");
-  const [kartaType, setKartaType] = useState<KartaType>("uzcard");
-  const [panelKey, setPanelKey] = useState(0);
-  const [pending, setPending] = useState<PendingItem[]>([]);
+  const [qrInfo, setQrInfo]         = useState<QrInfo>(EMPTY_QR);
+  const [card, setCard]             = useState<NfcCard | null>(null);
+  const [scanLoading, setScanLoading] = useState(false);
+  const [rightMode, setRightMode]   = useState<RightMode>("aktivatsa");
+  const [kartaType, setKartaType]   = useState<KartaType>("uzcard");
+  const [panelKey, setPanelKey]     = useState(0);
+  const [pending, setPending]       = useState<PendingItem[]>([]);
   const { toasts, show: showToast, remove } = useToast();
 
-  function handleScan(scannedValue: string) {
-    setQrInfo({
-      status: "active",
-      raqam: scannedValue,
-      token: "TKN-8F3D-A12C",
-      partiya: "B2-007",
-      amount: "45 000",
-    });
+  async function handleScan(nfc: string) {
+    setScanLoading(true);
+    try {
+      const res = await checkNfc(nfc);
+      const c = res.data.card;
+      setCard(c);
+      setQrInfo({
+        status: c.status === "active" ? "active" : "no-active",
+        raqam: c.card,
+        token: c.nfc,
+        partiya: c.batch,
+        amount: String(c.balance),
+      });
+    } catch {
+      showToast("NFC karta topilmadi", "error");
+      setCard(null);
+      setQrInfo(EMPTY_QR);
+    } finally {
+      setScanLoading(false);
+    }
   }
 
   function handleClear() {
     setQrInfo(EMPTY_QR);
+    setCard(null);
   }
 
   function handleNewOperation() {
     setQrInfo(EMPTY_QR);
+    setCard(null);
     setPanelKey((k) => k + 1);
   }
 
@@ -36,6 +60,7 @@ export function useKassaHome() {
       { id: Date.now().toString(), qrInfo, savedAt: new Date() },
     ]);
     setQrInfo(EMPTY_QR);
+    setCard(null);
     setPanelKey((k) => k + 1);
   }
 
@@ -44,12 +69,13 @@ export function useKassaHome() {
     if (!item) return;
     if (qrInfo.raqam) {
       setPending((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, qrInfo } : p))
+        prev.map((p) => (p.id === id ? { ...p, qrInfo } : p)),
       );
     } else {
       setPending((prev) => prev.filter((p) => p.id !== id));
     }
     setQrInfo(item.qrInfo);
+    setCard(null);
   }
 
   function handleRemovePending(id: string) {
@@ -59,6 +85,7 @@ export function useKassaHome() {
   function handleSuccess(message: string) {
     showToast(message, "success");
     setQrInfo(EMPTY_QR);
+    setCard(null);
     setPanelKey((k) => k + 1);
   }
 
@@ -69,6 +96,8 @@ export function useKassaHome() {
 
   return {
     qrInfo,
+    card,
+    scanLoading,
     rightMode,
     kartaType,
     setKartaType,

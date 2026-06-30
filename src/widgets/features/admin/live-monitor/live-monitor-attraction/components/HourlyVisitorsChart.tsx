@@ -49,7 +49,7 @@ function HourlyTooltip({ active, payload, label }: TipProps) {
       <p className="mb-1">{label}</p>
       <p className="font-semibold" style={{ color: "var(--text-default)" }}>
         {payload[0].value?.toLocaleString()}{" "}
-        <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>kishi</span>
+        <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>чел.</span>
       </p>
     </div>
   );
@@ -60,11 +60,11 @@ export function HourlyVisitorsChart() {
     <CusCard>
       <CusCardHeader
         icon={LuTrendingUp}
-        title="Soatlik tashrifchilar"
+        title="Посетители по часам"
         iconColor="var(--color-cyan)"
         action={
           <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Bugun
+            Сегодня
           </span>
         }
       />

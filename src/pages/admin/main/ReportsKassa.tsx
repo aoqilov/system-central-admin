@@ -39,7 +39,7 @@ function _s(n: number) {
 }
 
 const fmtM = (v: number) =>
-  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)} mln` : v.toLocaleString();
+  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)} млн` : v.toLocaleString();
 
 const COLORS = [
   "#3b82f6",
@@ -53,15 +53,15 @@ const COLORS = [
 ];
 
 const PRESETS = [
-  { label: "Bugun", days: 1 },
-  { label: "7 kun", days: 7 },
-  { label: "30 kun", days: 30 },
+  { label: "Сегодня", days: 1 },
+  { label: "7 дней", days: 7 },
+  { label: "30 дней", days: 30 },
 ] as const;
 
 const PAY_LEGEND = [
-  { label: "Naqd pul", color: "#22c55e" },
+  { label: "Наличные", color: "#22c55e" },
   { label: "UzCard", color: "#3b82f6" },
-  { label: "Karta to'ldirish", color: "#8b5cf6" },
+  { label: "Пополнение карты", color: "#8b5cf6" },
 ];
 
 // Static base values replacing removed interface fields
@@ -149,12 +149,12 @@ function StackedTip({ active, payload, label }: TipProps) {
         className="flex justify-between pt-1 border-t"
         style={{ borderColor: "var(--border-2)" }}
       >
-        <span style={{ color: "var(--text-muted)" }}>Jami</span>
+        <span style={{ color: "var(--text-muted)" }}>Итого</span>
         <span
           className="font-semibold tabular-nums"
           style={{ color: "var(--text-default)" }}
         >
-          {(total / 1_000_000).toFixed(2)} mln
+          {(total / 1_000_000).toFixed(2)} млн
         </span>
       </div>
     </div>
@@ -164,9 +164,9 @@ function StackedTip({ active, payload, label }: TipProps) {
 function PayTip({ active, payload, label }: TipProps) {
   if (!active || !payload?.length) return null;
   const labels: Record<string, string> = {
-    naqd: "Naqd pul",
+    naqd: "Наличные",
     uzcard: "UzCard",
-    karta: "Karta to'ldirish",
+    karta: "Пополнение карты",
   };
   const total = payload.reduce((s, p) => s + (p.value ?? 0), 0);
   return (
@@ -207,12 +207,12 @@ function PayTip({ active, payload, label }: TipProps) {
         className="flex justify-between pt-1 border-t"
         style={{ borderColor: "var(--border-2)" }}
       >
-        <span style={{ color: "var(--text-muted)" }}>Jami</span>
+        <span style={{ color: "var(--text-muted)" }}>Итого</span>
         <span
           className="font-semibold tabular-nums"
           style={{ color: "var(--text-default)" }}
         >
-          {(total / 1_000_000).toFixed(2)} mln
+          {(total / 1_000_000).toFixed(2)} млн
         </span>
       </div>
     </div>
@@ -386,24 +386,24 @@ const ReportsKassa = () => {
   // Excel export
   const exportExcel = () => {
     const rows = kassaSummary.map((k) => ({
-      Kassa: k.name,
-      Joylashuv: k.location,
-      Status:
+      Касса: k.name,
+      Расположение: k.location,
+      Статус:
         k.status === "active"
-          ? "Faol"
+          ? "Активна"
           : k.status === "maintenance"
-            ? "Ta'mirda"
-            : "Yopiq",
-      Tranzaksiyalar: k.transactions,
-      "Naqd (so'm)": k.naqd,
-      "UzCard (so'm)": k.uzcard,
-      "Karta (so'm)": k.karta,
-      "Jami daromad (so'm)": k.total,
+            ? "На ремонте"
+            : "Закрыта",
+      Транзакции: k.transactions,
+      "Наличные (сум)": k.naqd,
+      "UzCard (сум)": k.uzcard,
+      "Пополнение (сум)": k.karta,
+      "Выручка (сум)": k.total,
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
     ws["!cols"] = [20, 22, 12, 16, 18, 18, 18, 22].map((w) => ({ wch: w }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Kassa hisoboti");
+    XLSX.utils.book_append_sheet(wb, ws, "Отчёт по кассам");
     XLSX.writeFile(wb, `kassa-hisobot-${dateFrom}-${dateTo}.xlsx`);
   };
 
@@ -425,7 +425,7 @@ const ReportsKassa = () => {
   const columns: ColumnDef<KassaSummary>[] = [
     {
       key: "name",
-      header: "Kassa",
+      header: "Касса",
       render: (row) => (
         <div>
           <p
@@ -445,7 +445,7 @@ const ReportsKassa = () => {
     },
     {
       key: "transactions",
-      header: "Tranzaksiya",
+      header: "Транзакции",
       align: "right",
       render: (row) => (
         <span
@@ -458,7 +458,7 @@ const ReportsKassa = () => {
     },
     {
       key: "naqd",
-      header: "Naqd",
+      header: "Наличные",
       align: "right",
       render: (row) => (
         <span
@@ -484,7 +484,7 @@ const ReportsKassa = () => {
     },
     {
       key: "karta",
-      header: "Karta",
+      header: "Пополнение",
       align: "right",
       render: (row) => (
         <span
@@ -497,7 +497,7 @@ const ReportsKassa = () => {
     },
     {
       key: "total",
-      header: "Jami daromad",
+      header: "Выручка",
       align: "right",
       render: (row) =>
         row.total > 0 ? (
@@ -525,7 +525,7 @@ const ReportsKassa = () => {
           className="text-2xl font-semibold"
           style={{ color: "var(--text-default)" }}
         >
-          Hisobotlar <span style={{ color: "var(--color-blue)" }}>Kassa</span>
+          Отчёты <span style={{ color: "var(--color-blue)" }}>Касса</span>
         </h1>
       </div>
       <div className="space-y-4">
@@ -618,7 +618,7 @@ const ReportsKassa = () => {
               leftIcon={<LuDownload size={14} />}
               onClick={exportExcel}
             >
-              Excel yuklab olish
+              Скачать Excel
             </CusButton>
           </div>
         </CusCard>
@@ -627,30 +627,30 @@ const ReportsKassa = () => {
         <div className="grid grid-cols-2 desktop:grid-cols-4 gap-4">
           <StatCard
             icon={LuBanknote}
-            label="Jami daromad"
+            label="Выручка за период"
             value={fmtM(totalRevenue)}
-            sub={`${dates.length} kun davomida`}
+            sub={`${dates.length} дней`}
             color="var(--color-blue)"
           />
           <StatCard
             icon={LuArrowUpDown}
-            label="Jami tranzaksiya"
+            label="Всего транзакций"
             value={totalTx.toLocaleString()}
-            sub="davr uchun"
+            sub="за период"
             color="var(--color-cyan)"
           />
           <StatCard
             icon={LuWallet}
-            label="O'rtacha chek"
+            label="Средний чек"
             value={fmtM(avgTx)}
-            sub="bir tranzaksiya"
+            sub="за транзакцию"
             color="var(--color-purple)"
           />
           <StatCard
             icon={LuLayoutGrid}
-            label="Faol kassalar"
+            label="Активных касс"
             value={String(activeKassaCount)}
-            sub={`${kassaList.length} tadan`}
+            sub={`из ${kassaList.length}`}
             color="var(--color-green)"
           />
         </div>
@@ -661,7 +661,7 @@ const ReportsKassa = () => {
           <CusCard>
             <CusCardHeader
               icon={LuTrendingUp}
-              title="Kassalar bo'yicha daromad"
+              title="Выручка по кассам"
               iconColor="var(--color-blue)"
               action={
                 <span
@@ -741,7 +741,7 @@ const ReportsKassa = () => {
           <CusCard>
             <CusCardHeader
               icon={LuCreditCard}
-              title="To'lov turi bo'yicha daromad"
+              title="Выручка по типу оплаты"
               iconColor="var(--color-purple)"
               action={
                 <span
@@ -812,7 +812,7 @@ const ReportsKassa = () => {
         <CusCard>
           <CusCardHeader
             icon={LuBanknote}
-            title="Kassalar bo'yicha tafsilot"
+            title="Детализация по кассам"
             iconColor="var(--color-blue)"
             action={
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>
@@ -828,7 +828,7 @@ const ReportsKassa = () => {
             colorBodyHover="var(--bg-hover)"
             interactive
             size="md"
-            emptyText="Ma'lumot topilmadi"
+            emptyText="Нет данных"
           />
         </CusCard>
       </div>

@@ -54,29 +54,29 @@ const fmtMin = (m: number) => {
 const fmtH = (m: number) => `${(m / 60).toFixed(1)}h`;
 
 const PRESETS = [
-  { label: "Bugun", days: 1 },
-  { label: "7 kun", days: 7 },
-  { label: "30 kun", days: 30 },
+  { label: "Сегодня", days: 1 },
+  { label: "7 дней", days: 7 },
+  { label: "30 дней", days: 30 },
 ] as const;
 
 // ─── Role / status config ─────────────────────────────────────────────────────
 
 const ROLE_CFG: Record<EmployeeRole, { label: string; color: string }> = {
-  [EmployeeRole.ADMIN]: { label: "Admin", color: "#8b5cf6" },
-  [EmployeeRole.CASHIER]: { label: "Kassir", color: "#3b82f6" },
-  [EmployeeRole.OPERATOR]: { label: "Operator", color: "#06b6d4" },
-  [EmployeeRole.SECURITY]: { label: "Security", color: "#f59e0b" },
-  [EmployeeRole.CLEANER]: { label: "Cleaner", color: "#64748b" },
+  [EmployeeRole.ADMIN]: { label: "Админ", color: "#8b5cf6" },
+  [EmployeeRole.CASHIER]: { label: "Кассир", color: "#3b82f6" },
+  [EmployeeRole.OPERATOR]: { label: "Оператор", color: "#06b6d4" },
+  [EmployeeRole.SECURITY]: { label: "Охрана", color: "#f59e0b" },
+  [EmployeeRole.CLEANER]: { label: "Уборщик", color: "#64748b" },
 };
 
 const STATUS_CFG: Record<EmployeeStatus, { label: string; color: string }> = {
-  [EmployeeStatus.ACTIVE]: { label: "Faol", color: "var(--color-green)" },
-  [EmployeeStatus.INACTIVE]: { label: "Nofaol", color: "var(--color-gray)" },
+  [EmployeeStatus.ACTIVE]: { label: "Активный", color: "var(--color-green)" },
+  [EmployeeStatus.INACTIVE]: { label: "Неактивный", color: "var(--color-gray)" },
   [EmployeeStatus.VACATION]: {
-    label: "Ta'tilda",
+    label: "В отпуске",
     color: "var(--color-yellow)",
   },
-  [EmployeeStatus.FIRED]: { label: "Ketgan", color: "var(--color-red)" },
+  [EmployeeStatus.FIRED]: { label: "Уволен", color: "var(--color-red)" },
 };
 
 const ROLES = [
@@ -147,7 +147,7 @@ function HoursTip({ active, payload, label }: TipProps) {
         {label}
       </p>
       <div className="flex items-center justify-between gap-4">
-        <span style={{ color: "var(--text-muted)" }}>Ish soati</span>
+        <span style={{ color: "var(--text-muted)" }}>Часов работы</span>
         <span
           className="font-semibold tabular-nums"
           style={{ color: "#8b5cf6" }}
@@ -174,7 +174,7 @@ function RoleTip({ active, payload, label }: TipProps) {
         {label}
       </p>
       <div className="flex items-center justify-between gap-4">
-        <span style={{ color: "var(--text-muted)" }}>Ish soati</span>
+        <span style={{ color: "var(--text-muted)" }}>Часов работы</span>
         <span
           className="font-semibold tabular-nums"
           style={{ color: "var(--text-2)" }}
@@ -352,19 +352,19 @@ const ReportsEmployees = () => {
   // Excel export
   const exportExcel = () => {
     const rows = summary.map((e) => ({
-      Xodim: e.name,
-      Lavozim: ROLE_CFG[e.role].label,
-      Holat: STATUS_CFG[e.status].label,
-      "Ish kunlari": e.daysWorked,
-      "O'rt. ish vaqti": fmtMin(e.avgMinutes),
-      "Jami ish soati": fmtH(e.totalMinutes),
+      Сотрудник: e.name,
+      Должность: ROLE_CFG[e.role].label,
+      Статус: STATUS_CFG[e.status].label,
+      "Дни работы": e.daysWorked,
+      "Ср. раб. время": fmtMin(e.avgMinutes),
+      "Всего часов": fmtH(e.totalMinutes),
       "KPI (%)": e.efficiency || "—",
-      "Hisoblangan maosh": e.salary,
+      "Нач. зарплата": e.salary,
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
     ws["!cols"] = [24, 14, 12, 14, 16, 16, 10, 20].map((w) => ({ wch: w }));
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Xodimlar hisoboti");
+    XLSX.utils.book_append_sheet(wb, ws, "Отчёт сотрудников");
     XLSX.writeFile(wb, `xodimlar-hisobot-${dateFrom}-${dateTo}.xlsx`);
   };
 
@@ -386,7 +386,7 @@ const ReportsEmployees = () => {
   const columns: ColumnDef<EmployeeSummary>[] = [
     {
       key: "name",
-      header: "Xodim",
+      header: "Сотрудник",
       render: (row) => (
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <img
@@ -420,7 +420,7 @@ const ReportsEmployees = () => {
     },
     {
       key: "role",
-      header: "Lavozim",
+      header: "Должность",
       render: (row) => {
         const cfg = ROLE_CFG[row.role];
         return (
@@ -442,7 +442,7 @@ const ReportsEmployees = () => {
     },
     {
       key: "status",
-      header: "Holat",
+      header: "Статус",
       render: (row) => {
         const cfg = STATUS_CFG[row.status];
         return (
@@ -473,7 +473,7 @@ const ReportsEmployees = () => {
     },
     {
       key: "daysWorked",
-      header: "Ish kunlari",
+      header: "Дни работы",
       align: "right",
       render: (row) => (
         <span
@@ -486,7 +486,7 @@ const ReportsEmployees = () => {
     },
     {
       key: "avgMinutes",
-      header: "O'rt. vaqt",
+      header: "Ср. время",
       align: "right",
       render: (row) => (
         <span
@@ -499,7 +499,7 @@ const ReportsEmployees = () => {
     },
     {
       key: "totalMinutes",
-      header: "Jami soat",
+      header: "Всего часов",
       align: "right",
       render: (row) => (
         <span
@@ -532,7 +532,7 @@ const ReportsEmployees = () => {
     },
     {
       key: "salary",
-      header: "Maosh (hisob.)",
+      header: "Зарплата (нач.)",
       align: "right",
       render: (row) =>
         row.salary > 0 ? (
@@ -540,7 +540,7 @@ const ReportsEmployees = () => {
             className="text-xs tabular-nums"
             style={{ color: "var(--text-default)" }}
           >
-            {(row.salary / 1_000_000).toFixed(2)} mln
+            {(row.salary / 1_000_000).toFixed(2)} млн
           </span>
         ) : (
           <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>
@@ -558,8 +558,8 @@ const ReportsEmployees = () => {
           className="text-2xl font-semibold"
           style={{ color: "var(--text-default)" }}
         >
-          Hisobotlar{" "}
-          <span style={{ color: "var(--color-blue)" }}>Xodimlar</span>
+          Отчёты{" "}
+          <span style={{ color: "var(--color-blue)" }}>Сотрудники</span>
         </h1>
       </div>
       <div className="space-y-4">
@@ -650,7 +650,7 @@ const ReportsEmployees = () => {
               leftIcon={<LuDownload size={14} />}
               onClick={exportExcel}
             >
-              Excel yuklab olish
+              Скачать Excel
             </CusButton>
           </div>
         </CusCard>
@@ -659,30 +659,30 @@ const ReportsEmployees = () => {
         <div className="grid grid-cols-2 desktop:grid-cols-4 gap-4">
           <StatCard
             icon={LuUsers}
-            label="Jami xodimlar"
+            label="Сотрудников"
             value={String(employees.length)}
-            sub="ro'yxatda"
+            sub="в списке"
             color="var(--color-blue)"
           />
           <StatCard
             icon={LuUserCheck}
-            label="Faol xodimlar"
+            label="Активные"
             value={String(activeCount)}
-            sub="bugun ishda"
+            sub="сегодня на работе"
             color="var(--color-green)"
           />
           <StatCard
             icon={LuClock}
-            label="Jami ish soati"
+            label="Всего часов"
             value={`${totalManHours}h`}
-            sub={`${dates.length} kun davomida`}
+            sub={`${dates.length} дней`}
             color="var(--color-purple)"
           />
           <StatCard
             icon={LuTrendingUp}
-            label="O'rtacha KPI"
+            label="Средний KPI"
             value={`${avgEfficiency}%`}
-            sub={`Davomad: ${avgAttendance}%`}
+            sub={`Посещаемость: ${avgAttendance}%`}
             color="var(--color-cyan)"
           />
         </div>
@@ -693,7 +693,7 @@ const ReportsEmployees = () => {
           <CusCard>
             <CusCardHeader
               icon={LuClock}
-              title="Kunlik umumiy ish soatlari"
+              title="Рабочие часы по дням"
               iconColor="var(--color-purple)"
               action={
                 <span
@@ -760,7 +760,7 @@ const ReportsEmployees = () => {
           <CusCard>
             <CusCardHeader
               icon={LuActivity}
-              title="Lavozim bo'yicha ish soatlari"
+              title="Часы по должностям"
               iconColor="var(--color-cyan)"
               action={
                 <span
@@ -830,7 +830,7 @@ const ReportsEmployees = () => {
         <CusCard>
           <CusCardHeader
             icon={LuUsers}
-            title="Xodimlar bo'yicha tafsilot"
+            title="Детализация по сотрудникам"
             iconColor="var(--color-blue)"
             action={
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>
@@ -846,7 +846,7 @@ const ReportsEmployees = () => {
             colorBodyHover="var(--bg-hover)"
             interactive
             size="sm"
-            emptyText="Ma'lumot topilmadi"
+            emptyText="Нет данных"
           />
         </CusCard>
       </div>

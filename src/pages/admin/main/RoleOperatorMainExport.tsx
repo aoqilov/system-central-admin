@@ -77,21 +77,21 @@ const ROWS: AttractionRow[] = attractions.map((a) => genRow(a.id, a.name, a.pric
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const STAT_COLS: { key: keyof CardCounts; label: string; color: string; icon: React.ElementType }[] = [
-  { key: "jami",      label: "Jami",       color: "var(--text-default)", icon: LuUsers     },
-  { key: "asosiy",    label: "Offline",    color: "#3b82f6",             icon: LuWifiOff   },
-  { key: "online",    label: "Online",     color: "#8b5cf6",             icon: LuWifi      },
-  { key: "vip",       label: "VIP",        color: "#eab308",             icon: LuStar      },
-  { key: "mehmon",    label: "Mehmon",     color: "#06b6d4",             icon: LuUserCheck },
-  { key: "parkXodim", label: "Park xodim", color: "#22c55e",             icon: LuShield    },
+  { key: "jami",      label: "Всего",     color: "var(--text-default)", icon: LuUsers     },
+  { key: "asosiy",    label: "Offline",   color: "#3b82f6",             icon: LuWifiOff   },
+  { key: "online",    label: "Online",    color: "#8b5cf6",             icon: LuWifi      },
+  { key: "vip",       label: "VIP",       color: "#eab308",             icon: LuStar      },
+  { key: "mehmon",    label: "Гость",     color: "#06b6d4",             icon: LuUserCheck },
+  { key: "parkXodim", label: "Сотрудник", color: "#22c55e",             icon: LuShield    },
 ];
 
 const TABLE_COLS: { key: keyof CardCounts; label: string; color: string }[] = [
-  { key: "jami",      label: "Jami",       color: "var(--text-default)" },
-  { key: "asosiy",    label: "Offline",    color: "#3b82f6"             },
-  { key: "online",    label: "Online",     color: "#8b5cf6"             },
-  { key: "vip",       label: "VIP",        color: "#eab308"             },
-  { key: "mehmon",    label: "Mehmon",     color: "#06b6d4"             },
-  { key: "parkXodim", label: "Park xodim", color: "#22c55e"             },
+  { key: "jami",      label: "Всего",     color: "var(--text-default)" },
+  { key: "asosiy",    label: "Offline",   color: "#3b82f6"             },
+  { key: "online",    label: "Online",    color: "#8b5cf6"             },
+  { key: "vip",       label: "VIP",       color: "#eab308"             },
+  { key: "mehmon",    label: "Гость",     color: "#06b6d4"             },
+  { key: "parkXodim", label: "Сотрудник", color: "#22c55e"             },
 ];
 
 const thBase: React.CSSProperties = {
@@ -191,8 +191,8 @@ export default function RoleOperatorMainExport() {
 </head><body><table>
 <thead><tr>
   ${th("#")}${th("Привлечение", "left")}${th("Round")}
-  ${th("Jami")}${th("Offline")}${th("Online")}${th("VIP")}${th("Mehmon")}${th("Park xodim")}
-  ${th("Haq to'langan", "right")}${th("Jami summa", "right")}
+  ${th("Всего")}${th("Offline")}${th("Online")}${th("VIP")}${th("Гость")}${th("Сотрудник")}
+  ${th("Оплачено", "right")}${th("Итого", "right")}
 </tr></thead>
 <tbody>${bodyRows}</tbody>
 <tfoot><tr style="background:#f1f5f9">
@@ -335,7 +335,7 @@ export default function RoleOperatorMainExport() {
           style={{ background: "var(--bg-second)", borderColor: "#22c55e40" }}
         >
           <div className="flex items-center justify-between gap-1">
-            <span className="text-[10px] font-semibold truncate" style={{ color: "var(--text-muted)" }}>Jami summa</span>
+            <span className="text-[10px] font-semibold truncate" style={{ color: "var(--text-muted)" }}>Итого</span>
             <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0" style={{ background: "#22c55e18" }}>
               <LuBanknote size={11} style={{ color: "#22c55e" }} />
             </div>
@@ -375,16 +375,16 @@ export default function RoleOperatorMainExport() {
                   colSpan={TABLE_COLS.length}
                   style={{ ...thBase, textAlign: "center", paddingBottom: 16 }}
                 >
-                  Karta turi
+                  Тип карты
                 </th>
                 <th rowSpan={2} style={{ ...thBase, textAlign: "right", lineHeight: 1.4 }}>
-                  <span style={{ display: "block" }}>Haq to'langan</span>
+                  <span style={{ display: "block" }}>Оплачено</span>
                   <span style={{ display: "block", fontWeight: 400, fontSize: 10, color: "var(--text-dim)", textTransform: "none", letterSpacing: 0 }}>
-                    (online+offline) × narx
+                    (онлайн+офлайн) × цена
                   </span>
                 </th>
                 <th rowSpan={2} style={{ ...thBase, textAlign: "right", borderRight: "none" }}>
-                  Jami summa
+                  Итого
                 </th>
               </tr>
 

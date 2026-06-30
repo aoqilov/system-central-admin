@@ -10,7 +10,7 @@ import {
 } from "../../../../../../components/ui/table/CusTable";
 import CusSelect from "../../../../../../components/ui/select/CusSelect";
 
-type PaymentType = "Naqd" | "UzCard" | "Karta";
+type PaymentType = "Наличные" | "UzCard" | "Карта";
 type TxStatus = "success" | "pending" | "failed";
 
 interface Transaction {
@@ -24,9 +24,9 @@ interface Transaction {
 }
 
 const PAYMENT_COLOR: Record<PaymentType, string> = {
-  Naqd: "var(--color-green)",
+  Наличные: "var(--color-green)",
   UzCard: "var(--color-blue)",
-  Karta: "var(--color-purple)",
+  Карта: "var(--color-purple)",
 };
 
 const STATUS_CFG: Record<
@@ -34,28 +34,28 @@ const STATUS_CFG: Record<
   { label: string; color: string; icon: typeof LuCircleCheck }
 > = {
   success: {
-    label: "Muvaffaq",
+    label: "Успешно",
     color: "var(--color-green)",
     icon: LuCircleCheck,
   },
-  pending: { label: "Kutilmoqda", color: "var(--color-yellow)", icon: LuClock },
-  failed: { label: "Xato", color: "var(--color-red)", icon: LuCircleX },
+  pending: { label: "Ожидание", color: "var(--color-yellow)", icon: LuClock },
+  failed: { label: "Ошибка", color: "var(--color-red)", icon: LuCircleX },
 };
 
 const transactions: Transaction[] = [
   {
     id: 1,
     time: "17:44",
-    kassaName: "Bosh Kassa",
+    kassaName: "Главная касса",
     cashier: "Aziz N.",
     amount: 45_000,
-    paymentType: "Naqd",
+    paymentType: "Наличные",
     status: "success",
   },
   {
     id: 2,
     time: "17:43",
-    kassaName: "Kassa #7",
+    kassaName: "Касса #7",
     cashier: "Sherzod T.",
     amount: 120_000,
     paymentType: "UzCard",
@@ -64,25 +64,25 @@ const transactions: Transaction[] = [
   {
     id: 3,
     time: "17:42",
-    kassaName: "Kassa #2",
+    kassaName: "Касса #2",
     cashier: "Dilnoza M.",
     amount: 60_000,
-    paymentType: "Karta",
+    paymentType: "Карта",
     status: "pending",
   },
   {
     id: 4,
     time: "17:41",
-    kassaName: "Kassa #4",
+    kassaName: "Касса #4",
     cashier: "Jasur K.",
     amount: 90_000,
-    paymentType: "Naqd",
+    paymentType: "Наличные",
     status: "success",
   },
   {
     id: 5,
     time: "17:40",
-    kassaName: "Kassa #5",
+    kassaName: "Касса #5",
     cashier: "Feruza O.",
     amount: 30_000,
     paymentType: "UzCard",
@@ -91,25 +91,25 @@ const transactions: Transaction[] = [
   {
     id: 6,
     time: "17:39",
-    kassaName: "Bosh Kassa",
+    kassaName: "Главная касса",
     cashier: "Aziz N.",
     amount: 75_000,
-    paymentType: "Karta",
+    paymentType: "Карта",
     status: "failed",
   },
   {
     id: 7,
     time: "17:38",
-    kassaName: "Kassa #2",
+    kassaName: "Касса #2",
     cashier: "Dilnoza M.",
     amount: 45_000,
-    paymentType: "Naqd",
+    paymentType: "Наличные",
     status: "success",
   },
   {
     id: 8,
     time: "17:37",
-    kassaName: "Kassa #7",
+    kassaName: "Касса #7",
     cashier: "Sherzod T.",
     amount: 150_000,
     paymentType: "UzCard",
@@ -118,25 +118,25 @@ const transactions: Transaction[] = [
   {
     id: 9,
     time: "17:36",
-    kassaName: "Kassa #4",
+    kassaName: "Касса #4",
     cashier: "Jasur K.",
     amount: 60_000,
-    paymentType: "Karta",
+    paymentType: "Карта",
     status: "success",
   },
   {
     id: 10,
     time: "17:35",
-    kassaName: "Kassa #5",
+    kassaName: "Касса #5",
     cashier: "Feruza O.",
     amount: 45_000,
-    paymentType: "Naqd",
+    paymentType: "Наличные",
     status: "success",
   },
   {
     id: 11,
     time: "17:34",
-    kassaName: "Bosh Kassa",
+    kassaName: "Главная касса",
     cashier: "Aziz N.",
     amount: 90_000,
     paymentType: "UzCard",
@@ -145,25 +145,25 @@ const transactions: Transaction[] = [
   {
     id: 12,
     time: "17:33",
-    kassaName: "Kassa #7",
+    kassaName: "Касса #7",
     cashier: "Sherzod T.",
     amount: 30_000,
-    paymentType: "Naqd",
+    paymentType: "Наличные",
     status: "pending",
   },
   {
     id: 13,
     time: "17:32",
-    kassaName: "Kassa #2",
+    kassaName: "Касса #2",
     cashier: "Dilnoza M.",
     amount: 120_000,
-    paymentType: "Karta",
+    paymentType: "Карта",
     status: "success",
   },
   {
     id: 14,
     time: "17:31",
-    kassaName: "Kassa #4",
+    kassaName: "Касса #4",
     cashier: "Jasur K.",
     amount: 45_000,
     paymentType: "UzCard",
@@ -172,10 +172,10 @@ const transactions: Transaction[] = [
   {
     id: 15,
     time: "17:30",
-    kassaName: "Kassa #5",
+    kassaName: "Касса #5",
     cashier: "Feruza O.",
     amount: 75_000,
-    paymentType: "Naqd",
+    paymentType: "Наличные",
     status: "success",
   },
 ];
@@ -183,7 +183,7 @@ const transactions: Transaction[] = [
 const columns: ColumnDef<Transaction>[] = [
   {
     key: "time",
-    header: "Vaqt",
+    header: "Время",
     render: (tx) => (
       <span
         className="font-mono text-xs"
@@ -195,21 +195,21 @@ const columns: ColumnDef<Transaction>[] = [
   },
   {
     key: "kassaName",
-    header: "Kassa",
+    header: "Касса",
     render: (tx) => (
       <span style={{ color: "var(--text-2)" }}>{tx.kassaName}</span>
     ),
   },
   {
     key: "cashier",
-    header: "Kassir",
+    header: "Кассир",
     render: (tx) => (
       <span style={{ color: "var(--text-3)" }}>{tx.cashier}</span>
     ),
   },
   {
     key: "amount",
-    header: "Miqdor",
+    header: "Сумма",
     align: "right",
     render: (tx) => (
       <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
@@ -219,7 +219,7 @@ const columns: ColumnDef<Transaction>[] = [
   },
   {
     key: "paymentType",
-    header: "To'lov",
+    header: "Оплата",
     render: (tx) => (
       <span
         style={{
@@ -238,7 +238,7 @@ const columns: ColumnDef<Transaction>[] = [
   },
   {
     key: "status",
-    header: "Status",
+    header: "Статус",
     render: (tx) => {
       const st = STATUS_CFG[tx.status];
       const StIcon = st.icon;
@@ -275,7 +275,7 @@ export function KassaTransactionFeed() {
     <CusCard>
       <CusCardHeader
         icon={LuActivity}
-        title="Jonli tranzaksiyalar"
+        title="Живые транзакции"
         iconColor="var(--color-green)"
         action={
           <div className="flex items-center gap-3">
@@ -284,7 +284,7 @@ export function KassaTransactionFeed() {
                 options={KASSA_OPTIONS}
                 value={kassaFilter || undefined}
                 onChange={(v) => setKassaFilter(v as string)}
-                placeholder="Barcha kassalar"
+                placeholder="Все кассы"
                 size="sm"
                 clearable
               />

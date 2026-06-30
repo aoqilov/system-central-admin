@@ -2,14 +2,16 @@ export interface ApiResponse<T> {
   statusCode: number;
   data: T;
 }
-
 export interface Card {
   id: number;
-  code: string;
+  batch: string;
+  card: string; // card dan map qilinadi
+  nfc: string;
   status: "active" | "inactive" | "blocked" | "lost" | "frozen";
-  createdAt: string;
+  createdAt: string; // imported_at dan map qilinadi
+  imported_at: string;
+  activatedAt: string | null;
 }
-
 export type CardStatus = Card["status"];
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
@@ -84,17 +86,17 @@ export const CARD_STATUS_META: Record<
   CardStatus,
   { label: string; scheme: "gray" | "green" | "blue" | "red" }
 > = {
-  active:   { label: "Faol",       scheme: "green" },
-  inactive: { label: "Faolsiz",    scheme: "gray"  },
-  blocked:  { label: "Bloklangan", scheme: "red"   },
-  lost:     { label: "Yo'qolgan",  scheme: "red"   },
-  frozen:   { label: "Muzlatilgan", scheme: "blue" },
+  active: { label: "Faol", scheme: "green" },
+  inactive: { label: "Faolsiz", scheme: "gray" },
+  blocked: { label: "Bloklangan", scheme: "red" },
+  lost: { label: "Yo'qolgan", scheme: "red" },
+  frozen: { label: "Muzlatilgan", scheme: "blue" },
 };
 
 export const CARD_STATUS_TRANSITIONS: Record<CardStatus, CardStatus[]> = {
   inactive: ["active"],
-  active:   ["blocked", "lost", "frozen"],
-  blocked:  ["inactive"],
-  lost:     ["inactive"],
-  frozen:   ["active"],
+  active: ["blocked", "lost", "frozen"],
+  blocked: ["inactive"],
+  lost: ["inactive"],
+  frozen: ["active"],
 };

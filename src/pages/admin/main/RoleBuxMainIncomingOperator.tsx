@@ -94,21 +94,21 @@ const STAT_COLS: {
   color: string;
   icon: React.ElementType;
 }[] = [
-  { key: "jami", label: "Jami", color: "var(--text-default)", icon: LuUsers },
+  { key: "jami", label: "Всего", color: "var(--text-default)", icon: LuUsers },
   { key: "asosiy", label: "Offline", color: "#3b82f6", icon: LuWifiOff },
   { key: "online", label: "Online", color: "#8b5cf6", icon: LuWifi },
   { key: "vip", label: "VIP", color: "#eab308", icon: LuStar },
-  { key: "mehmon", label: "Mehmon", color: "#06b6d4", icon: LuUserCheck },
-  { key: "parkXodim", label: "Park xodim", color: "#22c55e", icon: LuShield },
+  { key: "mehmon", label: "Гость", color: "#06b6d4", icon: LuUserCheck },
+  { key: "parkXodim", label: "Сотрудник", color: "#22c55e", icon: LuShield },
 ];
 
 const TABLE_COLS: { key: keyof CardCounts; label: string; color: string }[] = [
-  { key: "jami", label: "Jami", color: "var(--text-default)" },
+  { key: "jami", label: "Всего", color: "var(--text-default)" },
   { key: "asosiy", label: "Offline", color: "#3b82f6" },
   { key: "online", label: "Online", color: "#8b5cf6" },
   { key: "vip", label: "VIP", color: "#eab308" },
-  { key: "mehmon", label: "Mehmon", color: "#06b6d4" },
-  { key: "parkXodim", label: "Park xodim", color: "#22c55e" },
+  { key: "mehmon", label: "Гость", color: "#06b6d4" },
+  { key: "parkXodim", label: "Сотрудник", color: "#22c55e" },
 ];
 
 const thBase: React.CSSProperties = {
@@ -226,8 +226,8 @@ export default function RoleBuxMainIncomingOperator() {
 </head><body><table>
 <thead><tr>
   ${th("#")}${th("Привлечение", "left")}${th("Round")}
-  ${th("Jami")}${th("Offline")}${th("Online")}${th("VIP")}${th("Mehmon")}${th("Park xodim")}
-  ${th("Haq to'langan", "right")}${th("Jami summa", "right")}
+  ${th("Всего")}${th("Offline")}${th("Online")}${th("VIP")}${th("Гость")}${th("Сотрудник")}
+  ${th("Оплачено", "right")}${th("Итого", "right")}
 </tr></thead>
 <tbody>${bodyRows}</tbody>
 <tfoot><tr style="background:#f1f5f9">
@@ -422,7 +422,7 @@ export default function RoleBuxMainIncomingOperator() {
               className="text-[10px] font-semibold truncate"
               style={{ color: "var(--text-muted)" }}
             >
-              Jami summa
+              Итого
             </span>
             <div
               className="w-5 h-5 rounded-md flex items-center justify-center shrink-0"
@@ -463,13 +463,13 @@ export default function RoleBuxMainIncomingOperator() {
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Attraksiyalar: <b style={{ color: "var(--text-default)" }}>{ROWS.length}</b>
+              Привлечений: <b style={{ color: "var(--text-default)" }}>{ROWS.length}</b>
             </span>
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Jami round: <b style={{ color: "#60a5fa" }}>{totalRounds}</b>
+              Раундов: <b style={{ color: "#60a5fa" }}>{totalRounds}</b>
             </span>
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Jami summa: <b style={{ color: "#22c55e" }}>{fmt(totalRevenue)} сум</b>
+              Итого: <b style={{ color: "#22c55e" }}>{fmt(totalRevenue)} сум</b>
             </span>
           </div>
         </div>
@@ -557,13 +557,13 @@ export default function RoleBuxMainIncomingOperator() {
                   colSpan={TABLE_COLS.length}
                   style={{ ...thBase, textAlign: "center", paddingBottom: 16 }}
                 >
-                  Karta turi
+                  Тип карты
                 </th>
                 <th
                   rowSpan={2}
                   style={{ ...thBase, textAlign: "right", lineHeight: 1.4 }}
                 >
-                  <span style={{ display: "block" }}>Haq to'langan</span>
+                  <span style={{ display: "block" }}>Оплачено</span>
                   <span
                     style={{
                       display: "block",
@@ -574,14 +574,14 @@ export default function RoleBuxMainIncomingOperator() {
                       letterSpacing: 0,
                     }}
                   >
-                    (online+offline) × narx
+                    (онлайн+офлайн) × цена
                   </span>
                 </th>
                 <th
                   rowSpan={2}
                   style={{ ...thBase, textAlign: "right", borderRight: "none" }}
                 >
-                  Jami summa
+                  Итого
                 </th>
               </tr>
 
@@ -783,9 +783,9 @@ export default function RoleBuxMainIncomingOperator() {
           {[
             { label: "Дата",          value: selectedDay.format("DD.MM.YYYY") },
             { label: "Отправлено",    value: MOCK_SENT_AT },
-            { label: "Attraksiyalar", value: `${ROWS.length} та` },
-            { label: "Jami round",    value: `${totalRounds}` },
-            { label: "Jami summa",    value: `${fmt(totalRevenue)} сум`, bold: true },
+            { label: "Привлечений", value: `${ROWS.length}` },
+            { label: "Раундов",     value: `${totalRounds}` },
+            { label: "Итого",       value: `${fmt(totalRevenue)} сум`, bold: true },
           ].map((row) => (
             <div
               key={row.label}

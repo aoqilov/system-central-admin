@@ -28,18 +28,18 @@ export function TopAttractionsChart() {
     <CusCard>
       <CusCardHeader
         icon={LuFerrisWheel}
-        title="Top attraksionlar"
+        title="Топ аттракционы"
         iconColor="var(--color-blue)"
         action={
           <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Tashrifchilar
+            Посетители
           </span>
         }
       />
       <div className="p-4">
         <BarListChart
           data={topAttractions}
-          valueFormatter={(v) => `${v} kishi`}
+          valueFormatter={(v) => `${v} чел.`}
           sort="desc"
           barHeight={32}
           gap={8}

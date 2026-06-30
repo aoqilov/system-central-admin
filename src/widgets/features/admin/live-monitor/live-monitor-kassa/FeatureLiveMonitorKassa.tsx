@@ -10,7 +10,7 @@ const FeatureLiveMonitorKassa = () => {
       <PageHeader
         title="Live monitor"
         subtitle="Мониторинг транзакций кассы в реальном времени"
-        highlight="Kassa"
+        highlight="Касса"
       />
 
       <KassaStatCards />

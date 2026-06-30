@@ -95,18 +95,18 @@ export function EmployeeCharts() {
       <CusCard>
         <CusCardHeader
           icon={LuFerrisWheel}
-          title="Operatorlar (turlar)"
+          title="Операторы (туры)"
           iconColor="var(--color-cyan)"
           action={
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Bugun
+              Сегодня
             </span>
           }
         />
         <div className="p-4">
           <BarListChart
             data={topOperators}
-            valueFormatter={(v) => `${v} tur`}
+            valueFormatter={(v) => `${v} тур`}
             sort="none"
             barHeight={32}
             gap={8}
@@ -118,18 +118,18 @@ export function EmployeeCharts() {
       <CusCard>
         <CusCardHeader
           icon={LuBanknote}
-          title="Kassirlar daromadi"
+          title="Выручка кассиров"
           iconColor="var(--color-blue)"
           action={
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Bugun
+              Сегодня
             </span>
           }
         />
         <div className="p-4">
           <BarListChart
             data={cashierRevenue}
-            valueFormatter={(v) => `${(v / 1_000_000).toFixed(2)} mln`}
+            valueFormatter={(v) => `${(v / 1_000_000).toFixed(2)} млн`}
             sort="desc"
             barHeight={32}
             gap={8}
@@ -141,11 +141,11 @@ export function EmployeeCharts() {
       <CusCard>
         <CusCardHeader
           icon={LuClock}
-          title="Haftalik ish vaqti"
+          title="Рабочее время за неделю"
           iconColor="var(--color-purple)"
           action={
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              O'rtacha
+              В среднем
             </span>
           }
         />

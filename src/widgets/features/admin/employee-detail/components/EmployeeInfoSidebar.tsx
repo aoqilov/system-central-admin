@@ -1,5 +1,5 @@
 import { LuPhone, LuSend, LuBriefcase, LuUser } from "react-icons/lu";
-import dayjs from "dayjs";
+import { fmtDate } from "@/utils/dateUtils";
 import type { ApiEmployee } from "../types";
 
 function InfoRow({
@@ -51,7 +51,7 @@ export default function EmployeeInfoSidebar({ employee }: { employee: ApiEmploye
       ? {
           icon: LuUser,
           label: "Дата рождения",
-          value: dayjs(employee.date_of_birth).format("DD.MM.YYYY"),
+          value: fmtDate(employee.date_of_birth),
         }
       : null,
   ].filter((r): r is NonNullable<typeof r> => r !== null);

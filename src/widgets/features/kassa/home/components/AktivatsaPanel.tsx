@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
 import { CusButton } from "@/components/ui/buttons/CusButton";
+import type { PayType, KartaType } from "../types";
+import { topupCard } from "../api/apiKassaHomePay";
 
-export type PayType = "naqd" | "karta" | "online-tolov";
-export type KartaType = "uzcard" | "humo";
+export type { PayType, KartaType };
 
 interface Props {
+  nfc: string;
+  payType: PayType;
+  kartaType: KartaType;
+  provider: "payme" | "click" | "uzum-bank";
   onSuccess: () => void;
 }
 
@@ -65,12 +70,15 @@ function NumKey({
   );
 }
 
-export function AktivatsaPanel({ onSuccess }: Props) {
-  const [summa, setSumma] = useState(""); // raw digits only
+export function AktivatsaPanel({ nfc, payType, kartaType, provider, onSuccess }: Props) {
+  const [summa, setSumma]   = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError]   = useState<string | null>(null);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
       if (e.key >= "0" && e.key <= "9") { handleKey(e.key); return; }
       if (e.key === "Backspace") { handleKey("⌫"); return; }
       if (e.key === "Escape") { handleKey("CLR"); return; }
@@ -80,6 +88,7 @@ export function AktivatsaPanel({ onSuccess }: Props) {
   }, []);
 
   function handleKey(key: string) {
+    setError(null);
     if (key === "CLR") { setSumma(""); return; }
     setSumma((prev) => {
       if (key === "⌫") return prev.slice(0, -1);
@@ -94,13 +103,25 @@ export function AktivatsaPanel({ onSuccess }: Props) {
     });
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
+    if (!nfc || !summa) return;
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError(null);
+    try {
+      await topupCard({
+        nfc,
+        amount: Number(summa),
+        payment_type: payType === "naqd" ? "cash" : payType === "karta" ? "card" : "online",
+        ...(payType === "karta" && { payment_card_type: kartaType }),
+        ...(payType === "online" && { payment_service_type: provider === "uzum-bank" ? "uzum" : provider }),
+      });
       setSumma("");
       onSuccess();
-    }, 1200);
+    } catch {
+      setError("To'lov amalga oshmadi. Qayta urinib ko'ring.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const display = summa ? formatSumma(summa) : "0";
@@ -108,63 +129,66 @@ export function AktivatsaPanel({ onSuccess }: Props) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto flex flex-col gap-3">
-      {/* Amount display */}
-      <div
-        className="flex items-end justify-end gap-2 px-4 py-3 rounded-2xl"
-        style={{
-          background: "var(--bg-second)",
-          border: "1px solid var(--border-default)",
-          minHeight: 64,
-        }}
-      >
-        <span
+        {/* Amount display */}
+        <div
+          className="flex items-end justify-end gap-2 px-4 py-3 rounded-2xl"
           style={{
-            fontSize: summa.length > 9 ? "1.6rem" : "2.2rem",
-            fontWeight: 700,
-            color: summa ? "var(--text-default)" : "var(--text-dim)",
-            fontVariantNumeric: "tabular-nums",
-            letterSpacing: "0.01em",
-            lineHeight: 1,
-            transition: "font-size 0.1s",
+            background: "var(--bg-second)",
+            border: `1px solid ${error ? "#ef444440" : "var(--border-default)"}`,
+            minHeight: 64,
           }}
         >
-          {display}
-        </span>
-        <span
-          className="pb-1 font-semibold text-sm"
-          style={{ color: "var(--text-muted)" }}
-        >
-          UZS
-        </span>
-      </div>
-
-      {/* Numpad */}
-      <div className="flex flex-col gap-1.5">
-        {/* 3-column rows: 1-9 */}
-        <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
-          {KEYS_TOP.flat().map((key, i) => (
-            <NumKey key={`${key}-${i}`} label={key} onPress={handleKey} />
-          ))}
+          <span
+            style={{
+              fontSize: summa.length > 9 ? "1.6rem" : "2.2rem",
+              fontWeight: 700,
+              color: summa ? "var(--text-default)" : "var(--text-dim)",
+              fontVariantNumeric: "tabular-nums",
+              letterSpacing: "0.01em",
+              lineHeight: 1,
+              transition: "font-size 0.1s",
+            }}
+          >
+            {display}
+          </span>
+          <span
+            className="pb-1 font-semibold text-sm"
+            style={{ color: "var(--text-muted)" }}
+          >
+            UZS
+          </span>
         </div>
-        {/* 2-column rows: 0/00 and ⌫/CLR */}
-        <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
-          {KEYS_BOT.flat().map((key, i) => {
-            const isRed = key === "⌫" || key === "CLR";
-            return <NumKey key={`${key}-${i}`} label={key} onPress={handleKey} red={isRed} />;
-          })}
+
+        {error && (
+          <p className="text-xs text-center" style={{ color: "#ef4444" }}>
+            {error}
+          </p>
+        )}
+
+        {/* Numpad */}
+        <div className="flex flex-col gap-1.5">
+          <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+            {KEYS_TOP.flat().map((key, i) => (
+              <NumKey key={`${key}-${i}`} label={key} onPress={handleKey} />
+            ))}
+          </div>
+          <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
+            {KEYS_BOT.flat().map((key, i) => {
+              const isRed = key === "⌫" || key === "CLR";
+              return <NumKey key={`${key}-${i}`} label={key} onPress={handleKey} red={isRed} />;
+            })}
+          </div>
         </div>
       </div>
 
-      </div>
-
-      {/* Submit — always visible at bottom */}
+      {/* Submit */}
       <div className="shrink-0 pt-3">
         <CusButton
           size="2xl"
           colorPalette="blue"
           variant="solid"
           className="w-full"
-          isDisabled={!summa}
+          isDisabled={!summa || !nfc}
           isLoading={loading}
           loadingText="Bajarilmoqda..."
           onClick={handleSubmit}

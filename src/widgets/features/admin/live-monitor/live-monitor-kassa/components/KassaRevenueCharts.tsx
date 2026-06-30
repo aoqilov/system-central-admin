@@ -5,14 +5,14 @@ import {
 } from "../../../../../../components/shared/card/CusCard";
 import { BarListChart } from "../../../../../../components/charts/chakra/BarListChart";
 
-const fmtFull = (v: number) => `${v.toLocaleString()} so'm`;
+const fmtFull = (v: number) => `${v.toLocaleString()} сум`;
 
 const kassaRevenue = [
-  { label: "Bosh Kassa", value: 4_850_000, color: "var(--color-blue)" },
-  { label: "Kassa #7", value: 3_780_000, color: "var(--color-purple)" },
-  { label: "Kassa #2", value: 3_210_000, color: "var(--color-cyan)" },
-  { label: "Kassa #4", value: 2_640_000, color: "var(--color-green)" },
-  { label: "Kassa #5", value: 1_920_000, color: "var(--color-yellow)" },
+  { label: "Главная касса", value: 4_850_000, color: "var(--color-blue)" },
+  { label: "Касса #7", value: 3_780_000, color: "var(--color-purple)" },
+  { label: "Касса #2", value: 3_210_000, color: "var(--color-cyan)" },
+  { label: "Касса #4", value: 2_640_000, color: "var(--color-green)" },
+  { label: "Касса #5", value: 1_920_000, color: "var(--color-yellow)" },
 ];
 
 const selfPayBreakdown = [
@@ -27,11 +27,11 @@ export function KassaRevenueCharts() {
       <CusCard>
         <CusCardHeader
           icon={LuBanknote}
-          title="Kassalar daromadi"
+          title="Выручка по кассам"
           iconColor="var(--color-blue)"
           action={
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Bugun
+              Сегодня
             </span>
           }
         />
@@ -50,11 +50,11 @@ export function KassaRevenueCharts() {
       <CusCard>
         <CusCardHeader
           icon={LuTrendingUp}
-          title="Mijoz o'z-hisobini toldirgan to'lovi"
+          title="Пополнение баланса клиентами"
           iconColor="var(--color-cyan)"
           action={
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Bugun
+              Сегодня
             </span>
           }
         />

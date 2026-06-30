@@ -11,7 +11,7 @@
 import { useRef, useState } from "react";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusSegment } from "@/components/ui/segment/CusSegment";
-import type { PayType, KartaType } from "./components/AktivatsaPanel";
+import type { PayType, KartaType } from "./types";
 import { ToastList } from "./components/ToastList";
 import { QrInfoRow } from "./components/QrInfoRow";
 import { AktivatsaPanel } from "./components/AktivatsaPanel";
@@ -33,6 +33,7 @@ export default function FeatureKassaHome() {
   );
   const {
     qrInfo,
+    card,
     rightMode,
     panelKey,
     toasts,
@@ -236,7 +237,7 @@ export default function FeatureKassaHome() {
                   items={[
                     { id: "naqd", label: "Naqd" },
                     { id: "karta", label: "Karta" },
-                    { id: "online-tolov", label: "Online to'lov" },
+                    { id: "online", label: "Online to'lov" },
                   ]}
                 />
               </div>
@@ -260,7 +261,7 @@ export default function FeatureKassaHome() {
                 </div>
               )}
 
-              {payType === "online-tolov" && (
+              {payType === "online" && (
                 <div className="flex flex-col gap-1.5">
                   <p
                     className="text-sm font-medium"
@@ -291,9 +292,17 @@ export default function FeatureKassaHome() {
             {rightMode === "aktivatsa" && (
               <AktivatsaPanel
                 key={panelKey}
-                onSuccess={() =>
-                  handleSuccess("Aktivatsa muvaffaqiyatli bajarildi!")
-                }
+                nfc={card?.nfc ?? ""}
+                payType={payType}
+                kartaType={kartaType}
+                provider={provider}
+                onSuccess={() => {
+                  handleSuccess("Aktivatsa muvaffaqiyatli bajarildi!");
+                  setPayType("naqd");
+                  setKartaType("uzcard");
+                  setProvider("payme");
+                  scanRef.current?.focus();
+                }}
               />
             )}
             {rightMode === "relation" && (

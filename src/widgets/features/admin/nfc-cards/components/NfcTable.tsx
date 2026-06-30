@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import dayjs from "dayjs";
+import { fmtDateTime } from "@/utils/dateUtils";
 import { LuPencil, LuTrash2, LuX } from "react-icons/lu";
 import { CusTable, type ColumnDef } from "@/components/ui/table/CusTable";
 import { CusPagination } from "@/components/ui/table/CusPagination";
@@ -22,7 +22,6 @@ const COLUMNS: ColumnDef<Card>[] = [
   {
     key: "id",
     header: "ID",
-    width: 80,
     render: (r) => (
       <span
         className="font-mono text-xs font-semibold"
@@ -40,7 +39,31 @@ const COLUMNS: ColumnDef<Card>[] = [
         className="font-mono text-xs"
         style={{ color: "var(--text-default)" }}
       >
-        {r.code}
+        {r.card}
+      </span>
+    ),
+  },
+  {
+    key: "batch",
+    header: "Batch",
+    render: (r) => (
+      <span
+        className="font-mono text-xs"
+        style={{ color: "var(--text-default)" }}
+      >
+        {r.batch}
+      </span>
+    ),
+  },
+  {
+    key: "nfc",
+    header: "nfc kodi",
+    render: (r) => (
+      <span
+        className="font-mono text-xs"
+        style={{ color: "var(--text-default)" }}
+      >
+        {r.nfc}
       </span>
     ),
   },
@@ -50,11 +73,11 @@ const COLUMNS: ColumnDef<Card>[] = [
     render: (r) => <NfcStatusBadge status={r.status} />,
   },
   {
-    key: "createdAt",
+    key: "imported_at",
     header: "Yaratilgan",
     render: (r) => (
       <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-        {dayjs(r.createdAt).format("DD.MM.YYYY HH:mm")}
+        {fmtDateTime(r.imported_at)}
       </span>
     ),
   },

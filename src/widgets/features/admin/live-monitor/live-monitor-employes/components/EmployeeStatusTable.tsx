@@ -21,21 +21,21 @@ const fmtMin = (m = 0) => {
 };
 
 const ROLE_CFG: Record<EmployeeRole, { label: string; color: string }> = {
-  [EmployeeRole.ADMIN]: { label: "Admin", color: "var(--color-purple)" },
-  [EmployeeRole.CASHIER]: { label: "Kassir", color: "var(--color-blue)" },
-  [EmployeeRole.OPERATOR]: { label: "Operator", color: "var(--color-cyan)" },
-  [EmployeeRole.SECURITY]: { label: "Security", color: "var(--color-yellow)" },
-  [EmployeeRole.CLEANER]: { label: "Cleaner", color: "var(--color-gray)" },
+  [EmployeeRole.ADMIN]: { label: "Админ", color: "var(--color-purple)" },
+  [EmployeeRole.CASHIER]: { label: "Кассир", color: "var(--color-blue)" },
+  [EmployeeRole.OPERATOR]: { label: "Оператор", color: "var(--color-cyan)" },
+  [EmployeeRole.SECURITY]: { label: "Охрана", color: "var(--color-yellow)" },
+  [EmployeeRole.CLEANER]: { label: "Уборщик", color: "var(--color-gray)" },
 };
 
 const STATUS_CFG: Record<EmployeeStatus, { label: string; color: string }> = {
-  [EmployeeStatus.ACTIVE]: { label: "Faol", color: "var(--color-green)" },
-  [EmployeeStatus.INACTIVE]: { label: "Nofaol", color: "var(--color-gray)" },
+  [EmployeeStatus.ACTIVE]: { label: "Активный", color: "var(--color-green)" },
+  [EmployeeStatus.INACTIVE]: { label: "Неактивный", color: "var(--color-gray)" },
   [EmployeeStatus.VACATION]: {
-    label: "Ta'tilda",
+    label: "В отпуске",
     color: "var(--color-yellow)",
   },
-  [EmployeeStatus.FIRED]: { label: "Ketgan", color: "var(--color-red)" },
+  [EmployeeStatus.FIRED]: { label: "Уволен", color: "var(--color-red)" },
 };
 
 type Emp = (typeof employees)[number];
@@ -43,7 +43,7 @@ type Emp = (typeof employees)[number];
 const columns: ColumnDef<Emp>[] = [
   {
     key: "fullName",
-    header: "Xodim",
+    header: "Сотрудник",
     render: (e) => (
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <img
@@ -75,7 +75,7 @@ const columns: ColumnDef<Emp>[] = [
   },
   {
     key: "role",
-    header: "Lavozim",
+    header: "Должность",
     render: (e) => {
       const cfg = ROLE_CFG[e.role];
       return (
@@ -97,7 +97,7 @@ const columns: ColumnDef<Emp>[] = [
   },
   {
     key: "status",
-    header: "Holat",
+    header: "Статус",
     render: (e) => {
       const cfg = STATUS_CFG[e.status];
       return (
@@ -129,7 +129,7 @@ const columns: ColumnDef<Emp>[] = [
   },
   {
     key: "statsUser",
-    header: "Keldi",
+    header: "Приход",
     render: (e) => (
       <span
         className="font-mono text-xs"
@@ -141,7 +141,7 @@ const columns: ColumnDef<Emp>[] = [
   },
   {
     key: "statsUser",
-    header: "Ish vaqti",
+    header: "Отработано",
     render: (e) => (
       <span style={{ fontSize: 12, color: "var(--text-3)" }}>
         {fmtMin(e.statsUser?.core.workedTodayMinutes)}
@@ -173,7 +173,7 @@ export function EmployeeStatusTable() {
     <CusCard>
       <CusCardHeader
         icon={LuActivity}
-        title="Xodimlar holati"
+        title="Статус сотрудников"
         iconColor="var(--color-green)"
         action={
           <div className="flex items-center gap-1.5">

@@ -1,8 +1,7 @@
+import type { AxiosError } from "axios";
 import api from "./axiosInstance";
-import {
-  getStoredToken,
-  clearAuth,
-} from "@/widgets/features/login/api/authApi";
+import queryClient from "./queryClient";
+import { getStoredToken, clearAuth } from "@/widgets/features/login/api/authApi";
 
 // ─── Request interceptor ──────────────────────────────────────────────────────
 
@@ -21,14 +20,17 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    console.error("API error:", error);
+  (error: AxiosError) => {
+    const status = error.response?.status;
     const url = error.config?.url ?? "";
     const isLoginFlow = url.includes("/auth/") || url.includes("/roles");
-    if (error.response?.status === 401 && !isLoginFlow) {
+
+    if (status === 401 && !isLoginFlow) {
       clearAuth();
-      window.location.href = "/login";
+      queryClient.clear();
+      window.location.replace("/login");
     }
+
     return Promise.reject(error);
   },
 );

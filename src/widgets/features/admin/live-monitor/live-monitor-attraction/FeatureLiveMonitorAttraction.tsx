@@ -71,14 +71,14 @@ function AttractionTabStatCards() {
   );
 
   const CARDS: { label: string; value: string; sub?: string; color: string; icon: React.ElementType }[] = [
-    { label: "Round",      value: String(totalRounds),                                             color: "#60a5fa", icon: LuPlay       },
-    { label: "Jami",       value: String(totals.jami),                                             color: "var(--text-default)", icon: LuUsers     },
-    { label: "Offline",    value: String(totals.asosiy),                                           color: "#3b82f6", icon: LuWifiOff    },
-    { label: "Online",     value: String(totals.online),                                           color: "#8b5cf6", icon: LuWifi       },
+    { label: "Раунды",     value: String(totalRounds),                                             color: "#60a5fa", icon: LuPlay       },
+    { label: "Всего",      value: String(totals.jami),                                             color: "var(--text-default)", icon: LuUsers     },
+    { label: "Офлайн",     value: String(totals.asosiy),                                           color: "#3b82f6", icon: LuWifiOff    },
+    { label: "Онлайн",     value: String(totals.online),                                           color: "#8b5cf6", icon: LuWifi       },
     { label: "VIP",        value: String(totals.vip),                                              color: "#eab308", icon: LuStar       },
-    { label: "Mehmon",     value: String(totals.mehmon),                                           color: "#06b6d4", icon: LuUserCheck  },
-    { label: "Park xodim", value: String(totals.parkXodim),                                       color: "#22c55e", icon: LuShield     },
-    { label: "Jami summa", value: fmt(totals.total),                         sub: "сум",           color: "#22c55e", icon: LuBanknote   },
+    { label: "Гость",      value: String(totals.mehmon),                                           color: "#06b6d4", icon: LuUserCheck  },
+    { label: "Сотрудник",  value: String(totals.parkXodim),                                       color: "#22c55e", icon: LuShield     },
+    { label: "Итого",      value: fmt(totals.total),                         sub: "сум",           color: "#22c55e", icon: LuBanknote   },
   ];
 
   return (
@@ -316,7 +316,7 @@ const FeatureLiveMonitorAttraction = () => {
             style={{ color: "var(--text-default)" }}
           >
             Live Monitor{" "}
-            <span style={{ color: "var(--color-blue)" }}>Attraksion</span>
+            <span style={{ color: "var(--color-blue)" }}>Аттракцион</span>
           </h1>
         </div>
         <CusSegment
@@ -325,8 +325,8 @@ const FeatureLiveMonitorAttraction = () => {
           value={tab}
           onValueChange={setTab}
           items={[
-            { id: "umumiy",        label: "Umumiy"        },
-            { id: "attractionlar", label: "Attractionlar" },
+            { id: "umumiy",        label: "Общая"       },
+            { id: "attractionlar", label: "Аттракционы" },
           ]}
         />
       </div>

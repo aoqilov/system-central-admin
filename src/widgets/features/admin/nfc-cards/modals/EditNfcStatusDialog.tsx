@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Dialog } from "@chakra-ui/react";
-import dayjs from "dayjs";
+import { fmtDateTime } from "@/utils/dateUtils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -107,7 +107,7 @@ export function EditNfcStatusDialog({ open, onClose, card }: Props) {
             <div className="flex justify-between">
               <span style={{ color: "var(--text-muted)" }}>Yaratilgan</span>
               <span style={{ color: "var(--text-default)" }}>
-                {dayjs(c.createdAt).format("DD.MM.YYYY HH:mm")}
+                {fmtDateTime(c.createdAt)}
               </span>
             </div>
           </div>

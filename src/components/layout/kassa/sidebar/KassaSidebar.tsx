@@ -9,9 +9,11 @@ import {
   LuFileText,
 } from "react-icons/lu";
 import { TbReport } from "react-icons/tb";
+import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/context/ThemeContext";
 import { clearAuth } from "@/widgets/features/login/api/authApi";
-import { useSmena } from "@/context/SmenaContext";
+import { getTodayReports } from "@/widgets/features/kassa/otchet/api/apiKassaOtchet";
+import { CASHBOX_ID, CASHBOX_REPORTS_KEY } from "@/widgets/features/kassa/kassa.constants";
 
 // ─── Nav config ───────────────────────────────────────────────────────────────
 
@@ -54,7 +56,12 @@ function SidebarContent({
 }) {
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
-  const { active } = useSmena();
+  const { data } = useQuery({
+    queryKey: CASHBOX_REPORTS_KEY(CASHBOX_ID),
+    queryFn: () => getTodayReports(CASHBOX_ID),
+  });
+  const hasActiveX =
+    data?.data["cashbox-reports"].xreports.some((x) => x.status === "open") ?? false;
 
   function handleLogout() {
     clearAuth();
@@ -113,7 +120,7 @@ function SidebarContent({
       {/* Nav */}
       <nav className="flex-1 px-2 py-3 overflow-y-auto flex flex-col gap-0.5">
         {KASSA_NAV.map((item) => {
-          const isDisabled = item.requiresActive && !active;
+          const isDisabled = item.requiresActive && !hasActiveX;
           if (isDisabled) {
             return (
               <div
@@ -230,7 +237,13 @@ export function KassaSidebar({
 // ─── KassaBottomNav ───────────────────────────────────────────────────────────
 
 export function KassaBottomNav() {
-  const { active } = useSmena();
+  const { data } = useQuery({
+    queryKey: CASHBOX_REPORTS_KEY(CASHBOX_ID),
+    queryFn: () => getTodayReports(CASHBOX_ID),
+  });
+  const hasActiveX =
+    data?.data["cashbox-reports"].xreports.some((x) => x.status === "open") ?? false;
+
   return (
     <nav
       className="tablet:hidden fixed bottom-0 left-0 right-0 z-30 flex items-stretch px-2 pb-2 pt-1.5 gap-1"
@@ -241,7 +254,7 @@ export function KassaBottomNav() {
       }}
     >
       {KASSA_NAV.map((item) => {
-        const isDisabled = item.requiresActive && !active;
+        const isDisabled = item.requiresActive && !hasActiveX;
         if (isDisabled) {
           return (
             <div
