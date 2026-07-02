@@ -1,34 +1,32 @@
-import type { PaymentMethod } from "../types";
+import api from "@/api-config/axiosInstance";
+import type { PaymentPayload, PaymentResponse, CurrentRoundResponse, AttractionRound } from "../types";
 
-export const MOCK = {
-  attractionName: "Karusel",
-  price: 15_000,
-  maxSlots: 8,
+
+export const payWithNFC = async (
+  payload: PaymentPayload,
+): Promise<PaymentResponse> => {
+  const { data } = await api.post<PaymentResponse>("/cards/payment", {
+    data: payload,
+  });
+  return data;
 };
 
-export interface PaymentApiResponse {
-  success: boolean;
-  message: string;
-  amount?: number;
-  cardBalance?: number;
-  paymentMethod?: PaymentMethod;
-}
+export const getCurrentRound = async (
+  attractionID: number,
+): Promise<AttractionRound | null> => {
+  const { data } = await api.get<CurrentRoundResponse>(
+    `/attractions/${attractionID}/rounds/current`,
+  );
+  return data.data["attraction-round"] ?? null;
+};
 
-export async function callPaymentApi(
-  nfcId: string,
-  amount: number,
-  orderId: string,
-): Promise<PaymentApiResponse> {
-  // TODO: axiosInstance.post("/nfc/payment", { nfcId, amount, orderId })
-  void nfcId;
-  void orderId;
-  await new Promise((r) => setTimeout(r, 1500));
-  const method: PaymentMethod = Math.random() > 0.5 ? "karta" : "online";
-  return Math.random() > 0.25
-    ? { success: true, message: "Pul yechildi", amount, paymentMethod: method }
-    : {
-        success: false,
-        message: "Pul yetarli emas",
-        cardBalance: Math.floor(Math.random() * 50_000),
-      };
-}
+export const closeRound = async (
+  attractionID: number,
+  roundID: number,
+): Promise<AttractionRound> => {
+  const { data } = await api.post<{ statusCode: number; data: { "attraction-round": AttractionRound } }>(
+    `/attractions/${attractionID}/rounds/${roundID}/close`,
+  );
+  return data.data["attraction-round"];
+};
+

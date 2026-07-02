@@ -1,54 +1,42 @@
-import { useState } from "react";
-import dayjs from "dayjs";
-import { AttractionSmenaCard } from "./components/AttractionSmenaCard";
+import { LuFerrisWheel } from "react-icons/lu";
+import { fmtDate } from "@/utils/dateUtils";
+import PageHeader from "@/widgets/shared-ui/PageHeader";
+import { useOperatorAttraction } from "../hooks/useOperatorAttraction";
+import { useOperatorHome } from "./hooks";
+import { RoundStatsRow } from "./components/RoundStatsRow";
 import { RoundsTable } from "./components/RoundsTable";
-import { MOCK_ATTRACTION_NAME, MOCK_SMENA, MOCK_ROUNDS } from "./api/homeApi";
 
 export default function FeatureOperatorHome() {
-  const [smenaOpen, setSmenaOpen]           = useState(false);
-  const [smenaStartTime, setSmenaStartTime] = useState("");
-  const [operatorName, setOperatorName]     = useState(MOCK_SMENA.operatorName);
-  const [paused, setPaused]                 = useState(false);
-  const [pauseReason, setPauseReason]       = useState("");
+  const { attraction } = useOperatorAttraction();
+  const { rounds, totals, activeXreport, isLoading } = useOperatorHome(attraction?.id);
 
-  function openSmena(name: string) {
-    setOperatorName(name);
-    setSmenaStartTime(dayjs().format("HH:mm"));
-    setSmenaOpen(true);
-  }
+  const date = fmtDate(new Date());
 
-  function closeSmena() {
-    setSmenaOpen(false);
-    setSmenaStartTime("");
-    setPaused(false);
-    setPauseReason("");
-  }
-
-  function pauseSmena(reason: string) {
-    setPaused(true);
-    setPauseReason(reason);
-  }
-
-  function resumeSmena() {
-    setPaused(false);
-    setPauseReason("");
+  if (isLoading) {
+    return (
+      <div className="p-4 flex flex-col gap-5 pb-6">
+        <PageHeader title={attraction?.name ?? "Bosh sahifa"} subtitle={date} />
+        <div
+          className="rounded-2xl border px-5 py-10 flex items-center justify-center gap-3"
+          style={{ background: "var(--bg-second)", borderColor: "var(--border-default)" }}
+        >
+          <LuFerrisWheel size={20} className="animate-spin" style={{ color: "var(--text-muted)" }} />
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Yuklanmoqda...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="p-4 space-y-4 pb-6">
-      <AttractionSmenaCard
-        attractionName={MOCK_ATTRACTION_NAME}
-        smenaOpen={smenaOpen}
-        smenaInfo={{ ...MOCK_SMENA, operatorName, openedAt: smenaStartTime }}
-        rounds={MOCK_ROUNDS}
-        paused={paused}
-        pauseReason={pauseReason}
-        onOpen={openSmena}
-        onClose={closeSmena}
-        onPause={pauseSmena}
-        onResume={resumeSmena}
+    <div className="p-4 flex flex-col gap-5 pb-6">
+      <PageHeader
+        title={attraction?.name ?? "Bosh sahifa"}
+        subtitle={`${date} · Bugungi aylanishlar`}
       />
-      <RoundsTable rounds={MOCK_ROUNDS} />
+
+      <RoundStatsRow activeXreport={activeXreport} />
+
+      <RoundsTable rounds={rounds} totals={totals} />
     </div>
   );
 }

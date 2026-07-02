@@ -21,8 +21,8 @@ export const closeReport = async (
   cashboxID: number,
   payload: CloseReportPayload,
 ) => {
-  const { data } = await api.post<ApiResponse<CloseReportData>>(
-    `/cashboxes/${cashboxID}/reports/close`,
+  const { data } = await api.put<ApiResponse<CloseReportData>>(
+    `/cashboxes/${cashboxID}/reports/status`,
     { data: payload },
   );
   return data;

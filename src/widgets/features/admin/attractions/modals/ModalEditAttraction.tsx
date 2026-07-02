@@ -42,6 +42,7 @@ interface FormValues {
   age_limit: string;
   min_height: string;
   max_weight: string;
+  device: string;
   description: string;
   status: string;
   new_main_file: File | null;
@@ -60,6 +61,7 @@ function toFormValues(a: Attraction): FormValues {
     age_limit: String(a.age_limit),
     min_height: String(a.min_height),
     max_weight: String(a.max_weight),
+    device: a.device ? String(a.device) : "",
     description: a.description ?? "",
     status: a.status,
     new_main_file: null,
@@ -153,6 +155,7 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
       age_limit: Number(data.age_limit),
       min_height: Number(data.min_height),
       max_weight: Number(data.max_weight),
+      device: data.device ? Number(data.device) : undefined,
       description: data.description.trim() || undefined,
       status: data.status,
       ...fileIds,
@@ -339,6 +342,23 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
           <Row2>
             <Controller
               control={control}
+              name="device"
+              render={({ field, fieldState }) => (
+                <CusInput
+                  ref={field.ref}
+                  label="Device ID"
+                  placeholder="abc123"
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  errorText={fieldState.error?.message}
+                />
+              )}
+            />
+          </Row2>
+          <Row2>
+            <Controller
+              control={control}
               name="category"
               rules={{ required: "Kategoriyani tanlang" }}
               render={({ field, fieldState }) => (
@@ -347,25 +367,6 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
                   <CusSelect
                     options={categoryOptions}
                     placeholder="Kategoriya tanlang"
-                    value={field.value}
-                    onChange={(v) => field.onChange(v)}
-                  />
-                  {fieldState.error && (
-                    <ErrorText text={fieldState.error.message ?? ""} />
-                  )}
-                </div>
-              )}
-            />
-            <Controller
-              control={control}
-              name="status"
-              rules={{ required: "Statusni tanlang" }}
-              render={({ field, fieldState }) => (
-                <div>
-                  <Label text="Status" required />
-                  <CusSelect
-                    options={STATUS_OPTIONS}
-                    placeholder="Status tanlang"
                     value={field.value}
                     onChange={(v) => field.onChange(v)}
                   />
@@ -522,6 +523,25 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
 
         {/* Qo'shimcha */}
         <Section title="Qo'shimcha">
+          <Controller
+            control={control}
+            name="status"
+            rules={{ required: "Statusni tanlang" }}
+            render={({ field, fieldState }) => (
+              <div>
+                <Label text="Status" required />
+                <CusSelect
+                  options={STATUS_OPTIONS}
+                  placeholder="Status tanlang"
+                  value={field.value}
+                  onChange={(v) => field.onChange(v)}
+                />
+                {fieldState.error && (
+                  <ErrorText text={fieldState.error.message ?? ""} />
+                )}
+              </div>
+            )}
+          />
           <Controller
             control={control}
             name="description"

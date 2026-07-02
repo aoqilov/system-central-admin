@@ -5,6 +5,7 @@ import AppLayout from "../components/layout/admin/AppLayout";
 import { AuthGuard } from "../middleware/AuthGuard";
 import { RoleTypes } from "@/const/constData";
 import KassaProfile from "../pages/forKassa/KassaProfile";
+import OperatorSmena from "@/pages/forOperator/OperatorSmena";
 
 const { SUPERADMIN, HEAD_CASHIER, HEAD_OPERATOR, HEAD_ACCOUNTANT } = RoleTypes;
 
@@ -197,9 +198,11 @@ export const routes: RouteObject[] = [
       </AuthGuard>
     ),
     children: [
-      { path: "/operator", element: <OperatorHome /> },
+      { path: "/operator", element: <Navigate to="/operator/smena" replace /> },
+      { path: "/operator/home", element: <OperatorHome /> },
       { path: "/operator/payment", element: <OperatorPayment /> },
       { path: "/operator/profile", element: <OperatorProfile /> },
+      { path: "/operator/smena", element: <OperatorSmena /> },
     ],
   },
   {

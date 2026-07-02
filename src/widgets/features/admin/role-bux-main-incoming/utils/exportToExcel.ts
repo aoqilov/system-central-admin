@@ -35,24 +35,42 @@ export async function exportToExcel({
   const titleRow = ws.addRow(["Входящие кассовые отчёты"]);
   ws.mergeCells(titleRow.number, 1, titleRow.number, colCount);
   titleRow.height = 28;
-  titleRow.getCell(1).font      = { name: "Calibri", size: 14, bold: true, color: { argb: "FF1F3864" } };
+  titleRow.getCell(1).font = {
+    name: "Calibri",
+    size: 14,
+    bold: true,
+    color: { argb: "FF1F3864" },
+  };
   titleRow.getCell(1).alignment = { horizontal: "left", vertical: "middle" };
 
   // ── Park / Date ──
   const parkRow = ws.addRow([`Парк: ${parkName}`]);
   ws.mergeCells(parkRow.number, 1, parkRow.number, colCount);
-  parkRow.getCell(1).font      = { name: "Calibri", size: 11, color: { argb: "FF404040" } };
+  parkRow.getCell(1).font = {
+    name: "Calibri",
+    size: 11,
+    color: { argb: "FF404040" },
+  };
   parkRow.getCell(1).alignment = { horizontal: "left", vertical: "middle" };
 
   const dateInfoRow = ws.addRow([`Дата: ${dateLabel}`]);
   ws.mergeCells(dateInfoRow.number, 1, dateInfoRow.number, colCount);
-  dateInfoRow.getCell(1).font      = { name: "Calibri", size: 11, color: { argb: "FF404040" } };
+  dateInfoRow.getCell(1).font = {
+    name: "Calibri",
+    size: 11,
+    color: { argb: "FF404040" },
+  };
   dateInfoRow.getCell(1).alignment = { horizontal: "left", vertical: "middle" };
 
   if (acceptedAt) {
     const accRow = ws.addRow([`Принято: ${acceptedAt}`]);
     ws.mergeCells(accRow.number, 1, accRow.number, colCount);
-    accRow.getCell(1).font      = { name: "Calibri", size: 11, bold: true, color: { argb: "FF22C55E" } };
+    accRow.getCell(1).font = {
+      name: "Calibri",
+      size: 11,
+      bold: true,
+      color: { argb: "FF22C55E" },
+    };
     accRow.getCell(1).alignment = { horizontal: "left", vertical: "middle" };
   }
 
@@ -63,47 +81,72 @@ export async function exportToExcel({
   const hdr = ws.addRow(["Тип оплаты", ...kassas, "Итого"]);
   hdr.height = 28;
   hdr.eachCell({ includeEmpty: true }, (cell, col) => {
-    cell.fill      = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1F3864" } };
-    cell.font      = { name: "Calibri", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
-    cell.alignment = { horizontal: col === 1 ? "left" : "center", vertical: "middle" };
-    cell.border    = {
-      top:    { style: "thin", color: { argb: "FF2D4E8A" } },
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF1F3864" },
+    };
+    cell.font = {
+      name: "Calibri",
+      size: 11,
+      bold: true,
+      color: { argb: "FFFFFFFF" },
+    };
+    cell.alignment = {
+      horizontal: col === 1 ? "left" : "center",
+      vertical: "middle",
+    };
+    cell.border = {
+      top: { style: "thin", color: { argb: "FF2D4E8A" } },
       bottom: { style: "thin", color: { argb: "FF2D4E8A" } },
-      left:   { style: "thin", color: { argb: "FF2D4E8A" } },
-      right:  { style: "thin", color: { argb: "FF2D4E8A" } },
+      left: { style: "thin", color: { argb: "FF2D4E8A" } },
+      right: { style: "thin", color: { argb: "FF2D4E8A" } },
     };
   });
 
   // ── Data rows ──
   rows.forEach((row, idx) => {
     const rowTotal = row.kassas.reduce((s, k) => s + (k.noDiscount ?? 0), 0);
-    const eRow = ws.addRow([row.type, ...row.kassas.map((k) => k.noDiscount), rowTotal]);
+    const eRow = ws.addRow([
+      row.type,
+      ...row.kassas.map((k) => k.noDiscount),
+      rowTotal,
+    ]);
     eRow.height = 20;
     const bg = idx % 2 === 0 ? "FFFFFFFF" : "FFEBF3FB";
 
     eRow.eachCell({ includeEmpty: true }, (cell, col) => {
-      cell.fill   = { type: "pattern", pattern: "solid", fgColor: { argb: bg } };
-      cell.font   = { name: "Calibri", size: 11, color: { argb: "FF1F1F1F" } };
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: bg } };
+      cell.font = { name: "Calibri", size: 11, color: { argb: "FF1F1F1F" } };
       cell.border = {
-        top:    { style: "thin", color: { argb: "FFAEB9C8" } },
+        top: { style: "thin", color: { argb: "FFAEB9C8" } },
         bottom: { style: "thin", color: { argb: "FFAEB9C8" } },
-        left:   { style: "thin", color: { argb: "FFAEB9C8" } },
-        right:  { style: "thin", color: { argb: "FFAEB9C8" } },
+        left: { style: "thin", color: { argb: "FFAEB9C8" } },
+        right: { style: "thin", color: { argb: "FFAEB9C8" } },
       };
 
       if (col === 1) {
         cell.alignment = { horizontal: "left", vertical: "middle" };
       } else if (col === colCount) {
-        cell.numFmt    = "#,##0.00";
+        cell.numFmt = "#,##0.00";
         cell.alignment = { horizontal: "right", vertical: "middle" };
-        cell.font      = { name: "Calibri", size: 11, bold: true, color: { argb: "FF1F1F1F" } };
+        cell.font = {
+          name: "Calibri",
+          size: 11,
+          bold: true,
+          color: { argb: "FF1F1F1F" },
+        };
       } else {
         if (cell.value === null || cell.value === undefined) {
-          cell.value     = "—";
-          cell.font      = { name: "Calibri", size: 11, color: { argb: "FF9E9E9E" } };
+          cell.value = "—";
+          cell.font = {
+            name: "Calibri",
+            size: 11,
+            color: { argb: "FF9E9E9E" },
+          };
           cell.alignment = { horizontal: "center", vertical: "middle" };
         } else {
-          cell.numFmt    = "#,##0.00";
+          cell.numFmt = "#,##0.00";
           cell.alignment = { horizontal: "right", vertical: "middle" };
         }
       }
@@ -118,15 +161,27 @@ export async function exportToExcel({
   ]);
   totRow.height = 24;
   totRow.eachCell({ includeEmpty: true }, (cell, col) => {
-    cell.fill      = { type: "pattern", pattern: "solid", fgColor: { argb: "FFBDD7EE" } };
-    cell.font      = { name: "Calibri", size: 11, bold: true, color: { argb: "FF1F3864" } };
-    cell.border    = {
-      top:    { style: "medium", color: { argb: "FF1F3864" } },
-      bottom: { style: "medium", color: { argb: "FF1F3864" } },
-      left:   { style: "thin",   color: { argb: "FF1F3864" } },
-      right:  { style: "thin",   color: { argb: "FF1F3864" } },
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFBDD7EE" },
     };
-    cell.alignment = { horizontal: col === 1 ? "left" : "right", vertical: "middle" };
+    cell.font = {
+      name: "Calibri",
+      size: 11,
+      bold: true,
+      color: { argb: "FF1F3864" },
+    };
+    cell.border = {
+      top: { style: "medium", color: { argb: "FF1F3864" } },
+      bottom: { style: "medium", color: { argb: "FF1F3864" } },
+      left: { style: "thin", color: { argb: "FF1F3864" } },
+      right: { style: "thin", color: { argb: "FF1F3864" } },
+    };
+    cell.alignment = {
+      horizontal: col === 1 ? "left" : "right",
+      vertical: "middle",
+    };
     if (col > 1) cell.numFmt = "#,##0.00";
   });
 
@@ -139,25 +194,56 @@ export async function exportToExcel({
   ]);
   kartaExRow.height = 24;
   kartaExRow.eachCell({ includeEmpty: true }, (cell, col) => {
-    cell.fill      = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFF2CC" } };
-    cell.font      = { name: "Calibri", size: 11, bold: true, color: { argb: "FF7F6000" } };
-    cell.border    = {
-      top:    { style: "thin", color: { argb: "FFD6B656" } },
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FFFFF2CC" },
+    };
+    cell.font = {
+      name: "Calibri",
+      size: 11,
+      bold: true,
+      color: { argb: "FF7F6000" },
+    };
+    cell.border = {
+      top: { style: "thin", color: { argb: "FFD6B656" } },
       bottom: { style: "thin", color: { argb: "FFD6B656" } },
-      left:   { style: "thin", color: { argb: "FFD6B656" } },
-      right:  { style: "thin", color: { argb: "FFD6B656" } },
+      left: { style: "thin", color: { argb: "FFD6B656" } },
+      right: { style: "thin", color: { argb: "FFD6B656" } },
+    };
+    cell.alignment = {
+      horizontal: col === 1 ? "left" : "center",
+      vertical: "middle",
+    };
+  });
+
+  // ── Возврат карт row ──
+  const vozvratRow = ws.addRow([
+    "Возврат карт",
+    ...kassas.map(() => "0 шт."),
+    "0 шт.",
+  ]);
+  vozvratRow.height = 24;
+  vozvratRow.eachCell({ includeEmpty: true }, (cell, col) => {
+    cell.fill      = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFDE8E8" } };
+    cell.font      = { name: "Calibri", size: 11, bold: true, color: { argb: "FFEF4444" } };
+    cell.border    = {
+      top:    { style: "thin", color: { argb: "FFEF4444" } },
+      bottom: { style: "thin", color: { argb: "FFEF4444" } },
+      left:   { style: "thin", color: { argb: "FFEF4444" } },
+      right:  { style: "thin", color: { argb: "FFEF4444" } },
     };
     cell.alignment = { horizontal: col === 1 ? "left" : "center", vertical: "middle" };
   });
 
   // ── Download ──
   const buffer = await wb.xlsx.writeBuffer();
-  const blob   = new Blob([buffer as ArrayBuffer], {
+  const blob = new Blob([buffer as ArrayBuffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
   const url = URL.createObjectURL(blob);
-  const a   = document.createElement("a");
-  a.href     = url;
+  const a = document.createElement("a");
+  a.href = url;
   a.download = `Kassa-kiruvchi_${parkName}_${dateLabel}.xlsx`;
   document.body.appendChild(a);
   a.click();

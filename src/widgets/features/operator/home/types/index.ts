@@ -1,27 +1,28 @@
-export interface CardCounts {
-  jami: number;
-  asosiy: number;
-  online: number;
-  vip: number;
-  mehmon: number;
-  parkXodim: number;
+export interface AttractionRound {
+  id: number;
+  report: number;
+  attraction: number;
+  operator: number;
+  round_number: number;
+  status: "open" | "closed";
+  people_count: number;
+  offline_count: number;
+  online_count: number;
+  vip_count: number;
+  guest_count: number;
+  park_staff_count: number;
+  paid_amount: number;
+  total_amount: number;
+  started_at: string;
+  finished_at: string;
+  created_at: string;
 }
 
-export interface Round {
-  id: string;
-  time: string;
-  num: number;
-  cards: CardCounts;
-  price: number;
-  total: number;
+export interface TodayRoundsData {
+  "attraction-rounds": AttractionRound[];
 }
 
-export interface SmenaInfo {
-  number: number;
-  openedAt: string;
-  operatorName: string;
-}
-
-export function fmt(n: number) {
-  return n.toLocaleString("uz-UZ");
+export interface ApiResponse<T> {
+  statusCode: number;
+  data: T;
 }

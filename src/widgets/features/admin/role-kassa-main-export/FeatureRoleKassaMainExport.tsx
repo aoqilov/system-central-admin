@@ -83,7 +83,7 @@ export default function FeatureRoleKassaMainExport() {
       </div>
 
       {/* Summary cards */}
-      <ExportSummaryCards rows={rows} totalNoDiscount={totalNoDiscount} />
+      <ExportSummaryCards rows={rows} totalNoDiscount={totalNoDiscount} kartaSum={kartaSum} />
 
       {/* Main table */}
       <ExportReportTable

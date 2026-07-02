@@ -16,24 +16,33 @@ export interface PaySummary {
 }
 
 export const EMPTY_SUMMARY: PaySummary = {
-  naqd: 0, uzcard: 0, humo: 0, uzumbank: 0,
-  click: 0, payme: 0, total: 0, txCount: 0,
-  kartaSotildi: 0, kartaReg: 0,
+  naqd: 0,
+  uzcard: 0,
+  humo: 0,
+  uzumbank: 0,
+  click: 0,
+  payme: 0,
+  total: 0,
+  txCount: 0,
+  kartaSotildi: 0,
+  kartaReg: 0,
 };
 
-export function reportToPaySummary(report: CashboxReport | null | undefined): PaySummary {
+export function reportToPaySummary(
+  report: CashboxReport | null | undefined,
+): PaySummary {
   if (!report) return EMPTY_SUMMARY;
   return {
-    naqd:        report.cash_amount,
-    uzcard:      report.uzcard_amount,
-    humo:        report.humo_amount,
-    uzumbank:    report.uzum_amount,
-    click:       report.click_amount,
-    payme:       report.payme_amount,
-    total:       report.total_amount,
-    txCount:     report.transactions_count,
+    naqd: report.cash_amount,
+    uzcard: report.uzcard_amount,
+    humo: report.humo_amount,
+    uzumbank: report.uzum_amount,
+    click: report.click_amount,
+    payme: report.payme_amount,
+    total: report.total_amount,
+    txCount: report.transactions_count,
     kartaSotildi: report.activated_cards_count,
-    kartaReg:    report.relationed_cards_count,
+    kartaReg: report.relationed_cards_count,
   };
 }
 
@@ -139,8 +148,15 @@ export function buildZHtml(report: CashboxReport, isCopy = false): string {
 export function openPrint(html: string) {
   const blob = new Blob([html], { type: "text/html" });
   const url = URL.createObjectURL(blob);
-  const win = window.open(url, "_blank", "width=400,height=600");
-  if (!win) { URL.revokeObjectURL(url); return; }
+  const win = window.open(url);
+  if (!win) {
+    URL.revokeObjectURL(url);
+    return;
+  }
   win.focus();
-  setTimeout(() => { win.print(); win.close(); URL.revokeObjectURL(url); }, 300);
+  setTimeout(() => {
+    win.print();
+    win.close();
+    URL.revokeObjectURL(url);
+  }, 300);
 }

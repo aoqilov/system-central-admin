@@ -8,8 +8,13 @@ import type {
   DeleteOperatorResponse,
 } from "../types";
 
-export async function fetchCashbox(id: number): Promise<Cashbox> {
-  const { data } = await api.get<CashboxResponse>(`/cashbox/${id}`);
+export async function fetchCashbox(
+  cashboxID: number,
+  deviceID?: number,
+): Promise<Cashbox> {
+  const { data } = await api.get<CashboxResponse>(`/cashbox`, {
+    params: { cashboxID, ...(deviceID != null && { deviceID }) },
+  });
   return data.data.cashbox;
 }
 

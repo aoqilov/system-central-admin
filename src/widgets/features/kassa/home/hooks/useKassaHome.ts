@@ -34,7 +34,7 @@ export function useKassaHome() {
         amount: String(c.balance),
       });
     } catch {
-      showToast("NFC karta topilmadi", "error");
+      showToast("NFC karta topilmadi", "error", false);
       setCard(null);
       setQrInfo(EMPTY_QR);
     } finally {
@@ -83,7 +83,7 @@ export function useKassaHome() {
   }
 
   function handleSuccess(message: string) {
-    showToast(message, "success");
+    showToast(message, "success", true);
     setQrInfo(EMPTY_QR);
     setCard(null);
     setPanelKey((k) => k + 1);

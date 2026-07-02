@@ -11,23 +11,45 @@ import {
   LuPanelLeft,
   LuChevronDown,
   LuX,
+  LuPhone,
 } from "react-icons/lu";
 import dayjs from "dayjs";
 import { useTheme } from "../../../context/ThemeContext";
 import { CusPopover } from "../../ui/popover/CusPopover";
+import { CusImagePreview } from "../../ui/image/CusImagePreview";
 import { clearAuth } from "@/widgets/features/login/api/authApi";
+import { useMe } from "@/widgets/api-global/files-route/auth";
+import { useActiveXreport } from "@/widgets/features/operator/hooks/useActiveXreport";
+import { useOperatorAttraction } from "@/widgets/features/operator/hooks/useOperatorAttraction";
+import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
 import RoleSwitch from "@/components/shared/RoleSwitch";
+import { RiFileList3Line } from "react-icons/ri";
+import { VscDebugContinueSmall } from "react-icons/vsc";
+import { CusButton } from "@/components/ui/buttons/CusButton";
 
 interface NavItem {
   to: string;
   label: string;
   icon: React.ElementType;
   end?: boolean;
+  restricted?: boolean;
 }
 
 const NAV: NavItem[] = [
-  { to: "/operator/payment", icon: LuCreditCard, label: "Оплата" },
-  { to: "/operator", icon: LuLayoutDashboard, label: "Главная", end: true },
+  {
+    to: "/operator/payment",
+    icon: LuCreditCard,
+    label: "Оплата",
+    restricted: true,
+  },
+  {
+    to: "/operator/home",
+    icon: VscDebugContinueSmall,
+    label: "Актив смена",
+    restricted: true,
+    end: true,
+  },
+  { to: "/operator/smena", icon: RiFileList3Line, label: "Смена" },
   { to: "/operator/profile", icon: LuUser, label: "Профиль" },
 ];
 
@@ -65,10 +87,12 @@ function SidebarContent({
   collapsed,
   onClose,
   onNavClick,
+  hasActiveX,
 }: {
   collapsed: boolean;
   onClose: () => void;
   onNavClick: () => void;
+  hasActiveX: boolean;
 }) {
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
@@ -129,42 +153,67 @@ function SidebarContent({
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-3 overflow-y-auto flex flex-col gap-0.5">
-        {NAV.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            onClick={onNavClick}
-            title={collapsed ? item.label : undefined}
-            className={({ isActive }) =>
-              `flex items-center rounded-lg text-base font-medium transition-all duration-150
-              ${
-                isActive
-                  ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
-                  : "border border-transparent hover:bg-black/5 dark:hover:bg-white/5"
-              }`
-            }
-            style={({ isActive }) => ({
-              color: isActive ? undefined : "var(--text-4)",
-              gap: collapsed ? 0 : 12,
-              padding: collapsed ? "18px 20px" : "18px 16px",
-              justifyContent: collapsed ? "center" : "flex-start",
-            })}
-          >
-            {({ isActive }) => (
-              <>
-                <item.icon
-                  size={24}
-                  style={{
-                    color: isActive ? undefined : "var(--text-muted)",
-                    flexShrink: 0,
-                  }}
-                />
+        {NAV.map((item) => {
+          const isDisabled = !!item.restricted && !hasActiveX;
+
+          if (isDisabled) {
+            return (
+              <div
+                key={item.to}
+                title={collapsed ? item.label : undefined}
+                className="flex items-center rounded-lg text-base font-medium border border-transparent"
+                style={{
+                  color: "var(--text-muted)",
+                  opacity: 0.4,
+                  cursor: "not-allowed",
+                  gap: collapsed ? 0 : 12,
+                  padding: collapsed ? "18px 20px" : "18px 16px",
+                  justifyContent: collapsed ? "center" : "flex-start",
+                }}
+              >
+                <item.icon size={24} style={{ flexShrink: 0 }} />
                 {!collapsed && item.label}
-              </>
-            )}
-          </NavLink>
-        ))}
+              </div>
+            );
+          }
+
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              onClick={onNavClick}
+              title={collapsed ? item.label : undefined}
+              className={({ isActive }) =>
+                `flex items-center rounded-lg text-base font-medium transition-all duration-150
+                ${
+                  isActive
+                    ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
+                    : "border border-transparent hover:bg-black/5 dark:hover:bg-white/5"
+                }`
+              }
+              style={({ isActive }) => ({
+                color: isActive ? undefined : "var(--text-4)",
+                gap: collapsed ? 0 : 12,
+                padding: collapsed ? "18px 20px" : "18px 16px",
+                justifyContent: collapsed ? "center" : "flex-start",
+              })}
+            >
+              {({ isActive }) => (
+                <>
+                  <item.icon
+                    size={24}
+                    style={{
+                      color: isActive ? undefined : "var(--text-muted)",
+                      flexShrink: 0,
+                    }}
+                  />
+                  {!collapsed && item.label}
+                </>
+              )}
+            </NavLink>
+          );
+        })}
       </nav>
 
       {/* Bottom: theme + logout */}
@@ -172,59 +221,22 @@ function SidebarContent({
         className="px-2 pb-3 pt-2 flex flex-col gap-0.5 border-t shrink-0"
         style={{ borderColor: "var(--border-default)" }}
       >
-        <button
-          onClick={toggle}
-          title={
-            collapsed
-              ? theme === "dark"
-                ? "Светлая тема"
-                : "Тёмная тема"
-              : undefined
-          }
-          className="flex items-center rounded-lg text-base font-medium transition-all duration-150 hover:bg-black/5 dark:hover:bg-white/5 border border-transparent"
+        <CusButton
           style={{
-            color: "var(--text-4)",
-            gap: collapsed ? 0 : 12,
-            padding: collapsed ? "18px 20px" : "18px 16px",
-            justifyContent: collapsed ? "center" : "flex-start",
+            width: "40px",
+            height: "40px",
+            borderRadius: "50%",
+            fontSize: "14px",
+            fontWeight: 600,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
+          colorPalette="orange"
+          variant="solid"
         >
-          {theme === "dark" ? (
-            <LuSun
-              size={24}
-              style={{ color: "var(--text-muted)", flexShrink: 0 }}
-            />
-          ) : (
-            <LuMoon
-              size={24}
-              style={{ color: "var(--text-muted)", flexShrink: 0 }}
-            />
-          )}
-          {!collapsed && (theme === "dark" ? "Светлая тема" : "Тёмная тема")}
-        </button>
-
-        <button
-          onClick={handleLogout}
-          title={collapsed ? "Выйти" : undefined}
-          className="flex items-center rounded-lg text-base font-medium transition-all duration-150 border border-transparent"
-          style={{
-            color: "#ef4444",
-            gap: collapsed ? 0 : 12,
-            padding: collapsed ? "18px 20px" : "18px 16px",
-            justifyContent: collapsed ? "center" : "flex-start",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background =
-              "rgba(239,68,68,0.08)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background =
-              "transparent";
-          }}
-        >
-          <LuLogOut size={24} style={{ flexShrink: 0 }} />
-          {!collapsed && "Выйти"}
-        </button>
+          SOS
+        </CusButton>
       </div>
     </div>
   );
@@ -232,7 +244,7 @@ function SidebarContent({
 
 // ─── Bottom nav ───────────────────────────────────────────────────────────────
 
-function BottomNav() {
+function BottomNav({ hasActiveX }: { hasActiveX: boolean }) {
   return (
     <nav
       className="desktop:hidden fixed bottom-0 left-0 right-0 z-30 flex items-stretch px-2 pb-2 pt-1.5 gap-1"
@@ -242,21 +254,42 @@ function BottomNav() {
         borderTop: "1px solid var(--border-default)",
       }}
     >
-      {NAV.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          end={item.end}
-          className="flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl text-xs font-medium transition-all duration-150"
-          style={({ isActive }) => ({
-            color: isActive ? "#60a5fa" : "var(--text-muted)",
-            background: isActive ? "rgba(59,130,246,0.10)" : "transparent",
-          })}
-        >
-          <item.icon size={26} />
-          <span>{item.label}</span>
-        </NavLink>
-      ))}
+      {NAV.map((item) => {
+        const isDisabled = !!item.restricted && !hasActiveX;
+
+        if (isDisabled) {
+          return (
+            <div
+              key={item.to}
+              className="flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl text-xs font-medium"
+              style={{
+                color: "var(--text-muted)",
+                opacity: 0.35,
+                cursor: "not-allowed",
+              }}
+            >
+              <item.icon size={26} />
+              <span>{item.label}</span>
+            </div>
+          );
+        }
+
+        return (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className="flex-1 flex flex-col items-center justify-center gap-1.5 rounded-xl text-xs font-medium transition-all duration-150"
+            style={({ isActive }) => ({
+              color: isActive ? "#60a5fa" : "var(--text-muted)",
+              background: isActive ? "rgba(59,130,246,0.10)" : "transparent",
+            })}
+          >
+            <item.icon size={26} />
+            <span>{item.label}</span>
+          </NavLink>
+        );
+      })}
     </nav>
   );
 }
@@ -268,6 +301,13 @@ function OperatorLayoutBody() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const { data: me } = useMe();
+  const { attraction } = useOperatorAttraction();
+  const hasActiveX = useActiveXreport(attraction?.id);
+
+  const fullName = me ? `${me.firstname} ${me.lastname}` : "Operator";
+  const avatarUrl = me?.file ? getFileUrl(me.file) : null;
+  const initial = fullName.charAt(0).toUpperCase();
 
   function handleLogout() {
     clearAuth();
@@ -299,6 +339,7 @@ function OperatorLayoutBody() {
           collapsed={collapsed}
           onClose={() => setSidebarOpen(false)}
           onNavClick={() => {}}
+          hasActiveX={hasActiveX}
         />
       </aside>
 
@@ -313,6 +354,7 @@ function OperatorLayoutBody() {
           collapsed={false}
           onClose={() => setSidebarOpen(false)}
           onNavClick={() => setSidebarOpen(false)}
+          hasActiveX={hasActiveX}
         />
       </div>
 
@@ -374,28 +416,41 @@ function OperatorLayoutBody() {
 
             <CusPopover
               placement="bottom-end"
-              width={220}
+              width={240}
               trigger={(open) => (
                 <button
                   className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5 border"
                   style={{ borderColor: "var(--border-default)" }}
                 >
-                  <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
-                    O
-                  </div>
+                  {avatarUrl ? (
+                    <CusImagePreview
+                      src={avatarUrl}
+                      alt={fullName}
+                      width={24}
+                      height={24}
+                      borderRadius="50%"
+                      preview={false}
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                      {initial}
+                    </div>
+                  )}
                   <div className="text-left hidden desktop:block">
                     <p
                       className="text-xs font-medium leading-none"
                       style={{ color: "var(--text-2)" }}
                     >
-                      Operator
+                      {fullName}
                     </p>
-                    <p
-                      className="text-[10px] mt-0.5"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      operator@park.io
-                    </p>
+                    {me?.phone_number && (
+                      <p
+                        className="text-[10px] mt-0.5"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        {me.phone_number}
+                      </p>
+                    )}
                   </div>
                   <LuChevronDown
                     size={12}
@@ -409,21 +464,39 @@ function OperatorLayoutBody() {
               )}
             >
               <div
-                className="px-4 py-3 border-b"
+                className="px-4 py-3 border-b flex items-center gap-3"
                 style={{ borderColor: "var(--border-default)" }}
               >
-                <p
-                  className="text-xs font-semibold"
-                  style={{ color: "var(--text-default)" }}
-                >
-                  Operator
-                </p>
-                <p
-                  className="text-[11px] mt-0.5"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  operator@park.io
-                </p>
+                {avatarUrl ? (
+                  <CusImagePreview
+                    src={avatarUrl}
+                    alt={fullName}
+                    width={40}
+                    height={40}
+                    borderRadius="50%"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                    {initial}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p
+                    className="text-xs font-semibold truncate"
+                    style={{ color: "var(--text-default)" }}
+                  >
+                    {fullName}
+                  </p>
+                  {me?.phone_number && (
+                    <p
+                      className="flex items-center gap-1 text-[11px] mt-0.5"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      <LuPhone size={10} />
+                      {me.phone_number}
+                    </p>
+                  )}
+                </div>
               </div>
               <div className="p-1.5 space-y-0.5">
                 <button
@@ -468,7 +541,7 @@ function OperatorLayoutBody() {
       </div>
 
       {/* Mobile bottom nav */}
-      <BottomNav />
+      <BottomNav hasActiveX={hasActiveX} />
     </div>
   );
 }
@@ -476,5 +549,21 @@ function OperatorLayoutBody() {
 // ─── Layout (default export) ──────────────────────────────────────────────────
 
 export default function OperatorLayout() {
+  useEffect(() => {
+    const KEY = "dntdiOP";
+
+    let existing = localStorage.getItem(KEY);
+
+    if (!existing) {
+      const generated = Math.floor(
+        1000000 + Math.random() * 9000000,
+      ).toString();
+
+      localStorage.setItem(KEY, generated);
+      console.log("Generated device key:", generated);
+    } else {
+      console.log("Existing device key:", existing);
+    }
+  }, []);
   return <OperatorLayoutBody />;
 }

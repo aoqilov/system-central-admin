@@ -212,6 +212,29 @@ export function ExportReportTable({
                 {kartaSum} шт.
               </td>
             </tr>
+
+            {/* Возврат карт row */}
+            <tr style={{ background: "var(--bg-main)" }}>
+              <td
+                style={{
+                  ...tdStyle,
+                  ...stickyFirst,
+                  fontWeight: 600,
+                  color: "#ef4444",
+                  background: "var(--bg-main)",
+                }}
+              >
+                Возврат карт
+              </td>
+              {kassas.map((_, ki) => (
+                <td key={ki} style={{ ...tdNum, color: "#ef4444", fontWeight: 600 }}>
+                  0 шт.
+                </td>
+              ))}
+              <td style={{ ...tdNum, fontWeight: 700, color: "#ef4444", borderRight: "none" }}>
+                0 шт.
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

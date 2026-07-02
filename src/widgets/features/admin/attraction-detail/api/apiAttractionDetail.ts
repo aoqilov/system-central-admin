@@ -8,9 +8,12 @@ import type {
 } from "../types";
 
 export async function fetchAttractionDetail(
-  id: number,
+  attractionID: number,
+  deviceID?: number,
 ): Promise<AttractionDetail> {
-  const { data } = await api.get<AttractionDetailResponse>(`/attraction/${id}`);
+  const { data } = await api.get<AttractionDetailResponse>(`/attraction`, {
+    params: { attractionID, ...(deviceID != null && { deviceID }) },
+  });
   return data.data.attraction;
 }
 

@@ -1,4 +1,4 @@
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { SmenaProvider } from "@/context/SmenaContext";
 import { KassaSidebar, KassaBottomNav } from "./sidebar/KassaSidebar";
@@ -17,7 +17,10 @@ function KassaLayoutBody() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen tablet:flex" style={{ background: "var(--bg-main)" }}>
+    <div
+      className="min-h-screen tablet:flex"
+      style={{ background: "var(--bg-main)" }}
+    >
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (
         <div
@@ -51,6 +54,22 @@ function KassaLayoutBody() {
 }
 
 export default function KassaLayout() {
+  useEffect(() => {
+    const KEY = "dntdiKA";
+
+    let existing = localStorage.getItem(KEY);
+
+    if (!existing) {
+      const generated = Math.floor(
+        1000000 + Math.random() * 9000000,
+      ).toString();
+
+      localStorage.setItem(KEY, generated);
+      console.log("Generated device key:", generated);
+    } else {
+      console.log("Existing device key:", existing);
+    }
+  }, []);
   return (
     <SmenaProvider>
       <KassaLayoutBody />

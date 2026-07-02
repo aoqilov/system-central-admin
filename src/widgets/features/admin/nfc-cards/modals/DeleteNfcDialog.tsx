@@ -94,7 +94,7 @@ export function DeleteNfcDialog({ open, onClose, cards }: Props) {
                   Ushbu kartani o'chirasizmi?
                 </p>
                 <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-                  Kod: <span className="font-mono">{list[0].code}</span>
+                  Kod: <span className="font-mono">{list[0].card}</span>
                 </p>
               </>
             )}

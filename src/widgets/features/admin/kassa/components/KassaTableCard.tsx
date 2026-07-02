@@ -10,7 +10,11 @@ import {
   LuX,
   LuUser,
 } from "react-icons/lu";
-import { CashboxStatusLabel, CashboxStatusBadge, CashboxStatusTypes } from "@/const/constData";
+import {
+  CashboxStatusLabel,
+  CashboxStatusBadge,
+  CashboxStatusTypes,
+} from "@/const/constData";
 import type { Cashbox, CashboxStatus } from "../types";
 import { fetchCashboxes, deleteCashboxes } from "../api/apiKassa";
 import { CusTable, type ColumnDef } from "@/components/ui/table/CusTable";
@@ -115,6 +119,17 @@ export function KassaTableCard() {
         </div>
       ),
     },
+    {
+      key: "device",
+      header: "Девайс",
+      sortable: false,
+      render: (row) => (
+        <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+          {row.device}
+        </span>
+      ),
+    },
+
     {
       key: "status",
       header: "Статус",

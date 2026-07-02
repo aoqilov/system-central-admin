@@ -40,6 +40,7 @@ export interface Attraction {
   max_weight: number;
   description: string;
   operators: AttractionOperatorItem[];
+  device: number;
 }
 
 export interface PaginationSchema {
@@ -85,6 +86,7 @@ export interface CreateAttractionPayload {
 // --- Update
 export interface UpdateAttractionPayload extends Partial<CreateAttractionPayload> {
   status?: string;
+  device?: number;
 }
 
 // --- Categories

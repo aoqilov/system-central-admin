@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { LuSearch, LuTrash2, LuX, LuPencil, LuPlus, LuEye } from "react-icons/lu";
+import {
+  LuSearch,
+  LuTrash2,
+  LuX,
+  LuPencil,
+  LuPlus,
+  LuEye,
+} from "react-icons/lu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
@@ -37,11 +44,20 @@ function ImagePreviewCell({ src, alt }: { src: string; alt: string }) {
         <img
           src={src}
           alt={alt}
-          style={{ width: 54, height: 44, borderRadius: 6, objectFit: "cover", display: "block" }}
+          style={{
+            width: 54,
+            height: 44,
+            borderRadius: 6,
+            objectFit: "cover",
+            display: "block",
+          }}
         />
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(true);
+          }}
           style={{
             position: "absolute",
             inset: 0,
@@ -59,11 +75,23 @@ function ImagePreviewCell({ src, alt }: { src: string; alt: string }) {
           <LuEye size={18} color="white" />
         </button>
       </div>
-      <CusDialog open={open} onClose={() => setOpen(false)} size="lg" closeOnBackdrop>
+      <CusDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        size="lg"
+        closeOnBackdrop
+      >
         <img
           src={src}
           alt={alt}
-          style={{ maxWidth: "100%", maxHeight: "60vh", borderRadius: 10, objectFit: "contain", display: "block", margin: "0 auto" }}
+          style={{
+            maxWidth: "100%",
+            maxHeight: "60vh",
+            borderRadius: 10,
+            objectFit: "contain",
+            display: "block",
+            margin: "0 auto",
+          }}
         />
       </CusDialog>
     </>
@@ -90,7 +118,9 @@ export default function AttractionTableCard() {
   const [statusFilter, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [selectedAttractions, setSelectedAttractions] = useState<Attraction[]>([]);
+  const [selectedAttractions, setSelectedAttractions] = useState<Attraction[]>(
+    [],
+  );
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -110,7 +140,8 @@ export default function AttractionTableCard() {
 
   useEffect(() => {
     setPage(1);
-    setSelectedRows([]); setSelectedAttractions([]);
+    setSelectedRows([]);
+    setSelectedAttractions([]);
   }, [categoryFilter, statusFilter]);
 
   // --- Queries
@@ -145,7 +176,8 @@ export default function AttractionTableCard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["attractions"] });
       queryClient.invalidateQueries({ queryKey: ["attraction-stats"] });
-      setSelectedRows([]); setSelectedAttractions([]);
+      setSelectedRows([]);
+      setSelectedAttractions([]);
     },
   });
 
@@ -172,34 +204,52 @@ export default function AttractionTableCard() {
       header: t("columns.name"),
       sortable: false,
       render: (row) => (
-          <div className="flex items-center gap-3">
-            <ImagePreviewCell
-              src={row.dashboard_file ? getFileUrl(row.dashboard_file) : ""}
-              alt={row.name}
-            />
-            <div>
-              <p
-                onClick={(e) => { e.stopPropagation(); navigate(`/attraction/${row.id}`); }}
-                style={{
-                  fontWeight: 500,
-                  color: "var(--text-default)",
-                  fontSize: 13,
-                  cursor: "pointer",
-                  textDecoration: "none",
-                  display: "inline",
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.textDecoration = "underline"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.textDecoration = "none"; }}
-              >
-                {row.name}
+        <div className="flex items-center gap-3">
+          <ImagePreviewCell
+            src={row.dashboard_file ? getFileUrl(row.dashboard_file) : ""}
+            alt={row.name}
+          />
+          <div>
+            <p
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/attraction/${row.id}`);
+              }}
+              style={{
+                fontWeight: 500,
+                color: "var(--text-default)",
+                fontSize: 13,
+                cursor: "pointer",
+                textDecoration: "none",
+                display: "inline",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.textDecoration =
+                  "underline";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.textDecoration = "none";
+              }}
+            >
+              {row.name}
+            </p>
+            {row.manufacturer && (
+              <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                {row.manufacturer}
               </p>
-              {row.manufacturer && (
-                <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                  {row.manufacturer}
-                </p>
-              )}
-            </div>
+            )}
           </div>
+        </div>
+      ),
+    },
+    {
+      key: "device",
+      header: "девайс",
+      sortable: false,
+      render: (row) => (
+        <span style={{ fontSize: 12, color: "var(--text-2)" }}>
+          {row.device ?? <span style={{ color: "var(--text-muted)" }}>—</span>}
+        </span>
       ),
     },
     {
@@ -284,10 +334,17 @@ export default function AttractionTableCard() {
             ) : (
               <div
                 style={{
-                  width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
-                  background: "var(--bg-hover)", display: "flex",
-                  alignItems: "center", justifyContent: "center",
-                  fontSize: 10, fontWeight: 600, color: "var(--text-muted)",
+                  width: 22,
+                  height: 22,
+                  borderRadius: "50%",
+                  flexShrink: 0,
+                  background: "var(--bg-hover)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
                 }}
               >
                 {first.firstname?.charAt(0)?.toUpperCase() ?? "?"}
@@ -299,9 +356,13 @@ export default function AttractionTableCard() {
             {extra > 0 && (
               <span
                 style={{
-                  fontSize: 10, fontWeight: 600, color: "var(--text-muted)",
-                  background: "var(--bg-hover)", borderRadius: 4,
-                  padding: "1px 5px", flexShrink: 0,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: "var(--text-muted)",
+                  background: "var(--bg-hover)",
+                  borderRadius: 4,
+                  padding: "1px 5px",
+                  flexShrink: 0,
                 }}
               >
                 +{extra}
@@ -442,7 +503,10 @@ export default function AttractionTableCard() {
                 <LuTrash2 size={13} /> {t("delete")}
               </CusButton>
               <button
-                onClick={() => { setSelectedRows([]); setSelectedAttractions([]); }}
+                onClick={() => {
+                  setSelectedRows([]);
+                  setSelectedAttractions([]);
+                }}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -469,7 +533,10 @@ export default function AttractionTableCard() {
                 <LuTrash2 size={13} /> {t("delete")} ({selectedRows.length})
               </CusButton>
               <button
-                onClick={() => { setSelectedRows([]); setSelectedAttractions([]); }}
+                onClick={() => {
+                  setSelectedRows([]);
+                  setSelectedAttractions([]);
+                }}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -536,7 +603,8 @@ export default function AttractionTableCard() {
           open={openEdit}
           onClose={() => {
             setOpenEdit(false);
-            setSelectedRows([]); setSelectedAttractions([]);
+            setSelectedRows([]);
+            setSelectedAttractions([]);
           }}
           attraction={editAttraction}
         />

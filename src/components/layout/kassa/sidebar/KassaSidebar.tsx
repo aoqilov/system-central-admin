@@ -7,13 +7,16 @@ import {
   LuX,
   LuUser,
   LuFileText,
+  LuCreditCard,
 } from "react-icons/lu";
 import { TbReport } from "react-icons/tb";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "@/context/ThemeContext";
 import { clearAuth } from "@/widgets/features/login/api/authApi";
 import { getTodayReports } from "@/widgets/features/kassa/otchet/api/apiKassaOtchet";
-import { CASHBOX_ID, CASHBOX_REPORTS_KEY } from "@/widgets/features/kassa/kassa.constants";
+import { CASHBOX_REPORTS_KEY } from "@/widgets/features/kassa/kassa.constants";
+import { useCashbox } from "@/widgets/features/kassa/hooks/useCashbox";
+import { VscDebugContinueSmall } from "react-icons/vsc";
 
 // ─── Nav config ───────────────────────────────────────────────────────────────
 
@@ -29,14 +32,14 @@ export const KASSA_NAV: NavItem[] = [
   {
     to: "/rolekassa",
     label: "Tolov qilish",
-    icon: LuLayoutDashboard,
+    icon: LuCreditCard,
     end: true,
     requiresActive: true,
   },
   {
     to: "/rolekassa/smena",
     label: "Smena",
-    icon: TbReport,
+    icon: VscDebugContinueSmall,
     requiresActive: true,
   },
   { to: "/rolekassa/otchet", label: "Otchet", icon: LuFileText },
@@ -56,12 +59,15 @@ function SidebarContent({
 }) {
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
+  const { cashboxId } = useCashbox();
   const { data } = useQuery({
-    queryKey: CASHBOX_REPORTS_KEY(CASHBOX_ID),
-    queryFn: () => getTodayReports(CASHBOX_ID),
+    queryKey: CASHBOX_REPORTS_KEY(cashboxId ?? 0),
+    queryFn: () => getTodayReports(cashboxId!),
+    enabled: !!cashboxId,
   });
-  const hasActiveX =
-    data?.data["cashbox-reports"].xreports.some((x) => x.status === "open") ?? false;
+  const xreports = data?.data["cashbox-reports"].xreports ?? [];
+  const hasActiveX = xreports.some((x) => x.status === "open");
+  const hasStopped = xreports.some((x) => x.status === "stopped");
 
   function handleLogout() {
     clearAuth();
@@ -120,7 +126,7 @@ function SidebarContent({
       {/* Nav */}
       <nav className="flex-1 px-2 py-3 overflow-y-auto flex flex-col gap-0.5">
         {KASSA_NAV.map((item) => {
-          const isDisabled = item.requiresActive && !hasActiveX;
+          const isDisabled = item.requiresActive && (!hasActiveX || hasStopped);
           if (isDisabled) {
             return (
               <div
@@ -237,12 +243,15 @@ export function KassaSidebar({
 // ─── KassaBottomNav ───────────────────────────────────────────────────────────
 
 export function KassaBottomNav() {
+  const { cashboxId } = useCashbox();
   const { data } = useQuery({
-    queryKey: CASHBOX_REPORTS_KEY(CASHBOX_ID),
-    queryFn: () => getTodayReports(CASHBOX_ID),
+    queryKey: CASHBOX_REPORTS_KEY(cashboxId ?? 0),
+    queryFn: () => getTodayReports(cashboxId!),
+    enabled: !!cashboxId,
   });
-  const hasActiveX =
-    data?.data["cashbox-reports"].xreports.some((x) => x.status === "open") ?? false;
+  const xreports = data?.data["cashbox-reports"].xreports ?? [];
+  const hasActiveX = xreports.some((x) => x.status === "open");
+  const hasStopped = xreports.some((x) => x.status === "stopped");
 
   return (
     <nav
@@ -254,7 +263,7 @@ export function KassaBottomNav() {
       }}
     >
       {KASSA_NAV.map((item) => {
-        const isDisabled = item.requiresActive && !hasActiveX;
+        const isDisabled = item.requiresActive && (!hasActiveX || hasStopped);
         if (isDisabled) {
           return (
             <div

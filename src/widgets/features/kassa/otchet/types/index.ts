@@ -5,8 +5,8 @@ export interface ApiResponse<T> {
 
 // ─── Shared ───────────────────────────────────────────────────────────────────
 
-export type ReportType   = "xreport" | "zreport";
-export type ReportStatus = "open" | "closed";
+export type ReportType = "xreport" | "zreport";
+export type ReportStatus = "open" | "closed" | "stopped";
 
 export interface ReportOperator {
   id: number;
@@ -51,14 +51,21 @@ export interface OpenReportData {
 }
 
 export interface CloseReportPayload {
+  status: "open" | "closed" | "stopped" | "confirmed" | "cancelled";
   report_type: ReportType;
+  report: number;
 }
 
 export interface CloseReportData {
   success: true;
 }
 
-export type ZReportConfirmStatus = "confirmed" | "cancelled";
+export type ZReportConfirmStatus =
+  | "confirmed"
+  | "cancelled"
+  | "stopped"
+  | "open"
+  | "closed";
 
 export interface ZReportConfirmItem {
   id: number;

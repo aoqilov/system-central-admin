@@ -95,7 +95,7 @@ export function EditNfcStatusDialog({ open, onClose, card }: Props) {
                 className="font-mono text-xs font-semibold"
                 style={{ color: "var(--text-default)" }}
               >
-                {c.code}
+                {c.card}
               </span>
             </div>
             <div className="flex justify-between">

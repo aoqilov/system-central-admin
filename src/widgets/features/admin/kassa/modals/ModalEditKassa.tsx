@@ -21,6 +21,7 @@ interface FormValues {
   name: string;
   place: string;
   status: string;
+  device: string;
   description: string;
 }
 
@@ -47,7 +48,7 @@ export function ModalEditKassa({ open, onClose, kassa }: Props) {
   });
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
-    defaultValues: { name: "", place: "", status: "", description: "" },
+    defaultValues: { name: "", place: "", status: "", device: "", description: "" },
   });
 
   useEffect(() => {
@@ -56,6 +57,7 @@ export function ModalEditKassa({ open, onClose, kassa }: Props) {
         name: kassa.name,
         place: kassa.place,
         status: kassa.status,
+        device: kassa.device != null ? String(kassa.device) : "",
         description: kassa.description ?? "",
       });
       updateMut.reset();
@@ -71,6 +73,7 @@ export function ModalEditKassa({ open, onClose, kassa }: Props) {
     if (data.name.trim() !== kassa!.name) payload.name = data.name.trim();
     if (data.place.trim() !== kassa!.place) payload.place = data.place.trim();
     if (data.status !== kassa!.status) payload.status = data.status as UpdateCashboxPayload["status"];
+    if (data.device.trim() !== String(kassa!.device ?? "")) payload.device = data.device.trim() || undefined;
     const newNote = data.description.trim() || null;
     if (newNote !== (kassa!.description ?? null)) payload.description = newNote;
 
@@ -159,6 +162,22 @@ export function ModalEditKassa({ open, onClose, kassa }: Props) {
               label="Joylashuvi"
               isRequired
               placeholder="1-qavat, kirish"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              errorText={fieldState.error?.message}
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="device"
+          render={({ field, fieldState }) => (
+            <CusInput
+              ref={field.ref}
+              label="Device ID"
+              placeholder="abc123"
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}

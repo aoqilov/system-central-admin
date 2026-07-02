@@ -7,11 +7,12 @@ import { CusTextArea } from "@/components/ui/inputs/CusTextArea";
 
 interface Props {
   open: boolean;
+  isPending: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
 
-export function PauseXOtchetDialog({ open, onClose, onConfirm }: Props) {
+export function PauseXOtchetDialog({ open, isPending, onClose, onConfirm }: Props) {
   const [reason, setReason] = useState("");
 
   function handleClose() {
@@ -34,11 +35,11 @@ export function PauseXOtchetDialog({ open, onClose, onConfirm }: Props) {
       footer={
         <>
           <Dialog.ActionTrigger asChild>
-            <CusButton variant="outline" onClick={handleClose}>
+            <CusButton variant="outline" isDisabled={isPending} onClick={handleClose}>
               Bekor qilish
             </CusButton>
           </Dialog.ActionTrigger>
-          <CusButton colorPalette="orange" onClick={handleConfirm}>
+          <CusButton colorPalette="orange" isLoading={isPending} onClick={handleConfirm}>
             <LuClock size={15} /> To'xtatish
           </CusButton>
         </>
@@ -46,16 +47,9 @@ export function PauseXOtchetDialog({ open, onClose, onConfirm }: Props) {
     >
       <div className="flex flex-col gap-3">
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          To'xtatilgan X-otchetni Otchet sahifasidan qayta davom ettirishingiz mumkin. Tolov
-          qilish va Smena bo'limlari o'chiriladi.
+          To'xtatilgan X-otchetni Otchet sahifasidan qayta davom ettirishingiz
+          mumkin. Tolov qilish va Smena bo'limlari o'chiriladi.
         </p>
-        <CusTextArea
-          label="Chiqib ketish sababi"
-          placeholder="Sababni yozing..."
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          rows={3}
-        />
       </div>
     </CusDialog>
   );

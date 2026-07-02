@@ -62,22 +62,32 @@ export interface DailyZReport extends ZReportItem {
 export interface ZReportsStats {
   total: number;
   open: number;
-  waiting: number;
+  stopped: number;
   confirmed: number;
   cancelled: number;
 }
 
-export interface ZReportsPagination {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+
+export interface ZReportsTotals {
+  total_amount: number;
+  cash_amount: number;
+  card_amount: number;
+  online_amount: number;
+  uzcard_amount: number;
+  humo_amount: number;
+  uzum_amount: number;
+  payme_amount: number;
+  click_amount: number;
+  activated_cards_count: number;
+  relationed_cards_count: number;
+  transactions_count: number;
+  xreports_count: number;
 }
 
 export interface GetZReportsData {
   stats: ZReportsStats;
-  "cashbox-zreports": CashboxZReportGroup[];
-  pagination: ZReportsPagination;
+  totals: ZReportsTotals;
+  cashboxes: CashboxZReportGroup[];
 }
 
 export interface UnsentDay {
@@ -86,10 +96,8 @@ export interface UnsentDay {
 }
 
 export interface GetZReportsParams {
-  date?: string;    // YYYY-MM-DD
+  date?: string;
   status?: string;
-  page?: number;
-  limit?: number;
 }
 
 export interface ConfirmZReportItem {
@@ -99,6 +107,11 @@ export interface ConfirmZReportItem {
 
 export interface ConfirmZReportsPayload {
   zreports: ConfirmZReportItem[];
+}
+
+export interface ReopenZReportPayload {
+  cashboxId: number;
+  reportId: number;
 }
 
 // ─── Helper ───────────────────────────────────────────────────────────────────

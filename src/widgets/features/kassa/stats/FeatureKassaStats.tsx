@@ -14,6 +14,7 @@ import {
   LuSmartphone,
   LuTrendingUp,
   LuUserCheck,
+  LuRotateCcw,
   LuCircleCheck,
   LuClock,
   LuActivity,
@@ -29,7 +30,8 @@ import { useNavigate } from "react-router-dom";
 import { getTodayReports } from "../otchet/api/apiKassaOtchet";
 import { getTransactions } from "./api/apiKassaStats";
 import type { CashboxTransaction } from "./types";
-import { CASHBOX_ID, CASHBOX_REPORTS_KEY } from "../kassa.constants";
+import { CASHBOX_REPORTS_KEY } from "../kassa.constants";
+import { useCashbox } from "../hooks/useCashbox";
 import { reportToPaySummary } from "../otchet/otchet.helpers";
 import { fmtDateTime } from "@/utils/dateUtils";
 
@@ -290,16 +292,19 @@ function EmptySmena({ onGoToOtchet }: { onGoToOtchet: () => void }) {
 
 export default function FeatureKassaStats() {
   const [txPage, setTxPage] = useState(1);
+  const { cashboxId } = useCashbox();
 
   const { data } = useQuery({
-    queryKey: CASHBOX_REPORTS_KEY(CASHBOX_ID),
-    queryFn: () => getTodayReports(CASHBOX_ID),
+    queryKey: CASHBOX_REPORTS_KEY(cashboxId ?? 0),
+    queryFn: () => getTodayReports(cashboxId!),
+    enabled: !!cashboxId,
   });
 
   const { data: txData, isLoading: txLoading } = useQuery({
-    queryKey: ["cashbox-transactions", CASHBOX_ID, txPage],
+    queryKey: ["cashbox-transactions", cashboxId, txPage],
     queryFn: () =>
-      getTransactions(CASHBOX_ID, { page: txPage, limit: TX_PAGE_SIZE }),
+      getTransactions(cashboxId!, { page: txPage, limit: TX_PAGE_SIZE }),
+    enabled: !!cashboxId,
   });
 
   const navigate = useNavigate();
@@ -440,6 +445,14 @@ export default function FeatureKassaStats() {
             value={String(s.kartaReg)}
             sub="bugun"
             color="#06b6d4"
+            dim={!activeX}
+          />
+          <StatCard
+            icon={LuRotateCcw}
+            label="Vozvrat karta"
+            value="0"
+            sub="bugun"
+            color="#ef4444"
             dim={!activeX}
           />
         </div>

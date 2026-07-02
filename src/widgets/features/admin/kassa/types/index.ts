@@ -19,6 +19,7 @@ export interface Cashbox {
   place: string;
   status: CashboxStatus;
   description: string | null;
+  device: string | number;
   operators: CashboxOperator[];
 }
 
@@ -93,4 +94,5 @@ export interface UpdateCashboxPayload {
   place?: string;
   status?: CashboxStatus;
   description?: string | null;
+  device?: string | number;
 }

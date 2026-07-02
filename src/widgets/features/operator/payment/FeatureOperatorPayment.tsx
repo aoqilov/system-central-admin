@@ -1,13 +1,15 @@
 import { useState, useRef } from "react";
-import { useRounds } from "../../../../hooks/useRounds";
-import { MOCK, callPaymentApi } from "./api/paymentApi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useOperatorAttraction } from "../hooks/useOperatorAttraction";
+import { payWithNFC, getCurrentRound, closeRound } from "./api/paymentApi";
+import { getTodayRounds } from "@/widgets/features/operator/home/api/apiOperatorHome";
 import { type RoundOrder, type DialogState } from "./types";
 import { NfcZone } from "./components/NfcZone";
 import { RoundTable } from "./components/RoundTable";
 import { PaymentDialog } from "./modals/PaymentDialog";
 
 export default function FeatureOperatorPayment() {
-  const { addRound, rounds } = useRounds();
+  const { attraction } = useOperatorAttraction();
 
   const [roundOrders, setRoundOrders] = useState<RoundOrder[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -16,11 +18,38 @@ export default function FeatureOperatorPayment() {
   const [dialogAmount, setDialogAmount] = useState<number | undefined>();
   const [dialogCardBalance, setDialogCardBalance] = useState<number | undefined>();
   const [focusTrigger, setFocusTrigger] = useState(0);
+  const [goLoading, setGoLoading] = useState(false);
 
   const orderIdRef = useRef(`ord-${Date.now()}`);
+  const qc = useQueryClient();
 
+  const ROUNDS_KEY = ["operator-rounds", attraction?.id ?? 0];
+  const CURRENT_ROUND_KEY = ["operator-current-round", attraction?.id ?? 0];
+
+  const { data: roundsData } = useQuery({
+    queryKey: ROUNDS_KEY,
+    queryFn: () => getTodayRounds(attraction!.id),
+    enabled: !!attraction,
+  });
+
+  const { data: currentRound } = useQuery({
+    queryKey: CURRENT_ROUND_KEY,
+    queryFn: () => getCurrentRound(attraction!.id),
+    enabled: !!attraction,
+  });
+
+  const allRounds = roundsData?.data["attraction-rounds"] ?? [];
+  const maxRoundNum = allRounds.length > 0 ? Math.max(...allRounds.map((r) => r.round_number)) : 0;
+  const displayRoundNum = currentRound ? currentRound.round_number : maxRoundNum + 1;
+
+  const ERROR_MESSAGES: Record<string, string> = {
+    "Not enough balance!": "Balansingizda pul yetarli emas",
+    "Round is full. Press GO first!": "Round to'lgan. Avval GO tugmasini bosing!",
+  };
+
+  const maxSlots = attraction?.seats ?? 8;
   const usedSlots = roundOrders.length;
-  const roundFull = usedSlots >= MOCK.maxSlots;
+  const roundFull = usedSlots >= maxSlots;
 
   function closeDialog() {
     setDialogOpen(false);
@@ -28,7 +57,7 @@ export default function FeatureOperatorPayment() {
   }
 
   async function handleNfc(nfcId: string) {
-    if (roundFull) return;
+    if (roundFull || !attraction) return;
     setDialogState("loading");
     setDialogMessage("");
     setDialogAmount(undefined);
@@ -36,24 +65,28 @@ export default function FeatureOperatorPayment() {
     setDialogOpen(true);
 
     try {
-      const res = await callPaymentApi(nfcId, MOCK.price, orderIdRef.current);
-      if (res.success) {
+      const res = await payWithNFC({ nfc: nfcId, attractionID: attraction.id });
+      const { paid, message, transaction } = res.data.payment;
+
+      if (paid && transaction) {
         setDialogState("success");
-        setDialogMessage(res.message);
-        setDialogAmount(res.amount);
+        setDialogMessage(message);
+        setDialogAmount(transaction.amount);
         setRoundOrders((prev) => [
           ...prev,
           {
-            id: `o-${Date.now()}`,
+            id: `o-${transaction.id}`,
             nfcId,
-            amount: res.amount ?? MOCK.price,
-            paymentMethod: res.paymentMethod ?? "karta",
+            amount: transaction.amount,
+            paymentMethod: "karta",
           },
         ]);
+        void qc.invalidateQueries({ queryKey: CURRENT_ROUND_KEY });
+        setTimeout(closeDialog, 1000);
       } else {
         setDialogState("insufficient");
-        setDialogMessage(res.message);
-        setDialogCardBalance(res.cardBalance);
+        setDialogMessage(ERROR_MESSAGES[message] ?? message);
+        setDialogCardBalance(transaction?.balance_after);
       }
     } catch {
       setDialogState("error");
@@ -61,16 +94,19 @@ export default function FeatureOperatorPayment() {
     }
   }
 
-  function handleGo() {
-    if (roundOrders.length === 0) return;
-    addRound({
-      paymentType: "card",
-      peopleCount: usedSlots,
-      totalAmount: roundOrders.reduce((s, o) => s + o.amount, 0),
-      attractionName: MOCK.attractionName,
-    });
-    setRoundOrders([]);
-    orderIdRef.current = `ord-${Date.now()}`;
+  async function handleGo() {
+    if (roundOrders.length === 0 || !attraction || goLoading) return;
+    setGoLoading(true);
+    try {
+      const round = await getCurrentRound(attraction.id);
+      if (round) await closeRound(attraction.id, round.id);
+      await qc.invalidateQueries({ queryKey: ROUNDS_KEY });
+      await qc.invalidateQueries({ queryKey: CURRENT_ROUND_KEY });
+    } finally {
+      setGoLoading(false);
+      setRoundOrders([]);
+      orderIdRef.current = `ord-${Date.now()}`;
+    }
   }
 
   return (
@@ -81,12 +117,15 @@ export default function FeatureOperatorPayment() {
             roundFull={roundFull}
             dialogOpen={dialogOpen}
             focusTrigger={focusTrigger}
+            price={attraction?.price ?? 0}
+            maxSlots={maxSlots}
             onSubmit={handleNfc}
           />
           <RoundTable
             roundOrders={roundOrders}
-            roundCount={rounds.length + 1}
-            maxSlots={MOCK.maxSlots}
+            roundCount={displayRoundNum}
+            maxSlots={maxSlots}
+            goLoading={goLoading}
             onGo={handleGo}
           />
         </div>

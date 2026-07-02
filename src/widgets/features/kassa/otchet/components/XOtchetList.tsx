@@ -11,6 +11,7 @@ interface Props {
   onOpenNew: () => void;
   onPause: (id: number) => void;
   onClose: (id: number) => void;
+  onResume: () => void;
 }
 
 export function XOtchetList({
@@ -20,6 +21,7 @@ export function XOtchetList({
   onOpenNew,
   onPause,
   onClose,
+  onResume,
 }: Props) {
   return (
     <div
@@ -39,7 +41,7 @@ export function XOtchetList({
               <CusButton
                 colorPalette="green"
                 size="sm"
-                variant="outline"
+                variant="solid"
                 onClick={onOpenNew}
               >
                 <LuPlus size={13} /> Yangi X-otchet ochish
@@ -86,6 +88,7 @@ export function XOtchetList({
                 onPause={() => onPause(item.id)}
                 onClose={() => onClose(item.id)}
                 onPrintCopy={() => openPrint(buildXHtml(item, true))}
+                onResume={onResume}
               />
             ))}
           </div>

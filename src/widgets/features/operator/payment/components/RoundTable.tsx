@@ -1,14 +1,15 @@
-import { LuCheck, LuUsers, LuChevronRight } from "react-icons/lu";
+import { LuCheck, LuUsers, LuChevronRight, LuLoader } from "react-icons/lu";
 import { PAYMENT_METHOD, fmt, type RoundOrder } from "../types";
 
 interface Props {
   roundOrders: RoundOrder[];
   roundCount: number;
   maxSlots: number;
+  goLoading: boolean;
   onGo: () => void;
 }
 
-export function RoundTable({ roundOrders, roundCount, maxSlots, onGo }: Props) {
+export function RoundTable({ roundOrders, roundCount, maxSlots, goLoading, onGo }: Props) {
   const usedSlots = roundOrders.length;
   const roundFull = usedSlots >= maxSlots;
   const totalAmount = roundOrders.reduce((s, o) => s + o.amount, 0);
@@ -135,7 +136,7 @@ export function RoundTable({ roundOrders, roundCount, maxSlots, onGo }: Props) {
       {/* GO button */}
       <button
         onClick={onGo}
-        disabled={roundOrders.length === 0}
+        disabled={roundOrders.length === 0 || goLoading}
         className="w-full rounded-2xl flex items-center justify-center gap-3 font-bold transition-all active:scale-[0.97]"
         style={{
           height: 72,
@@ -144,12 +145,15 @@ export function RoundTable({ roundOrders, roundCount, maxSlots, onGo }: Props) {
           background: roundOrders.length > 0 ? "#3b82f6" : "var(--bg-hover)",
           color: roundOrders.length > 0 ? "#fff" : "var(--text-muted)",
           border: "none",
-          cursor: roundOrders.length > 0 ? "pointer" : "not-allowed",
+          cursor: roundOrders.length > 0 && !goLoading ? "pointer" : "not-allowed",
           opacity: roundOrders.length > 0 ? 1 : 0.5,
         }}
       >
-        GO
-        <LuChevronRight size={24} />
+        {goLoading ? (
+          <LuLoader size={24} className="animate-spin" />
+        ) : (
+          <>GO <LuChevronRight size={24} /></>
+        )}
       </button>
     </div>
   );

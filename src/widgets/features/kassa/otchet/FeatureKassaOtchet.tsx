@@ -9,45 +9,74 @@ import { PauseXOtchetDialog } from "./modals/PauseXOtchetDialog";
 import { ZOtchetCloseDrawer } from "./modals/ZOtchetCloseDrawer";
 import { getTodayReports, openReport, closeReport } from "./api/apiKassaOtchet";
 import { reportToPaySummary, buildZHtml, openPrint } from "./otchet.helpers";
-import { CASHBOX_ID, CASHBOX_REPORTS_KEY } from "../kassa.constants";
-
-const QUERY_KEY = CASHBOX_REPORTS_KEY(CASHBOX_ID);
+import { CASHBOX_REPORTS_KEY } from "../kassa.constants";
+import { useCashbox } from "../hooks/useCashbox";
 
 export default function FeatureKassaOtchet() {
   const qc = useQueryClient();
+  const { cashboxId } = useCashbox();
 
-  const [openXDialog, setOpenXDialog]   = useState(false);
+  const [openXDialog, setOpenXDialog] = useState(false);
   const [pauseTargetId, setPauseTargetId] = useState<number | null>(null);
-  const [zDialog, setZDialog]           = useState(false);
+  const [zDialog, setZDialog] = useState(false);
+
+  const QUERY_KEY = CASHBOX_REPORTS_KEY(cashboxId ?? 0);
 
   const { data } = useQuery({
     queryKey: QUERY_KEY,
-    queryFn: () => getTodayReports(CASHBOX_ID),
+    queryFn: () => getTodayReports(cashboxId!),
+    enabled: !!cashboxId,
   });
 
-  const reports  = data?.data["cashbox-reports"];
-  const zreport  = reports?.zreport ?? null;
+  const reports = data?.data["cashbox-reports"];
+  const zreport = reports?.zreport ?? null;
   const xreports = reports?.xreports ?? [];
-  const activeX  = xreports.find((x) => x.status === "open") ?? null;
+  const activeX = xreports.find((x) => x.status === "open") ?? null;
 
-  const isZOpen   = zreport?.status === "open";
-  const canCloseZ = xreports.length > 0 && xreports.every((x) => x.status === "closed") && isZOpen;
-  const summary  = reportToPaySummary(zreport);
-  const date     = fmtDate(new Date());
+  const isZOpen = zreport?.status === "open";
+  const canCloseZ =
+    xreports.length > 0 &&
+    xreports.every((x) => x.status === "closed") &&
+    isZOpen;
+  const summary = reportToPaySummary(zreport);
+  const date = fmtDate(new Date());
 
   function invalidate() {
     void qc.invalidateQueries({ queryKey: QUERY_KEY });
   }
 
   const openMut = useMutation({
-    mutationFn: () => openReport(CASHBOX_ID),
-    onSuccess: () => { invalidate(); setOpenXDialog(false); },
+    mutationFn: () => openReport(cashboxId!),
+    onSuccess: () => {
+      invalidate();
+      setOpenXDialog(false);
+    },
   });
 
   const closeMut = useMutation({
-    mutationFn: (reportType: "xreport" | "zreport") =>
-      closeReport(CASHBOX_ID, { report_type: reportType }),
-    onSuccess: () => { invalidate(); setZDialog(false); },
+    mutationFn: ({ reportType, reportId }: { reportType: "xreport" | "zreport"; reportId: number }) =>
+      closeReport(cashboxId!, { status: "closed", report_type: reportType, report: reportId }),
+    onSuccess: () => {
+      invalidate();
+      setZDialog(false);
+    },
+  });
+
+  const stopMut = useMutation({
+    mutationFn: () =>
+      closeReport(cashboxId!, { status: "stopped", report_type: "xreport", report: activeX?.id ?? 0 }),
+    onSuccess: () => {
+      invalidate();
+      setPauseTargetId(null);
+    },
+  });
+
+  const resumeMut = useMutation({
+    mutationFn: () => {
+      const stoppedX = xreports.find((x) => x.status === "stopped");
+      return closeReport(cashboxId!, { status: "open", report_type: "xreport", report: stoppedX?.id ?? 0 });
+    },
+    onSuccess: () => invalidate(),
   });
 
   function handleZPrint() {
@@ -60,7 +89,10 @@ export default function FeatureKassaOtchet() {
 
   return (
     <div className="p-4 tablet:p-6 flex flex-col gap-5 pb-6">
-      <PageHeader title="Kunlik Otchet" subtitle="Kunlik otchet ma'lumotlari saqlanadi" />
+      <PageHeader
+        title="Kunlik Otchet"
+        subtitle="Kunlik otchet ma'lumotlari saqlanadi"
+      />
 
       <ZOtchetStatsBox
         date={date}
@@ -75,10 +107,11 @@ export default function FeatureKassaOtchet() {
       <XOtchetList
         xreports={xreports}
         activeX={activeX}
-        canOpenNew={!activeX && !zreport?.closed_at}
+        canOpenNew={!activeX && !zreport?.closed_at && xreports.every((x) => x.status !== "stopped")}
         onOpenNew={() => setOpenXDialog(true)}
         onPause={setPauseTargetId}
-        onClose={() => closeMut.mutate("xreport")}
+        onClose={() => closeMut.mutate({ reportType: "xreport", reportId: activeX?.id ?? 0 })}
+        onResume={() => resumeMut.mutate()}
       />
 
       <OpenXOtchetDialog
@@ -90,8 +123,9 @@ export default function FeatureKassaOtchet() {
 
       <PauseXOtchetDialog
         open={!!pauseTargetId}
+        isPending={stopMut.isPending}
         onClose={() => setPauseTargetId(null)}
-        onConfirm={() => setPauseTargetId(null)}
+        onConfirm={() => stopMut.mutate()}
       />
 
       <ZOtchetCloseDrawer
@@ -101,7 +135,7 @@ export default function FeatureKassaOtchet() {
         date={date}
         summary={summary}
         onPrint={handleZPrint}
-        onConfirm={() => closeMut.mutate("zreport")}
+        onConfirm={() => closeMut.mutate({ reportType: "zreport", reportId: zreport?.id ?? 0 })}
       />
     </div>
   );

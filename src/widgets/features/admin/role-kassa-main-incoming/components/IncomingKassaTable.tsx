@@ -1,9 +1,9 @@
 import {
   LuCheck,
-  LuX,
-  LuClock,
   LuCircleCheck,
   LuCircleX,
+  LuClock,
+  LuRotateCcw,
 } from "react-icons/lu";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -18,7 +18,7 @@ function fmt(n: number) {
 export interface TableRowState {
   smenaYopildi?: boolean;
   isConfirmPending?: boolean;
-  isRejectPending?: boolean;
+  isReopenPending?: boolean;
 }
 
 interface Props {
@@ -27,30 +27,35 @@ interface Props {
   onSmenaToggle: (id: number) => void;
   onConfirm: (id: number) => void;
   onReject: (id: number) => void;
+  onReopen?: (cashboxId: number, reportId: number) => void;
 }
 
 export function IncomingKassaTable({
   reports,
   rowState,
-  onSmenaToggle,
   onConfirm,
-  onReject,
+  onReopen,
 }: Props) {
   const columns: ColumnDef<DailyZReport>[] = [
     {
       key: "cashbox",
-      header: "Касса",
-      width: 180,
+      header: "Касса / Оператор",
+      width: 200,
       render: (row) => {
         const op = `${row.operator.firstname} ${row.operator.lastname}`;
-        const name = row.cashbox_name;
         return (
           <div>
             <p
               className="font-semibold text-xs"
               style={{ color: "var(--text-default)" }}
             >
-              {name}
+              {row.cashbox_name}
+            </p>
+            <p
+              className="text-[11px] mt-0.5"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {row.cashbox_place}
             </p>
             <p
               className="text-[11px] mt-0.5"
@@ -64,7 +69,7 @@ export function IncomingKassaTable({
     },
     {
       key: "payments",
-      header: "Тип оплаты",
+      header: "Тип оплаты (сум)",
       children: [
         {
           key: "cash",
@@ -127,25 +132,55 @@ export function IncomingKassaTable({
       ),
     },
     {
+      key: "txn",
+      header: "Транзакции",
+      width: 90,
+      align: "center",
+      render: (row) => (
+        <span className="text-xs" style={{ color: "var(--text-2)" }}>
+          {row.transactions_count}
+        </span>
+      ),
+    },
+    {
+      key: "xreports",
+      header: "X-отч.",
+      width: 70,
+      align: "center",
+      render: (row) => (
+        <span className="text-xs" style={{ color: "var(--text-2)" }}>
+          {row.xreports_count}
+        </span>
+      ),
+    },
+    {
       key: "status",
       header: "Статус",
-      width: 120,
+      width: 130,
       align: "center",
       render: (row) => {
         const s = row.status;
+        if (s === "confirmed")
+          return (
+            <CusBadge colorPalette="green" variant="subtle" size="sm">
+              Подтверждено
+            </CusBadge>
+          );
+        if (s === "cancelled")
+          return (
+            <CusBadge colorPalette="red" variant="subtle" size="sm">
+              Отказ
+            </CusBadge>
+          );
+        if (s === "closed")
+          return (
+            <CusBadge colorPalette="orange" variant="subtle" size="sm">
+              Ожидание
+            </CusBadge>
+          );
         return (
-          <CusBadge
-            colorPalette={
-              s === "confirmed" ? "green" : s === "cancelled" ? "red" : "gray"
-            }
-            variant="subtle"
-            size="sm"
-          >
-            {s === "confirmed"
-              ? "Подтверждено"
-              : s === "cancelled"
-                ? "Отказ"
-                : "Ожидание"}
+          <CusBadge colorPalette="blue" variant="subtle" size="sm">
+            Активная
           </CusBadge>
         );
       },
@@ -153,7 +188,7 @@ export function IncomingKassaTable({
     {
       key: "actions",
       header: "Действия",
-      width: 230,
+      width: 200,
       align: "center",
       render: (row) => {
         const s = row.status;
@@ -169,16 +204,27 @@ export function IncomingKassaTable({
             </div>
           );
         }
-        if (s === "cancelled" || s === "open") {
+        if (s === "cancelled") {
           return (
             <div
               className="flex items-center justify-center gap-1 text-xs font-medium"
               style={{ color: "#ef4444" }}
             >
-              <LuCircleX size={13} /> Отклонено
+              <LuCircleX size={13} /> Отказ
             </div>
           );
         }
+        if (s === "open") {
+          return (
+            <div
+              className="flex items-center justify-center gap-1 text-xs font-medium"
+              style={{ color: "var(--text-muted)" }}
+            >
+              <LuClock size={13} /> Активная смена
+            </div>
+          );
+        }
+        // closed — tasdiqlash yoki qayta ochish
         return (
           <div className="flex items-center justify-center gap-1.5">
             <CusButton
@@ -190,29 +236,15 @@ export function IncomingKassaTable({
             >
               <LuCheck size={12} /> Проверил
             </CusButton>
-            {/* <CusButton
-              size="xs"
-              colorPalette={rs.smenaYopildi ? "green" : "gray"}
-              variant={rs.smenaYopildi ? "surface" : "outline"}
-              onClick={() => onSmenaToggle(row.id)}
-            >
-              {rs.smenaYopildi ? (
-                <LuCheck size={12} />
-              ) : (
-                <LuClock size={12} />
-              )}
-              Смена
-            </CusButton> */}
-
-            {/* <CusButton
+            <CusButton
               size="xs"
               colorPalette="red"
               variant="outline"
-              isLoading={rs.isRejectPending}
-              onClick={() => onReject(row.id)}
+              isLoading={rs.isReopenPending}
+              onClick={() => onReopen?.(row.cashbox_id, row.id)}
             >
-              <LuX size={12} /> Отказ
-            </CusButton> */}
+              <LuRotateCcw size={12} /> Продолжить
+            </CusButton>
           </div>
         );
       },

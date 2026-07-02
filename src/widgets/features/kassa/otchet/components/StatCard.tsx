@@ -15,7 +15,7 @@ export function StatCard({ icon: Icon, label, value, sub, color, dim }: Props) {
         background: "var(--bg-second)",
         borderColor: "var(--border-default)",
         opacity: dim ? 0.45 : 1,
-        minWidth: 188,
+        minWidth: 158,
       }}
     >
       <div className="flex items-center justify-between">

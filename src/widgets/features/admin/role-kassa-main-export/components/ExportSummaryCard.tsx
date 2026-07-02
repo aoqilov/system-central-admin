@@ -15,6 +15,7 @@ export function ExportSummaryCard({ icon: Icon, label, value, sub, color }: Prop
       style={{
         background: "var(--bg-second)",
         borderColor: "var(--border-default)",
+        minWidth: 140,
       }}
     >
       <div className="flex items-center justify-between">

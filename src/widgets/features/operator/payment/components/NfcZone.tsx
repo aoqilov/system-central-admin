@@ -2,16 +2,17 @@ import { useState, useRef, useEffect } from "react";
 import { LuWifi } from "react-icons/lu";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { fmt } from "../types";
-import { MOCK } from "../api/paymentApi";
 
 interface Props {
   roundFull: boolean;
   dialogOpen: boolean;
   focusTrigger: number;
+  price: number;
+  maxSlots: number;
   onSubmit: (nfcId: string) => void;
 }
 
-export function NfcZone({ roundFull, dialogOpen, focusTrigger, onSubmit }: Props) {
+export function NfcZone({ roundFull, dialogOpen, focusTrigger, price, maxSlots, onSubmit }: Props) {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -23,9 +24,8 @@ export function NfcZone({ roundFull, dialogOpen, focusTrigger, onSubmit }: Props
 
   // Autofocus after each dialog close
   useEffect(() => {
-    if (!roundFull && !dialogOpen) inputRef.current?.focus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusTrigger]);
+    if (!roundFull) inputRef.current?.focus();
+  }, [focusTrigger, roundFull]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key !== "Enter") return;
@@ -52,7 +52,7 @@ export function NfcZone({ roundFull, dialogOpen, focusTrigger, onSubmit }: Props
           Цена за 1 человека
         </p>
         <p className="font-bold text-xl" style={{ color: "var(--text-default)" }}>
-          {fmt(MOCK.price)}{" "}
+          {fmt(price)}{" "}
           <span className="text-sm font-normal" style={{ color: "var(--text-muted)" }}>
             сум
           </span>
@@ -157,7 +157,7 @@ export function NfcZone({ roundFull, dialogOpen, focusTrigger, onSubmit }: Props
         {/* Helper */}
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
           {roundFull
-            ? `${MOCK.maxSlots}/${MOCK.maxSlots} мест занято`
+            ? `${maxSlots}/${maxSlots} мест занято`
             : "Считыватель карт готов"}
         </p>
       </div>

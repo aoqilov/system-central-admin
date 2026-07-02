@@ -7,11 +7,15 @@ import {
   LuPanelLeftClose,
   LuPanelLeft,
   LuChevronDown,
+  LuPhone,
 } from "react-icons/lu";
 import dayjs from "dayjs";
 import { useTheme } from "@/context/ThemeContext";
 import { CusPopover } from "@/components/ui/popover/CusPopover";
+import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
 import { clearAuth } from "@/widgets/features/login/api/authApi";
+import { useMe } from "@/widgets/api-global/files-route/auth";
+import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
 import RoleSwitch from "@/components/shared/RoleSwitch";
 
 // ─── Live clock ───────────────────────────────────────────────────────────────
@@ -23,7 +27,10 @@ function LiveClock() {
     return () => clearInterval(id);
   }, []);
   return (
-    <span className="font-mono text-2xl font-bold" style={{ color: "var(--text-3)" }}>
+    <span
+      className="font-mono text-2xl font-bold"
+      style={{ color: "var(--text-3)" }}
+    >
       {dayjs(now).format("HH:mm")}
     </span>
   );
@@ -39,6 +46,11 @@ interface Props {
 export function KassaHeader({ collapsed, onToggleCollapse }: Props) {
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
+  const { data: me } = useMe();
+
+  const fullName = me ? `${me.firstname} ${me.lastname}` : "Kassir";
+  const avatarUrl = me?.file ? getFileUrl(me.file) : null;
+  const initial = fullName.charAt(0).toUpperCase();
 
   function handleLogout() {
     clearAuth();
@@ -59,7 +71,10 @@ export function KassaHeader({ collapsed, onToggleCollapse }: Props) {
           <span className="text-white font-bold text-xs">P</span>
         </div>
         <div>
-          <p className="font-bold text-sm leading-none" style={{ color: "var(--text-default)" }}>
+          <p
+            className="font-bold text-sm leading-none"
+            style={{ color: "var(--text-default)" }}
+          >
             ParkOps
           </p>
           <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
@@ -83,7 +98,10 @@ export function KassaHeader({ collapsed, onToggleCollapse }: Props) {
         {/* Live clock */}
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-xs font-mono" style={{ color: "var(--text-4)" }}>
+          <span
+            className="text-xs font-mono"
+            style={{ color: "var(--text-4)" }}
+          >
             Live
           </span>
           <LiveClock />
@@ -92,22 +110,41 @@ export function KassaHeader({ collapsed, onToggleCollapse }: Props) {
         {/* User popover */}
         <CusPopover
           placement="bottom-end"
-          width={220}
+          width={240}
           trigger={(open) => (
             <button
               className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5 border"
               style={{ borderColor: "var(--border-default)" }}
             >
-              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
-                K
-              </div>
+              {avatarUrl ? (
+                <CusImagePreview
+                  src={avatarUrl}
+                  alt={fullName}
+                  width={24}
+                  height={24}
+                  borderRadius="50%"
+                  preview={false}
+                />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                  {initial}
+                </div>
+              )}
               <div className="text-left hidden tablet:block">
-                <p className="text-xs font-medium leading-none" style={{ color: "var(--text-2)" }}>
-                  Kassir
+                <p
+                  className="text-xs font-medium leading-none"
+                  style={{ color: "var(--text-2)" }}
+                >
+                  {fullName}
                 </p>
-                <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
-                  kassa@park.io
-                </p>
+                {me?.phone_number && (
+                  <p
+                    className="text-[10px] mt-0.5"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {me.phone_number}
+                  </p>
+                )}
               </div>
               <LuChevronDown
                 size={12}
@@ -120,13 +157,41 @@ export function KassaHeader({ collapsed, onToggleCollapse }: Props) {
             </button>
           )}
         >
-          <div className="px-4 py-3 border-b" style={{ borderColor: "var(--border-default)" }}>
-            <p className="text-xs font-semibold" style={{ color: "var(--text-default)" }}>
-              Kassir
-            </p>
-            <p className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
-              kassa@park.io
-            </p>
+          <div
+            className="px-4 py-3 border-b flex items-center gap-3"
+            style={{ borderColor: "var(--border-default)" }}
+          >
+            {avatarUrl ? (
+              <CusImagePreview
+                src={avatarUrl}
+                alt={fullName}
+                width={40}
+                height={40}
+                borderRadius="50%"
+                preview={false}
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                {initial}
+              </div>
+            )}
+            <div className="min-w-0">
+              <p
+                className="text-xs font-semibold truncate"
+                style={{ color: "var(--text-default)" }}
+              >
+                {fullName}
+              </p>
+              {me?.phone_number && (
+                <p
+                  className="flex items-center gap-1 text-[11px] mt-0.5"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  <LuPhone size={10} />
+                  {me.phone_number}
+                </p>
+              )}
+            </div>
           </div>
           <div className="p-1.5 space-y-0.5">
             <button
@@ -145,8 +210,14 @@ export function KassaHeader({ collapsed, onToggleCollapse }: Props) {
               onClick={handleLogout}
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors"
               style={{ color: "#ef4444" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.08)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background =
+                  "rgba(239,68,68,0.08)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background =
+                  "transparent";
+              }}
             >
               <LuLogOut size={14} />
               Chiqish

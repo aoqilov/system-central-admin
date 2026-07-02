@@ -15,9 +15,10 @@ export function BuxSummaryCard({ icon: Icon, label, value, sub, color }: Props) 
       style={{
         background: "var(--bg-second)",
         borderColor: "var(--border-default)",
+        minWidth: 140,
       }}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-1">
         <span className="text-xs" style={{ color: "var(--text-muted)" }}>
           {label}
         </span>

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   LuBanknote,
   LuWallet,
@@ -13,10 +12,12 @@ import {
   LuCircleX,
   LuClock,
 } from "react-icons/lu";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { fmtDateTime } from "@/utils/dateUtils";
 import type { DailyZReport } from "../types";
+import { reopenZReport } from "../api/apiRoleKassaMainIncoming";
 import { IncomingStatCard } from "./IncomingStatCard";
 
 function fmt(n: number) {
@@ -26,26 +27,34 @@ function fmt(n: number) {
 interface Props {
   report: DailyZReport;
   isConfirmPending?: boolean;
-  isRejectPending?: boolean;
   onConfirm: () => void;
-  onReject: () => void;
+  onReject?: () => void;
+  onReopen?: () => void;
 }
 
 export function IncomingKassaCard({
   report,
   isConfirmPending,
-  isRejectPending,
   onConfirm,
   onReject,
+  onReopen,
 }: Props) {
-  const [smenaYopildi, setSmenaYopildi] = useState(false);
+  const qc = useQueryClient();
+
+  const reopenMut = useMutation({
+    mutationFn: () => reopenZReport({ cashboxId: report.cashbox_id, reportId: report.id }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["z-reports"] });
+      onReopen?.();
+    },
+  });
 
   const isConfirmed = report.status === "confirmed";
   const isCancelled = report.status === "cancelled";
-  const isPending   = report.status === "closed"; // closed = waiting for confirmation
+  const isPending = report.status === "closed"; // closed = waiting for confirmation
 
   const kassaLabel = report.cashbox_name;
-  const op         = `${report.operator.firstname} ${report.operator.lastname}`;
+  const op = `${report.operator.firstname} ${report.operator.lastname}`;
 
   return (
     <div
@@ -55,8 +64,8 @@ export function IncomingKassaCard({
         borderColor: isConfirmed
           ? "#22c55e50"
           : isCancelled
-          ? "#ef444450"
-          : "var(--border-default)",
+            ? "#ef444450"
+            : "var(--border-default)",
       }}
     >
       {/* Header */}
@@ -66,13 +75,13 @@ export function IncomingKassaCard({
           borderColor: isConfirmed
             ? "#22c55e30"
             : isCancelled
-            ? "#ef444430"
-            : "var(--border-default)",
+              ? "#ef444430"
+              : "var(--border-default)",
           background: isConfirmed
             ? "#22c55e08"
             : isCancelled
-            ? "#ef444408"
-            : "transparent",
+              ? "#ef444408"
+              : "transparent",
         }}
       >
         <div
@@ -81,8 +90,8 @@ export function IncomingKassaCard({
             background: isConfirmed
               ? "#22c55e18"
               : isCancelled
-              ? "#ef444418"
-              : "var(--bg-hover)",
+                ? "#ef444418"
+                : "var(--bg-hover)",
           }}
         >
           {isConfirmed ? (
@@ -112,14 +121,15 @@ export function IncomingKassaCard({
               {isConfirmed
                 ? "Подтверждено"
                 : isCancelled
-                ? "Отказ"
-                : "Ожидание"}
+                  ? "Отказ"
+                  : "Ожидание"}
             </CusBadge>
           </div>
           <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
             {op} · {fmtDateTime(report.opened_at)}
-            {report.closed_at ? ` → ${fmtDateTime(report.closed_at)}` : ""}
-            {" "}· {report.transactions_count} транзакции
+            {report.closed_at
+              ? ` → ${fmtDateTime(report.closed_at)}`
+              : ""} · {report.transactions_count} транзакции
           </p>
         </div>
 
@@ -139,15 +149,69 @@ export function IncomingKassaCard({
       {/* Stat cards */}
       <div className="overflow-x-auto px-4 py-4">
         <div className="flex gap-3">
-          <IncomingStatCard icon={LuBanknote}    label="Выручка за день" value={fmt(report.total_amount)}               sub="сум"     color="#3b82f6" />
-          <IncomingStatCard icon={LuWallet}      label="Наличные"        value={fmt(report.cash_amount)}                sub="сум"     color="#22c55e" />
-          <IncomingStatCard icon={LuCreditCard}  label="UzCard"          value={fmt(report.uzcard_amount)}              sub="сум"     color="#3b82f6" />
-          <IncomingStatCard icon={LuCreditCard}  label="Humo"            value={fmt(report.humo_amount)}                sub="сум"     color="#8b5cf6" />
-          <IncomingStatCard icon={LuSmartphone}  label="UzumBank"        value={fmt(report.uzum_amount)}                sub="сум"     color="#06b6d4" />
-          <IncomingStatCard icon={LuSmartphone}  label="Click"           value={fmt(report.click_amount)}               sub="сум"     color="#f97316" />
-          <IncomingStatCard icon={LuSmartphone}  label="Payme"           value={fmt(report.payme_amount)}               sub="сум"     color="#ef4444" />
-          <IncomingStatCard icon={LuTrendingUp}  label="Продано карт"    value={String(report.activated_cards_count)}   sub="сегодня" color="#eab308" />
-          <IncomingStatCard icon={LuUserCheck}   label="Рег. карт"       value={String(report.relationed_cards_count)}  sub="сегодня" color="#06b6d4" />
+          <IncomingStatCard
+            icon={LuBanknote}
+            label="Выручка за день"
+            value={fmt(report.total_amount)}
+            sub="сум"
+            color="#3b82f6"
+          />
+          <IncomingStatCard
+            icon={LuWallet}
+            label="Наличные"
+            value={fmt(report.cash_amount)}
+            sub="сум"
+            color="#22c55e"
+          />
+          <IncomingStatCard
+            icon={LuCreditCard}
+            label="UzCard"
+            value={fmt(report.uzcard_amount)}
+            sub="сум"
+            color="#3b82f6"
+          />
+          <IncomingStatCard
+            icon={LuCreditCard}
+            label="Humo"
+            value={fmt(report.humo_amount)}
+            sub="сум"
+            color="#8b5cf6"
+          />
+          <IncomingStatCard
+            icon={LuSmartphone}
+            label="UzumBank"
+            value={fmt(report.uzum_amount)}
+            sub="сум"
+            color="#06b6d4"
+          />
+          <IncomingStatCard
+            icon={LuSmartphone}
+            label="Click"
+            value={fmt(report.click_amount)}
+            sub="сум"
+            color="#f97316"
+          />
+          <IncomingStatCard
+            icon={LuSmartphone}
+            label="Payme"
+            value={fmt(report.payme_amount)}
+            sub="сум"
+            color="#ef4444"
+          />
+          <IncomingStatCard
+            icon={LuTrendingUp}
+            label="Продано карт"
+            value={String(report.activated_cards_count)}
+            sub="сегодня"
+            color="#eab308"
+          />
+          <IncomingStatCard
+            icon={LuUserCheck}
+            label="Рег. карт"
+            value={String(report.relationed_cards_count)}
+            sub="сегодня"
+            color="#06b6d4"
+          />
         </div>
       </div>
 
@@ -176,15 +240,15 @@ export function IncomingKassaCard({
             >
               <LuCheck size={13} /> Проверил
             </CusButton>
-            {/* <CusButton
+            <CusButton
               size="xs"
               colorPalette="red"
               variant="outline"
-              isLoading={isRejectPending}
-              onClick={onReject}
+              isLoading={reopenMut.isPending}
+              onClick={() => reopenMut.mutate()}
             >
-              <LuX size={13} /> Отказ
-            </CusButton> */}
+              <LuX size={13} /> Продолжить смена !
+            </CusButton>
           </>
         ) : isConfirmed ? (
           <div
@@ -196,9 +260,9 @@ export function IncomingKassaCard({
         ) : (
           <div
             className="flex items-center gap-1.5 text-sm font-medium py-1"
-            style={{ color: "#ef4444" }}
+            style={{ color: "#3b82f6" }}
           >
-            <LuCircleX size={15} /> Отклонено
+            <LuClock size={15} /> Активная смена
           </div>
         )}
       </div>

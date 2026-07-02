@@ -1,210 +1,184 @@
-import { LuInbox, LuUsers, LuWifi, LuWifiOff, LuStar, LuUserCheck, LuShield } from "react-icons/lu";
-import { fmt, type CardCounts, type Round } from "../types";
+import type { AttractionRound } from "../types";
 
 interface Props {
-  rounds: Round[];
+  rounds: AttractionRound[];
+  totals: {
+    people: number;
+    offline: number;
+    online: number;
+    vip: number;
+    guest: number;
+    parkStaff: number;
+    paid: number;
+    total: number;
+  };
 }
 
-const CARD_COLS: { key: keyof CardCounts; label: string; color: string; icon: React.ElementType }[] = [
-  { key: "jami",      label: "Jami",       color: "var(--text-default)", icon: LuUsers      },
-  { key: "asosiy",    label: "Offline",    color: "#3b82f6",             icon: LuWifiOff    },
-  { key: "online",    label: "Online",     color: "#8b5cf6",             icon: LuWifi       },
-  { key: "vip",       label: "VIP",        color: "#eab308",             icon: LuStar       },
-  { key: "mehmon",    label: "Mehmon",     color: "#06b6d4",             icon: LuUserCheck  },
-  { key: "parkXodim", label: "Park xodim", color: "#22c55e",             icon: LuShield     },
-];
+function fmt(n: number) {
+  return n.toLocaleString("uz-UZ");
+}
 
-const thBase: React.CSSProperties = {
-  color: "var(--text-muted)",
-  fontSize: 11,
-  fontWeight: 600,
-  padding: "6px 10px",
-  whiteSpace: "nowrap",
-  borderBottom: "1px solid var(--border-default)",
-  borderRight: "1px solid var(--border-default)",
-  background: "var(--bg-hover)",
-  textTransform: "uppercase",
-  letterSpacing: "0.04em",
+function dash(n: number) {
+  return n === 0 ? "—" : String(n);
+}
+
+function fmtDash(n: number) {
+  return n === 0 ? "—" : fmt(n);
+}
+
+function time(iso: string) {
+  return iso?.slice(11, 16) ?? "—";
+}
+
+const COL = {
+  muted:  "var(--text-muted)",
+  text:   "var(--text-default)",
+  border: "var(--border-default)",
+  bg:     "var(--bg-second)",
+  bgCard: "var(--bg-main)",
 };
 
-const tdBase: React.CSSProperties = {
-  fontSize: 13,
-  padding: "10px 10px",
-  borderBottom: "1px solid var(--border-default)",
-  whiteSpace: "nowrap",
-  color: "var(--text-default)",
-};
-
-export function RoundsTable({ rounds }: Props) {
-  const totalRevenue = rounds.reduce((s, r) => s + r.total, 0);
-  const cardTotals = CARD_COLS.map((c) => ({
-    key: c.key,
-    total: rounds.reduce((s, r) => s + r.cards[c.key], 0),
-  }));
-
+export function RoundsTable({ rounds, totals }: Props) {
   return (
     <div
       className="rounded-2xl border overflow-hidden"
-      style={{ background: "var(--bg-second)", borderColor: "var(--border-default)" }}
+      style={{ background: COL.bg, borderColor: COL.border }}
     >
-      <div
-        className="px-5 py-3.5 border-b"
-        style={{ borderColor: "var(--border-default)" }}
-      >
-        <p className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>
+      <div className="px-5 py-4 border-b" style={{ borderColor: COL.border }}>
+        <p className="font-semibold text-sm" style={{ color: COL.text }}>
           Сегодняшние раунды
         </p>
       </div>
 
-      {rounds.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 py-12">
-          <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center"
-            style={{ background: "var(--bg-hover)" }}
-          >
-            <LuInbox size={22} style={{ color: "var(--text-muted)" }} />
-          </div>
-          <p className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>
-            Раундов пока нет
-          </p>
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 720 }}>
-            <thead>
-              {/* Row 1 */}
-              <tr>
-                <th rowSpan={2} style={{ ...thBase, textAlign: "left", paddingLeft: 16 }}>
-                  Время
-                </th>
-                <th rowSpan={2} style={{ ...thBase, textAlign: "center" }}>
-                  Round #
-                </th>
-                <th
-                  colSpan={CARD_COLS.length}
-                  style={{ ...thBase, textAlign: "center", paddingBottom: 16 }}
-                >
-                  Karta turi
-                </th>
-                <th rowSpan={2} style={{ ...thBase, textAlign: "right", lineHeight: 1.4 }}>
-                  <span style={{ display: "block" }}>Haq to'langan</span>
-                  <span style={{ display: "block", fontWeight: 400, fontSize: 10, color: "var(--text-dim)", textTransform: "none", letterSpacing: 0 }}>
-                    (online+offline) × narx
-                  </span>
-                </th>
-                <th rowSpan={2} style={{ ...thBase, textAlign: "right", paddingRight: 16, borderRight: "none" }}>
-                  Jami summa
-                </th>
-              </tr>
+      <div className="overflow-x-auto">
+        <table className="w-full" style={{ minWidth: 820 }}>
+          <thead>
+            {/* Spanning header */}
+            <tr style={{ borderBottom: `1px solid ${COL.border}`, background: COL.bgCard }}>
+              <th rowSpan={2} className="px-4 py-2 text-left text-xs font-medium" style={{ color: COL.muted, width: 70, borderRight: `1px solid ${COL.border}` }}>
+                ВРЕМЯ
+              </th>
+              <th rowSpan={2} className="px-4 py-2 text-center text-xs font-medium" style={{ color: COL.muted, width: 80, borderRight: `1px solid ${COL.border}` }}>
+                ROUND #
+              </th>
+              <th
+                colSpan={6}
+                className="px-4 py-2 text-center text-xs font-medium"
+                style={{ color: COL.muted, borderBottom: `1px solid ${COL.border}`, borderRight: `1px solid ${COL.border}` }}
+              >
+                KARTA TURI
+              </th>
+              <th rowSpan={2} className="px-4 py-2 text-right text-xs font-medium" style={{ color: COL.muted, width: 110, borderRight: `1px solid ${COL.border}` }}>
+                <span>HAQ TO'LANGAN</span>
+                <br />
+                <span className="font-normal" style={{ fontSize: 10 }}>(online+offline) × narx</span>
+              </th>
+              <th rowSpan={2} className="px-4 py-2 text-right text-xs font-medium" style={{ color: COL.muted, width: 100 }}>
+                JAMI SUMMA
+              </th>
+            </tr>
+            <tr style={{ borderBottom: `1px solid ${COL.border}`, background: COL.bgCard }}>
+              <th className="px-4 py-2 text-right text-xs font-medium" style={{ color: COL.muted, borderRight: `1px solid ${COL.border}` }}>JAMI</th>
+              <th className="px-4 py-2 text-right text-xs font-medium" style={{ color: "#06b6d4", borderRight: `1px solid ${COL.border}` }}>OFFLINE</th>
+              <th className="px-4 py-2 text-right text-xs font-medium" style={{ color: "#3b82f6", borderRight: `1px solid ${COL.border}` }}>ONLINE</th>
+              <th className="px-4 py-2 text-right text-xs font-medium" style={{ color: "#eab308", borderRight: `1px solid ${COL.border}` }}>VIP</th>
+              <th className="px-4 py-2 text-right text-xs font-medium" style={{ color: "#8b5cf6", borderRight: `1px solid ${COL.border}` }}>MEHMON</th>
+              <th className="px-4 py-2 text-right text-xs font-medium" style={{ color: "#22c55e", borderRight: `1px solid ${COL.border}` }}>PARK XODIM</th>
+            </tr>
+          </thead>
 
-              {/* Row 2 — card sub-columns */}
+          <tbody>
+            {rounds.length === 0 ? (
               <tr>
-                {CARD_COLS.map((c) => (
-                  <th
-                    key={c.key}
-                    style={{
-                      ...thBase,
-                      textAlign: "right",
-                      color: c.color,
-                      paddingTop: 3,
-                    }}
-                  >
-                    {c.label}
-                  </th>
-                ))}
+                <td colSpan={10} className="px-4 py-8 text-center text-sm" style={{ color: COL.muted }}>
+                  Bugun roundlar mavjud emas
+                </td>
               </tr>
-            </thead>
-
-            <tbody>
-              {rounds.map((r, ri) => (
+            ) : (
+              [...rounds].reverse().map((r) => (
                 <tr
                   key={r.id}
-                  style={ri < rounds.length - 1 ? { borderBottom: "1px solid var(--border-default)" } : undefined}
+                  style={{ borderBottom: `1px solid ${COL.border}` }}
                 >
-                  {/* Время */}
-                  <td style={{ ...tdBase, paddingLeft: 16, fontFamily: "monospace", fontWeight: 600, color: "var(--text-2)", borderRight: "1px solid var(--border-default)" }}>
-                    {r.time}
+                  <td className="px-4 py-3 text-sm" style={{ color: COL.muted }}>
+                    {time(r.started_at)}
                   </td>
-
-                  {/* Round # */}
-                  <td style={{ ...tdBase, textAlign: "center", borderRight: "1px solid var(--border-default)" }}>
+                  <td className="px-4 py-3 text-center">
                     <span
-                      className="inline-block px-2 py-0.5 rounded-lg text-sm font-bold"
-                      style={{ background: "#3b82f618", color: "#60a5fa" }}
+                      className="inline-flex items-center justify-center text-xs font-bold rounded-lg px-2 py-1"
+                      style={{ background: "#3b82f620", color: "#3b82f6", minWidth: 36 }}
                     >
-                      #{r.num}
+                      #{r.round_number}
                     </span>
                   </td>
-
-                  {/* Card type sub-columns */}
-                  {CARD_COLS.map((c, i) => {
-                    const val = r.cards[c.key];
-                    return (
-                      <td
-                        key={c.key}
-                        style={{
-                          ...tdBase,
-                          textAlign: "right",
-                          fontWeight: val > 0 ? 600 : 400,
-                          color: val > 0 ? c.color : "var(--text-dim)",
-                          borderRight: "1px solid var(--border-default)",
-                          ...(i === 0 ? { fontWeight: 700 } : {}),
-                        }}
-                      >
-                        {val > 0 ? val : "—"}
-                      </td>
-                    );
-                  })}
-
-                  {/* Narx 1x */}
-                  <td style={{ ...tdBase, textAlign: "right", color: "var(--text-default)", fontWeight: 600, borderRight: "1px solid var(--border-default)" }}>
-                    {fmt((r.cards.online + r.cards.asosiy) * r.price)}
+                  <td className="px-4 py-3 text-right text-sm font-medium" style={{ color: COL.text }}>
+                    {dash(r.people_count)}
                   </td>
-
-                  {/* Jami summa */}
-                  <td style={{ ...tdBase, textAlign: "right", paddingRight: 16 }}>
-                    <p className="font-bold text-sm" style={{ color: "var(--text-default)" }}>
-                      {fmt(r.total)}
-                    </p>
-                    <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>сум</p>
+                  <td className="px-4 py-3 text-right text-sm" style={{ color: "#06b6d4" }}>
+                    {dash(r.offline_count)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm" style={{ color: "#3b82f6" }}>
+                    {dash(r.online_count)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm" style={{ color: "#eab308" }}>
+                    {dash(r.vip_count)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm" style={{ color: "#8b5cf6" }}>
+                    {dash(r.guest_count)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm" style={{ color: "#22c55e" }}>
+                    {dash(r.park_staff_count)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm" style={{ color: COL.text }}>
+                    {fmtDash(r.paid_amount)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm font-semibold" style={{ color: "#22c55e" }}>
+                    {fmtDash(r.total_amount)}
+                    <span className="ml-1 font-normal text-xs" style={{ color: COL.muted }}>сум</span>
                   </td>
                 </tr>
-              ))}
-            </tbody>
+              ))
+            )}
+          </tbody>
 
+          {/* Footer totals */}
+          {rounds.length > 0 && (
             <tfoot>
-              <tr style={{ borderTop: "2px solid var(--border-default)", background: "var(--bg-hover)" }}>
-                <td
-                  colSpan={2}
-                  style={{ ...tdBase, paddingLeft: 16, fontWeight: 700, color: "var(--text-muted)", fontSize: 12, borderRight: "1px solid var(--border-default)" }}
-                >
+              <tr style={{ background: COL.bgCard }}>
+                <td className="px-4 py-3 text-sm font-semibold" style={{ color: COL.muted }}>
                   Итого
                 </td>
-                {cardTotals.map((ct, i) => (
-                  <td
-                    key={ct.key}
-                    style={{
-                      ...tdBase,
-                      textAlign: "right",
-                      fontWeight: 700,
-                      fontSize: 13,
-                      color: CARD_COLS[i].color,
-                      borderRight: "1px solid var(--border-default)",
-                    }}
-                  >
-                    {ct.total > 0 ? ct.total : "—"}
-                  </td>
-                ))}
-                <td style={{ ...tdBase, borderRight: "1px solid var(--border-default)" }} />
-                <td style={{ ...tdBase, textAlign: "right", paddingRight: 16, fontWeight: 700, fontSize: 13, color: "#22c55e" }}>
-                  {fmt(totalRevenue)}
-                  <span className="block text-[10px] font-normal" style={{ color: "var(--text-muted)" }}>сум</span>
+                <td />
+                <td className="px-4 py-3 text-right text-sm font-semibold" style={{ color: COL.text }}>
+                  {totals.people}
+                </td>
+                <td className="px-4 py-3 text-right text-sm font-semibold" style={{ color: "#06b6d4" }}>
+                  {totals.offline}
+                </td>
+                <td className="px-4 py-3 text-right text-sm font-semibold" style={{ color: "#3b82f6" }}>
+                  {totals.online}
+                </td>
+                <td className="px-4 py-3 text-right text-sm font-semibold" style={{ color: "#eab308" }}>
+                  {totals.vip}
+                </td>
+                <td className="px-4 py-3 text-right text-sm font-semibold" style={{ color: "#8b5cf6" }}>
+                  {totals.guest}
+                </td>
+                <td className="px-4 py-3 text-right text-sm font-semibold" style={{ color: "#22c55e" }}>
+                  {dash(totals.parkStaff)}
+                </td>
+                <td className="px-4 py-3 text-right text-sm font-semibold" style={{ color: COL.text }}>
+                  {fmtDash(totals.paid)}
+                </td>
+                <td className="px-4 py-3 text-right text-sm font-bold" style={{ color: "#22c55e" }}>
+                  {fmt(totals.total)}
+                  <span className="ml-1 font-normal text-xs" style={{ color: COL.muted }}>сум</span>
                 </td>
               </tr>
             </tfoot>
-          </table>
-        </div>
-      )}
+          )}
+        </table>
+      </div>
     </div>
   );
 }

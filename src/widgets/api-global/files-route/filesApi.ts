@@ -88,7 +88,7 @@ export async function fetchFiles(ids: number[]): Promise<FileData[]> {
 
 // Fayl URL ini qaytaradi (ko'rish uchun)
 export function getFileUrl(id: number): string {
-  const base = import.meta.env.VITE_API_URL ?? "";
+  const base = "https://central-park.rzbtech.uz";
   return `${base}/api/v1/files/${id}/view`;
 }
 

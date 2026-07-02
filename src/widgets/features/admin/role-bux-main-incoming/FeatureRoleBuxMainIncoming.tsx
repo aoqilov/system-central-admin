@@ -8,14 +8,13 @@ import PageHeader from "@/widgets/shared-ui/PageHeader";
 import { BuxDatePicker } from "./components/BuxDatePicker";
 import { BuxSummaryCards } from "./components/BuxSummaryCards";
 import { BuxReportTable } from "./components/BuxReportTable";
-import { BuxAcceptBar } from "./components/BuxAcceptBar";
 import { AcceptDialog } from "./modals/AcceptDialog";
-import { exportToExcel } from "./utils/exportToExcel";
 import { getAccountingReport } from "./api/apiBuxMainIncoming";
 import { buildPaymentRows, grandTotal } from "./types";
+import { exportToExcel } from "./utils/exportToExcel";
 
 const PARK_NAME = "Central Park";
-const TODAY     = dayjs().format("YYYY-MM-DD");
+const TODAY = dayjs().format("YYYY-MM-DD");
 
 function fmtRange(from: string, to: string): string {
   const f = fmtDate(from);
@@ -24,12 +23,11 @@ function fmtRange(from: string, to: string): string {
 }
 
 export default function FeatureRoleBuxMainIncoming() {
-  const [dateMode,     setDateMode]     = useState<"kunlik" | "oraliq">("kunlik");
-  const [date,         setDate]         = useState(TODAY);
-  const [dateFrom,     setDateFrom]     = useState(TODAY);
-  const [dateTo,       setDateTo]       = useState(TODAY);
-  const [acceptOpen,   setAcceptOpen]   = useState(false);
-  const [acceptedAt,   setAcceptedAt]   = useState<string | null>(null);
+  const [dateMode, setDateMode] = useState<"kunlik" | "oraliq">("kunlik");
+  const [date, setDate] = useState(TODAY);
+  const [dateFrom, setDateFrom] = useState(TODAY);
+  const [dateTo, setDateTo] = useState(TODAY);
+  const [acceptOpen, setAcceptOpen] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["bux-incoming-report", dateMode, date, dateFrom, dateTo],
@@ -41,35 +39,32 @@ export default function FeatureRoleBuxMainIncoming() {
       ),
   });
 
-  const report    = data?.data["cashbox-reports"];
-  const entries   = report?.cashboxes ?? [];
-  const kassas    = entries.map((e) => e.cashbox.name);
+  const report = data?.data["cashbox-reports"];
+  const entries = report?.cashboxes ?? [];
+  const kassas = entries.map((e) => e.cashbox.name);
   const kartaSold = entries.map((e) => e.zreport.activated_cards_count);
-  const rows      = buildPaymentRows(entries);
+  const rows = buildPaymentRows(entries);
 
-  const dateLabel         = dateMode === "kunlik" ? fmtDate(date) : fmtRange(dateFrom, dateTo);
-  const totalNoDiscount   = grandTotal(rows, "noDiscount");
+  const dateLabel =
+    dateMode === "kunlik" ? fmtDate(date) : fmtRange(dateFrom, dateTo);
+  const totalNoDiscount = grandTotal(rows, "noDiscount");
   const totalWithDiscount = grandTotal(rows, "withDiscount");
-  const kartaSum          = kartaSold.reduce((s, n) => s + n, 0);
+  const kartaSum = kartaSold.reduce((s, n) => s + n, 0);
 
   function handleAccept() {
-    setAcceptedAt(dayjs().format("DD.MM.YYYY — HH:mm"));
     setAcceptOpen(false);
   }
 
   function handleDateChange(d: string) {
     setDate(d);
-    setAcceptedAt(null);
   }
 
   function handleDateFromChange(d: string) {
     setDateFrom(d);
-    setAcceptedAt(null);
   }
 
   function handleDateToChange(d: string) {
     setDateTo(d);
-    setAcceptedAt(null);
   }
 
   return (
@@ -92,10 +87,17 @@ export default function FeatureRoleBuxMainIncoming() {
             onDateToChange={handleDateToChange}
           />
           <CusButton
-            variant="outline"
+            variant="solid"
+            colorPalette="green"
             size="sm"
             onClick={() =>
-              exportToExcel({ rows, kassas, kartaSold, dateLabel, parkName: PARK_NAME, acceptedAt })
+              exportToExcel({
+                rows,
+                kassas,
+                kartaSold,
+                dateLabel,
+                parkName: PARK_NAME,
+              })
             }
           >
             <LuDownload size={14} /> Скачать Excel
@@ -104,9 +106,13 @@ export default function FeatureRoleBuxMainIncoming() {
       </div>
 
       {/* Summary cards */}
-      <BuxSummaryCards rows={rows} totalNoDiscount={totalNoDiscount} />
+      <BuxSummaryCards
+        rows={rows}
+        totalNoDiscount={totalNoDiscount}
+        kartaSum={kartaSum}
+      />
 
-      {/* Accept bar */}
+      {/* Accept bar
       <BuxAcceptBar
         kassaCount={kassas.length}
         kartaSum={kartaSum}
@@ -114,7 +120,7 @@ export default function FeatureRoleBuxMainIncoming() {
         sentAt={null}
         acceptedAt={acceptedAt}
         onAccept={() => setAcceptOpen(true)}
-      />
+      /> */}
 
       {/* Main table */}
       <BuxReportTable

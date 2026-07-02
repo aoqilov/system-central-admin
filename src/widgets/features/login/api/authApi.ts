@@ -19,7 +19,7 @@ const ROLE_DEFAULT_PATH: Partial<Record<RoleTypes, string>> = {
   [RoleTypes.HEAD_OPERATOR]:   "/",
   [RoleTypes.HEAD_ACCOUNTANT]: "/",
   [RoleTypes.CASHIER]:         "/rolekassa/otchet",
-  [RoleTypes.OPERATOR]:        "/operator",
+  [RoleTypes.OPERATOR]:        "/operator/smena",
 };
 
 function setCookie(name: string, value: string, hours: number): void {
