@@ -17,7 +17,10 @@ import {
 import { CusPopover } from "../../../ui/popover/CusPopover";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
 import { useTheme } from "../../../../context/ThemeContext";
-import { clearAuth, getStoredEmployeeId } from "@/widgets/features/login/api/authApi";
+import {
+  clearAuth,
+  getStoredEmployeeId,
+} from "@/widgets/features/login/api/authApi";
 import { isPinEnabled, lockApp } from "@/utils/pinLock";
 import RoleSwitch from "@/components/shared/RoleSwitch";
 import { fetchEmployee } from "@/widgets/features/admin/employees/api/employeesApi";
@@ -30,7 +33,10 @@ interface HeaderProps {
 
 export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
   const [timeStr, setTimeStr] = useState(() =>
-    new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+    new Date().toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
   );
   const [pinEnabled, setPinEnabled] = useState(() => isPinEnabled());
   const navigate = useNavigate();
@@ -45,12 +51,17 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
   });
 
   const fullName = me ? `${me.lastname} ${me.firstname}` : "—";
-  const initial  = me?.firstname?.[0]?.toUpperCase() ?? "?";
+  const initial = me?.firstname?.[0]?.toUpperCase() ?? "?";
   const avatarUrl = me?.file ? getFileUrl(me.file) : null;
 
   useEffect(() => {
     const tick = () =>
-      setTimeStr(new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
+      setTimeStr(
+        new Date().toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      );
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
   }, []);
@@ -97,7 +108,7 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
         )}
       </button>
 
-      <RoleSwitch />
+      {/* <RoleSwitch /> */}
 
       <div className="flex items-center gap-2 ml-auto">
         {/* Live indicator — tablet+ */}
@@ -106,10 +117,16 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
           style={{ color: "var(--text-4)" }}
         >
           <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
-          <span className="font-mono text-md" style={{ color: "var(--text-3)" }}>
+          <span
+            className="font-mono text-md"
+            style={{ color: "var(--text-3)" }}
+          >
             Live
           </span>
-          <span className="font-mono text-xl" style={{ color: "var(--text-3)" }}>
+          <span
+            className="font-mono text-xl"
+            style={{ color: "var(--text-3)" }}
+          >
             {timeStr}
           </span>
         </div>
@@ -162,11 +179,17 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
               )}
 
               <div className="text-left hidden tablet:block">
-                <p className="text-xs font-medium leading-none" style={{ color: "var(--text-2)" }}>
+                <p
+                  className="text-xs font-medium leading-none"
+                  style={{ color: "var(--text-2)" }}
+                >
                   {fullName}
                 </p>
                 {me?.phone_number && (
-                  <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  <p
+                    className="text-[10px] mt-0.5"
+                    style={{ color: "var(--text-muted)" }}
+                  >
                     {me.phone_number}
                   </p>
                 )}
@@ -201,11 +224,17 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
               </div>
             )}
             <div className="min-w-0">
-              <p className="text-xs font-semibold truncate" style={{ color: "var(--text-default)" }}>
+              <p
+                className="text-xs font-semibold truncate"
+                style={{ color: "var(--text-default)" }}
+              >
                 {fullName}
               </p>
               {me?.phone_number && (
-                <p className="flex items-center gap-1 text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                <p
+                  className="flex items-center gap-1 text-[11px] mt-0.5"
+                  style={{ color: "var(--text-muted)" }}
+                >
                   <LuPhone size={10} />
                   {me.phone_number}
                 </p>
@@ -242,10 +271,12 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors"
               style={{ color: "#ef4444" }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.08)";
+                (e.currentTarget as HTMLButtonElement).style.background =
+                  "rgba(239,68,68,0.08)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                (e.currentTarget as HTMLButtonElement).style.background =
+                  "transparent";
               }}
             >
               <LuLogOut size={14} />

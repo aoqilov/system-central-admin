@@ -8,7 +8,7 @@ import "./api-config/interceptors";
 import "./index.css";
 import App from "./App";
 
-const APP_VERSION = "version: test 0.1.3";
+const APP_VERSION = "version: test 0.1.4";
 
 const root = document.getElementById("root")!;
 createRoot(root).render(
