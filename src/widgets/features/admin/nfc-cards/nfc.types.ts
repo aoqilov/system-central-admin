@@ -86,11 +86,11 @@ export const CARD_STATUS_META: Record<
   CardStatus,
   { label: string; scheme: "gray" | "green" | "blue" | "red" }
 > = {
-  active: { label: "Faol", scheme: "green" },
-  inactive: { label: "Faolsiz", scheme: "gray" },
-  blocked: { label: "Bloklangan", scheme: "red" },
-  lost: { label: "Yo'qolgan", scheme: "red" },
-  frozen: { label: "Muzlatilgan", scheme: "blue" },
+  active: { label: "Активна", scheme: "green" },
+  inactive: { label: "Не активна", scheme: "gray" },
+  blocked: { label: "Заблокирована", scheme: "red" },
+  lost: { label: "Утеряна", scheme: "red" },
+  frozen: { label: "Заморожена", scheme: "blue" },
 };
 
 export const CARD_STATUS_TRANSITIONS: Record<CardStatus, CardStatus[]> = {

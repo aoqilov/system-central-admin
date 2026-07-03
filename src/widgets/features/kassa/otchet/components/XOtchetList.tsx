@@ -2,7 +2,7 @@ import { LuFileText, LuPlus, LuPower } from "react-icons/lu";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import type { CashboxReport } from "../types";
 import { XOtchetCard } from "./XOtchetCard";
-import { buildXHtml, openPrint } from "../otchet.helpers";
+import { buildXHtml, buildXHtmlRussian, openPrint } from "../otchet.helpers";
 
 interface Props {
   xreports: CashboxReport[];
@@ -87,7 +87,7 @@ export function XOtchetList({
                 item={item}
                 onPause={() => onPause(item.id)}
                 onClose={() => onClose(item.id)}
-                onPrintCopy={() => openPrint(buildXHtml(item, true))}
+                onPrintCopy={() => openPrint(buildXHtmlRussian(item, true))}
                 onResume={onResume}
               />
             ))}

@@ -1,4 +1,5 @@
 // components/CusSelect.tsx
+import { useEffect, useMemo } from "react"
 import {
   Select,
   useListCollection,
@@ -80,15 +81,22 @@ const CusSelect = <T extends string | number>(props: CusSelectProps<T>) => {
     onChange,
   } = props
 
-  // Chakra uchun string-based collection
-  const { collection } = useListCollection({
-    initialItems: options.map((opt) => ({
-      ...opt,
-      value: toStr(opt.value),  // number bo'lsa string'ga
-    })),
+  const mappedItems = useMemo(
+    () => options.map((opt) => ({ ...opt, value: toStr(opt.value) })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [options.map((o) => toStr(o.value)).join(",")],
+  )
+
+  const { collection, set } = useListCollection({
+    initialItems: mappedItems,
     itemToValue: (item) => item.value,
     itemToString: (item) => item.label,
   })
+
+  // options asinxron o'zgarganda (masalan, API dan yuklanganda) collection yangilansin
+  useEffect(() => {
+    set(mappedItems)
+  }, [mappedItems])
 
   // value → string[] (Chakra uchun)
   const normalizedValue = value === undefined

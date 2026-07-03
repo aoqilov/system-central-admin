@@ -11,16 +11,17 @@ import { useToast } from "./useToast";
 import { checkNfc } from "../api/apiKassaHomePay";
 
 export function useKassaHome() {
-  const [qrInfo, setQrInfo]         = useState<QrInfo>(EMPTY_QR);
-  const [card, setCard]             = useState<NfcCard | null>(null);
+  const [qrInfo, setQrInfo] = useState<QrInfo>(EMPTY_QR);
+  const [card, setCard] = useState<NfcCard | null>(null);
   const [scanLoading, setScanLoading] = useState(false);
-  const [rightMode, setRightMode]   = useState<RightMode>("aktivatsa");
-  const [kartaType, setKartaType]   = useState<KartaType>("uzcard");
-  const [panelKey, setPanelKey]     = useState(0);
-  const [pending, setPending]       = useState<PendingItem[]>([]);
+  const [rightMode, setRightMode] = useState<RightMode>("aktivatsa");
+  const [kartaType, setKartaType] = useState<KartaType>("uzcard");
+  const [panelKey, setPanelKey] = useState(0);
+  const [pending, setPending] = useState<PendingItem[]>([]);
   const { toasts, show: showToast, remove } = useToast();
 
-  async function handleScan(nfc: string) {
+  async function handleScan(rawNfc: string) {
+    const nfc = rawNfc.replace(/^0+/, "");
     setScanLoading(true);
     try {
       const res = await checkNfc(nfc);
@@ -32,6 +33,7 @@ export function useKassaHome() {
         token: c.nfc,
         partiya: c.batch,
         amount: String(c.balance),
+        importedAt: c.imported_at,
       });
     } catch {
       showToast("NFC karta topilmadi", "error", false);

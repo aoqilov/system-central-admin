@@ -92,7 +92,7 @@ export function KassaHeader({ collapsed, onToggleCollapse }: Props) {
         {collapsed ? <LuPanelLeft size={18} /> : <LuPanelLeftClose size={18} />}
       </button>
 
-      {/* <RoleSwitch /> */}
+      {import.meta.env.DEV && <RoleSwitch />}
 
       <div className="flex items-center gap-4 ml-auto">
         {/* Live clock */}

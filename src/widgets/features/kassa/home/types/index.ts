@@ -86,7 +86,16 @@ export interface QrInfo {
   token: string;
   partiya: string;
   amount: string;
+  importedAt: string;
 }
+
+export const QR_STATUS_META: Record<
+  NonNullable<QrInfo["status"]>,
+  { label: string; scheme: "green" | "gray" }
+> = {
+  active: { label: "Активна", scheme: "green" },
+  "no-active": { label: "Не активна", scheme: "gray" },
+};
 
 export const EMPTY_QR: QrInfo = {
   status: null,
@@ -94,6 +103,7 @@ export const EMPTY_QR: QrInfo = {
   token: "",
   partiya: "",
   amount: "",
+  importedAt: "",
 };
 
 export interface PendingItem {

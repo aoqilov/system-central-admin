@@ -193,7 +193,7 @@ export const routes: RouteObject[] = [
   {
     // for operator pages
     element: (
-      <AuthGuard roles={[RoleTypes.OPERATOR]}>
+      <AuthGuard roles={[RoleTypes.OPERATOR, RoleTypes.SUPERADMIN]}>
         <OperatorLayout />
       </AuthGuard>
     ),
@@ -208,7 +208,13 @@ export const routes: RouteObject[] = [
   {
     // for kassa pages
     element: (
-      <AuthGuard roles={[RoleTypes.CASHIER]}>
+      <AuthGuard
+        roles={[
+          RoleTypes.CASHIER,
+          RoleTypes.SUPERADMIN,
+          RoleTypes.HEAD_CASHIER,
+        ]}
+      >
         <KassaLayout />
       </AuthGuard>
     ),

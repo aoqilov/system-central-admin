@@ -108,7 +108,7 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
         )}
       </button>
 
-      {/* <RoleSwitch /> */}
+      {import.meta.env.DEV && <RoleSwitch />}
 
       <div className="flex items-center gap-2 ml-auto">
         {/* Live indicator — tablet+ */}

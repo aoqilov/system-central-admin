@@ -8,7 +8,7 @@ import { OpenXOtchetDialog } from "./modals/OpenXOtchetDialog";
 import { PauseXOtchetDialog } from "./modals/PauseXOtchetDialog";
 import { ZOtchetCloseDrawer } from "./modals/ZOtchetCloseDrawer";
 import { getTodayReports, openReport, closeReport } from "./api/apiKassaOtchet";
-import { reportToPaySummary, buildZHtml, openPrint } from "./otchet.helpers";
+import { reportToPaySummary, buildZHtmlRussian, openPrint } from "./otchet.helpers";
 import { CASHBOX_REPORTS_KEY } from "../kassa.constants";
 import { useCashbox } from "../hooks/useCashbox";
 
@@ -80,11 +80,11 @@ export default function FeatureKassaOtchet() {
   });
 
   function handleZPrint() {
-    if (zreport) openPrint(buildZHtml(zreport));
+    if (zreport) openPrint(buildZHtmlRussian(zreport));
   }
 
   function handleZPrintCopy() {
-    if (zreport) openPrint(buildZHtml(zreport, true));
+    if (zreport) openPrint(buildZHtmlRussian(zreport, true));
   }
 
   return (

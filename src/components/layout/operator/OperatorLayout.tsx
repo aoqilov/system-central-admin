@@ -398,8 +398,7 @@ function OperatorLayoutBody() {
               <LuPanelLeftClose size={18} />
             )}
           </button>
-
-          {/* <RoleSwitch /> */}
+          {import.meta.env.DEV && <RoleSwitch />}
 
           {/* Right: clock + user popover */}
           <div className="flex items-center gap-4 ml-auto">

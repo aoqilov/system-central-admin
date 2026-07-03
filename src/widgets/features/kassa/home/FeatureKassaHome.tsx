@@ -7,8 +7,10 @@
   LuBanknote,
   LuTrash2,
   LuPause,
+  LuCalendar,
 } from "react-icons/lu";
 import { useRef, useState } from "react";
+import dayjs from "dayjs";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusSegment } from "@/components/ui/segment/CusSegment";
 import type { PayType, KartaType } from "./types";
@@ -58,7 +60,7 @@ export default function FeatureKassaHome() {
         className="flex justify-between px-4 tablet:px-6 py-2 border-b shrink-0"
         style={{ borderColor: "var(--border-default)" }}
       >
-        <PageHeader title="Kassa butka #3" />
+        <PageHeader title="Касса будка #3" />
         <HidDeviceStatus
           supported={supported}
           devices={devices}
@@ -106,7 +108,7 @@ export default function FeatureKassaHome() {
                       color: qrInfo.status === "active" ? "#22c55e" : "#6b7280",
                     }}
                   >
-                    {qrInfo.status === "active" ? "Aktiv" : "Nofaol"}
+                    {qrInfo.status === "active" ? "Активна" : "Не активна"}
                   </p>
                   <p
                     className="text-xs mt-0.5"
@@ -116,8 +118,8 @@ export default function FeatureKassaHome() {
                     }}
                   >
                     {qrInfo.status === "active"
-                      ? "QR kod faol holatda"
-                      : "QR kod faol emas"}
+                      ? "NFC код активен"
+                      : "NFC код не активен"}
                   </p>
                 </div>
               </div>
@@ -134,20 +136,38 @@ export default function FeatureKassaHome() {
                 className="text-[10px] font-semibold uppercase tracking-wider"
                 style={{ color: "var(--text-muted)" }}
               >
-                Karta ma'lumotlari
+                Данные карты
               </p>
-              <QrInfoRow icon={LuHash} label="Raqam" value={qrInfo.raqam} />
-              <QrInfoRow icon={LuQrCode} label="Token" value={qrInfo.token} />
               <QrInfoRow
+                icon={LuHash}
+                label="Номер"
+                value={qrInfo.raqam.replace(/\B(?=(\d{3})+(?!\d))/g, " ")}
+              />
+              {/* <QrInfoRow
                 icon={LuLayers}
-                label="Partiya"
+                label="Партия"
                 value={qrInfo.partiya}
               />
               <QrInfoRow
-                icon={LuBanknote}
-                label="Summa"
-                value={qrInfo.amount ? `${qrInfo.amount} so'm` : ""}
-              />
+                icon={LuCalendar}
+                label="Импорт в систему"
+                value={
+                  qrInfo.importedAt
+                    ? dayjs(qrInfo.importedAt).format("DD.MM.YYYY HH:mm")
+                    : ""
+                }
+              /> */}
+              {qrInfo.status === "active" && (
+                <QrInfoRow
+                  icon={LuBanknote}
+                  label="Сумма"
+                  value={Number(qrInfo.amount).toLocaleString("ru-RU")}
+                  suffix="сум"
+                  align="right"
+                  bg="#22c55e18"
+                  large
+                />
+              )}
             </div>
 
             <PendingList
@@ -182,10 +202,10 @@ export default function FeatureKassaHome() {
               className="flex-1"
             >
               <LuTrash2 size={16} />
-              Tozalash
+              Очистить
             </CusButton>
             <CusButton
-            size="xl"
+              size="xl"
               colorPalette="orange"
               variant="solid"
               isDisabled={!qrInfo.raqam}
@@ -196,7 +216,7 @@ export default function FeatureKassaHome() {
               className="flex-1"
             >
               <LuPause size={16} />
-              Kutish
+              Ожидание
             </CusButton>
           </div>
         </div>
@@ -215,8 +235,8 @@ export default function FeatureKassaHome() {
               value={rightMode}
               onValueChange={handleModeChange}
               items={[
-                { id: "aktivatsa", label: "Aktivatsa / To'ldirish" },
-                { id: "relation", label: "Userga relation" },
+                { id: "aktivatsa", label: "Активация / Пополнение" },
+                { id: "relation", label: "Привязка к пользователю" },
               ]}
             />
           </div>
@@ -228,16 +248,16 @@ export default function FeatureKassaHome() {
                   className="text-sm font-medium"
                   style={{ color: "var(--text-3)" }}
                 >
-                  To'lov turi
+                  Тип оплаты
                 </p>
                 <CusSegment
                   layout="block"
                   value={payType}
                   onValueChange={(v) => setPayType(v as PayType)}
                   items={[
-                    { id: "naqd", label: "Naqd" },
-                    { id: "karta", label: "Karta" },
-                    { id: "online", label: "Online to'lov" },
+                    { id: "naqd", label: "Наличные" },
+                    { id: "karta", label: "Карта" },
+                    { id: "online", label: "Онлайн оплата" },
                   ]}
                 />
               </div>
@@ -248,7 +268,7 @@ export default function FeatureKassaHome() {
                     className="text-sm font-medium"
                     style={{ color: "var(--text-3)" }}
                   >
-                    Karta turi
+                    Тип карты
                   </p>
                   <CusSegment
                     value={kartaType}
@@ -267,7 +287,7 @@ export default function FeatureKassaHome() {
                     className="text-sm font-medium"
                     style={{ color: "var(--text-3)" }}
                   >
-                    To'lov tizimi
+                    Платёжная система
                   </p>
                   <CusSegment
                     value={provider}
