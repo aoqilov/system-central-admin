@@ -78,7 +78,7 @@ export function buildXHtml(item: CashboxReport, isCopy = false): string {
     width: 80mm;
     margin: 0;
     padding: 3mm 4mm 20mm;
- font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
+ font-family: 'Arial Black', 'Arial', sans-serif;
     font-size: 11pt;
     font-weight: 700;
     line-height: 1.45;
@@ -226,7 +226,7 @@ export function buildXHtmlRussian(item: CashboxReport, isCopy = false): string {
     width: 80mm;
     margin: 0;
     padding: 3mm 4mm 20mm;
- font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
+ font-family: 'Arial Black', 'Arial', sans-serif;
     font-size: 11pt;
     font-weight: 700;
     line-height: 1.45;
@@ -375,7 +375,7 @@ export function buildZHtml(report: CashboxReport, isCopy = false): string {
     width: 80mm;
     margin: 0;
     padding: 3mm 4mm 20mm;
-   font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
+   font-family: 'Arial Black', 'Arial', sans-serif;
     font-size: 11pt;
     font-weight: 700;
     line-height: 1.45;
@@ -510,7 +510,7 @@ export function buildZHtmlRussian(
     width: 80mm;
     margin: 0;
     padding: 3mm 4mm 20mm;
-font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
+font-family: 'Arial Black', 'Arial', sans-serif;
     font-size: 11pt;
     font-weight: 700;
     line-height: 1.45;
