@@ -77,7 +77,7 @@ export function buildXHtml(item: CashboxReport, isCopy = false): string {
   html, body {
     width: 80mm;
     margin: 0;
-    padding: 3mm 4mm;
+    padding: 3mm 4mm 20mm;
  font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
     font-size: 11pt;
     font-weight: 700;
@@ -225,7 +225,7 @@ export function buildXHtmlRussian(item: CashboxReport, isCopy = false): string {
   html, body {
     width: 80mm;
     margin: 0;
-    padding: 3mm 4mm;
+    padding: 3mm 4mm 20mm;
  font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
     font-size: 11pt;
     font-weight: 700;
@@ -374,7 +374,7 @@ export function buildZHtml(report: CashboxReport, isCopy = false): string {
   html, body {
     width: 80mm;
     margin: 0;
-    padding: 3mm 4mm;
+    padding: 3mm 4mm 20mm;
    font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
     font-size: 11pt;
     font-weight: 700;
@@ -474,7 +474,9 @@ export function buildZHtml(report: CashboxReport, isCopy = false): string {
   <div class="row"><span>Karta sotildi</span><span class="val">${s.kartaSotildi} ta</span></div>
   <div class="row"><span>Karta reg.</span><span class="val">${s.kartaReg} ta</span></div>
 
-  ${report.closed_at ? `<div class="c footer">SMENA YOPILDI<br>${dayjs(report.closed_at).format("DD.MM.YYYY HH:mm")}</div>` : ""}
+  <hr class="sep" style="border-top: 2px solid #000;">
+  <div class="c" style="font-size: 13pt; font-weight: 900; letter-spacing: 1px; padding: 2mm 0;">SMENA YOPILDI<br>${dayjs(report.closed_at || report.report_date).format("DD.MM.YYYY HH:mm")}</div>
+  <hr class="sep" style="border-top: 2px solid #000;">
 </body>
 </html>`;
 }
@@ -507,7 +509,7 @@ export function buildZHtmlRussian(
   html, body {
     width: 80mm;
     margin: 0;
-    padding: 3mm 4mm;
+    padding: 3mm 4mm 20mm;
 font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
     font-size: 11pt;
     font-weight: 700;
@@ -607,7 +609,9 @@ font-family: 'Consolas', 'Menlo', 'Courier New', monospace;
   <div class="row"><span>Карт продано</span><span class="val">${s.kartaSotildi} шт</span></div>
   <div class="row"><span>Карт зарег.</span><span class="val">${s.kartaReg} шт</span></div>
 
-  ${report.closed_at ? `<div class="c footer">СМЕНА ЗАКРЫТА<br>${dayjs(report.closed_at).format("DD.MM.YYYY HH:mm")}</div>` : ""}
+  <hr class="sep" style="border-top: 2px solid #000;">
+  <div class="c" style="font-size: 13pt; font-weight: 900; letter-spacing: 1px; padding: 2mm 0;">СМЕНА ЗАКРЫТА<br>${dayjs(report.closed_at || report.report_date).format("DD.MM.YYYY HH:mm")}</div>
+  <hr class="sep" style="border-top: 2px solid #000;">
 </body>
 </html>`;
 }
