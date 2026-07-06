@@ -34,6 +34,7 @@ import { CASHBOX_REPORTS_KEY } from "../kassa.constants";
 import { useCashbox } from "../hooks/useCashbox";
 import { reportToPaySummary } from "../otchet/otchet.helpers";
 import { fmtDateTime } from "@/utils/dateUtils";
+import { span } from "framer-motion/client";
 
 const HOURLY = [
   { hour: "08:00", amount: 120_000 },
@@ -157,6 +158,12 @@ function CustomTooltip({ active, payload, label }: TipProps) {
 // ─── Table columns ────────────────────────────────────────────────────────────
 
 const COLUMNS: ColumnDef<CashboxTransaction>[] = [
+  {
+    key: "id",
+    header: "#id",
+    width: 30,
+    render: (row) => <span>{row.id}</span>,
+  },
   {
     key: "created_at",
     header: "Vaqt",

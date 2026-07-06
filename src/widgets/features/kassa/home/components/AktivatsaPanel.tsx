@@ -2,11 +2,15 @@ import { useState, useEffect } from "react";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import type { PayType, KartaType } from "../types";
 import { topupCard } from "../api/apiKassaHomePay";
+import { buildActivationHtml, openPrint } from "../forCheckKassa";
 
 export type { PayType, KartaType };
 
+const CARD_PRICE = 12_000;
+
 interface Props {
   nfc: string;
+  isNewCard: boolean;
   payType: PayType;
   kartaType: KartaType;
   provider: "payme" | "click" | "uzum-bank";
@@ -70,7 +74,7 @@ function NumKey({
   );
 }
 
-export function AktivatsaPanel({ nfc, payType, kartaType, provider, onSuccess }: Props) {
+export function AktivatsaPanel({ nfc, isNewCard, payType, kartaType, provider, onSuccess }: Props) {
   const [summa, setSumma]   = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError]   = useState<string | null>(null);
@@ -108,13 +112,14 @@ export function AktivatsaPanel({ nfc, payType, kartaType, provider, onSuccess }:
     setLoading(true);
     setError(null);
     try {
-      await topupCard({
+      const res = await topupCard({
         nfc,
         amount: Number(summa),
         payment_type: payType === "naqd" ? "cash" : payType === "karta" ? "card" : "online",
         ...(payType === "karta" && { payment_card_type: kartaType }),
         ...(payType === "online" && { payment_service_type: provider === "uzum-bank" ? "uzum" : provider }),
       });
+      openPrint(buildActivationHtml(res.data.transaction, isNewCard ? CARD_PRICE : undefined));
       setSumma("");
       onSuccess();
     } catch {
@@ -124,6 +129,8 @@ export function AktivatsaPanel({ nfc, payType, kartaType, provider, onSuccess }:
     }
   }
 
+  const topupAmount = Number(summa) || 0;
+  const total = isNewCard ? topupAmount + CARD_PRICE : topupAmount;
   const display = summa ? formatSumma(summa) : "0";
 
   return (
@@ -131,32 +138,56 @@ export function AktivatsaPanel({ nfc, payType, kartaType, provider, onSuccess }:
       <div className="flex-1 overflow-y-auto flex flex-col gap-3">
         {/* Amount display */}
         <div
-          className="flex items-end justify-end gap-2 px-4 py-3 rounded-2xl"
+          className="flex flex-col px-4 py-3 rounded-2xl gap-1"
           style={{
             background: "var(--bg-second)",
             border: `1px solid ${error ? "#ef444440" : "var(--border-default)"}`,
             minHeight: 64,
           }}
         >
-          <span
-            style={{
-              fontSize: summa.length > 9 ? "1.6rem" : "2.2rem",
-              fontWeight: 700,
-              color: summa ? "var(--text-default)" : "var(--text-dim)",
-              fontVariantNumeric: "tabular-nums",
-              letterSpacing: "0.01em",
-              lineHeight: 1,
-              transition: "font-size 0.1s",
-            }}
-          >
-            {display}
-          </span>
-          <span
-            className="pb-1 font-semibold text-sm"
-            style={{ color: "var(--text-muted)" }}
-          >
-            UZS
-          </span>
+          {isNewCard && (
+            <div className="flex flex-col gap-0.5 pb-2" style={{ borderBottom: "1px dashed var(--border-default)" }}>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+                  Пополнение
+                </span>
+                <span className="text-sm font-bold" style={{ color: "var(--text-default)", fontVariantNumeric: "tabular-nums" }}>
+                  {display} <span className="text-xs font-normal" style={{ color: "var(--text-muted)" }}>UZS</span>
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+                  Карта (1 раз)
+                </span>
+                <span className="text-sm font-bold" style={{ color: "#f59e0b", fontVariantNumeric: "tabular-nums" }}>
+                  {CARD_PRICE.toLocaleString("ru-RU")} <span className="text-xs font-normal" style={{ color: "var(--text-muted)" }}>UZS</span>
+                </span>
+              </div>
+            </div>
+          )}
+          <div className="flex items-end justify-between gap-2">
+            <span className="text-xs font-semibold" style={{ color: isNewCard ? "var(--text-muted)" : "transparent" }}>
+              ИТОГО
+            </span>
+            <div className="flex items-end gap-2">
+              <span
+                style={{
+                  fontSize: String(total).length > 9 ? "1.6rem" : "2.2rem",
+                  fontWeight: 700,
+                  color: summa ? "var(--text-default)" : "var(--text-dim)",
+                  fontVariantNumeric: "tabular-nums",
+                  letterSpacing: "0.01em",
+                  lineHeight: 1,
+                  transition: "font-size 0.1s",
+                }}
+              >
+                {isNewCard ? (summa ? total.toLocaleString("ru-RU") : CARD_PRICE.toLocaleString("ru-RU")) : display}
+              </span>
+              <span className="pb-1 font-semibold text-sm" style={{ color: "var(--text-muted)" }}>
+                UZS
+              </span>
+            </div>
+          </div>
         </div>
 
         {error && (
@@ -193,7 +224,9 @@ export function AktivatsaPanel({ nfc, payType, kartaType, provider, onSuccess }:
           loadingText="Bajarilmoqda..."
           onClick={handleSubmit}
         >
-          Aktivatsa / To'ldirish
+          {isNewCard
+            ? `Активация — ${total.toLocaleString("ru-RU")} UZS`
+            : "Пополнение"}
         </CusButton>
       </div>
     </div>

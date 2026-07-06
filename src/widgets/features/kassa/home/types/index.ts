@@ -46,8 +46,7 @@ export interface TopupPayload {
 
 export interface TopupTransaction {
   id: number;
-  card: number;
-  card_number: string;
+  card: string;
   nfc: string;
   type: TxType;
   amount: number;

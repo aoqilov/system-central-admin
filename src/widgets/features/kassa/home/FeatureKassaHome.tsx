@@ -313,6 +313,7 @@ export default function FeatureKassaHome() {
               <AktivatsaPanel
                 key={panelKey}
                 nfc={card?.nfc ?? ""}
+                isNewCard={qrInfo.status === "no-active" && !!qrInfo.raqam}
                 payType={payType}
                 kartaType={kartaType}
                 provider={provider}
