@@ -1,28 +1,30 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { LuPlus } from "react-icons/lu";
-import { useNfcCards } from "./hooks/useNfcCards";
+import { useNfcVip } from "./hooks/useNfcVip";
 import { NfcFilters } from "./components/NfcFilters";
 import { NfcTable } from "./components/NfcTable";
 import NfcStatusCards from "./components/NfcStatusCards";
 import { EditNfcStatusDialog } from "./modals/EditNfcStatusDialog";
 import { DeleteNfcDialog } from "./modals/DeleteNfcDialog";
 import { GenerateNfcDialog } from "./modals/GenerateNfcDialog";
+import { InfoNfcDialog } from "./modals/InfoNfcDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
-import { getCards, getCardsStats } from "./api/nfcApi";
+import { getCards, getCardsStats } from "./api/nfcVipApi";
 import type { Card } from "./nfc.types";
+import PageHeader from "@/widgets/shared-ui/PageHeader";
 
-export default function FeatureNfcCards() {
+export default function FeatureNfcVip() {
   const { filters, page, pageSize, setFilters, setPage, setPageSize } =
-    useNfcCards();
-
+    useNfcVip();
 
   const [generateOpen, setGenerateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Card | null>(null);
   const [deleteTargets, setDeleteTargets] = useState<Card[]>([]);
+  const [infoTarget, setInfoTarget] = useState<Card | null>(null);
 
   const { data: statsData } = useQuery({
-    queryKey: ["nfc-cards-stats"],
+    queryKey: ["nfc-vip-cards-stats"],
     queryFn: getCardsStats,
   });
 
@@ -35,7 +37,7 @@ export default function FeatureNfcCards() {
   }, [batches]);
 
   const { data: cardsData, isLoading } = useQuery({
-    queryKey: ["nfc-cards", filters, page, pageSize],
+    queryKey: ["nfc-vip-cards", filters, page, pageSize],
     queryFn: () =>
       getCards({
         page,
@@ -58,28 +60,24 @@ export default function FeatureNfcCards() {
     [],
   );
 
+  const editBatchName = batches.find(
+    (b) => String(b.batch) === editTarget?.batch,
+  )?.batchName;
+
+  const infoBatchName = batches.find(
+    (b) => String(b.batch) === infoTarget?.batch,
+  )?.batchName;
+
   return (
     <div className="p-4 tablet:p-6 space-y-5">
-      {/* Header */}
-      <div>
-        <p className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>
-          Boshqaruv
-        </p>
-        <h1
-          className="text-2xl font-semibold"
-          style={{ color: "var(--text-default)" }}
-        >
-          NFC Kartalar
-        </h1>
-        <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
-          Mehmonlar uchun NFC kirish kartalarini boshqarish.
-        </p>
-      </div>
+      <PageHeader
+        title="NFC карты:"
+        highlight="VIP"
+        subtitle="Управление VIP NFC картами"
+      />
 
-      {/* Stats — o'zi fetch qiladi */}
       <NfcStatusCards />
 
-      {/* Batch filter toggles */}
       {batches.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {batches.map((b) => (
@@ -88,18 +86,32 @@ export default function FeatureNfcCards() {
               onClick={() => setFilters({ batch: b.batch })}
               className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
               style={{
-                background: filters.batch === b.batch ? "var(--text-default)" : "var(--bg-second)",
-                color: filters.batch === b.batch ? "var(--bg-main)" : "var(--text-muted)",
+                background:
+                  filters.batch === b.batch
+                    ? "var(--text-default)"
+                    : "var(--bg-second)",
+                color:
+                  filters.batch === b.batch
+                    ? "var(--bg-main)"
+                    : "var(--text-muted)",
                 border: "1px solid var(--border-default)",
               }}
             >
               {b.batchName}
+              <span
+                className="ml-1.5 px-1.5 py-0.5 rounded text-xs font-semibold"
+                style={{
+                  background: filters.batch === b.batch ? "#2563eb" : "#dbeafe",
+                  color: filters.batch === b.batch ? "#fff" : "#1d4ed8",
+                }}
+              >
+                {b.total}
+              </span>
             </button>
           ))}
         </div>
       )}
 
-      {/* Table area */}
       <div
         className="rounded-xl"
         style={{
@@ -107,7 +119,6 @@ export default function FeatureNfcCards() {
           border: "1px solid var(--border-default)",
         }}
       >
-        {/* Filters + Add button */}
         <div
           className="p-4 flex flex-wrap items-end gap-2"
           style={{ borderBottom: "1px solid var(--border-default)" }}
@@ -125,19 +136,19 @@ export default function FeatureNfcCards() {
             leftIcon={<LuPlus size={14} />}
             onClick={() => setGenerateOpen(true)}
           >
-            Qo'shish
+            Добавить
           </CusButton>
         </div>
 
-        {/* Count info */}
         <div className="px-4 pt-3 pb-1">
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            {total} ta karta
-            {filters.status !== "all" || filters.search || filters.batch !== null ? " (filtrlangan)" : ""}
+            {total} карт
+            {filters.status !== "all" || filters.search || filters.batch !== null
+              ? " (отфильтровано)"
+              : ""}
           </p>
         </div>
 
-        {/* Table */}
         <div className="px-4 pb-4">
           <NfcTable
             data={cards}
@@ -147,12 +158,12 @@ export default function FeatureNfcCards() {
             onPageChange={setPage}
             onEdit={handleEditOpen}
             onDelete={handleDeleteOpen}
+            onInfo={setInfoTarget}
             isLoading={isLoading}
           />
         </div>
       </div>
 
-      {/* Dialogs */}
       <GenerateNfcDialog
         open={generateOpen}
         onClose={() => setGenerateOpen(false)}
@@ -162,12 +173,20 @@ export default function FeatureNfcCards() {
         open={editTarget !== null}
         onClose={() => setEditTarget(null)}
         card={editTarget}
+        batchName={editBatchName}
       />
 
       <DeleteNfcDialog
         open={deleteTargets.length > 0}
         onClose={() => setDeleteTargets([])}
         cards={deleteTargets}
+      />
+
+      <InfoNfcDialog
+        open={infoTarget !== null}
+        onClose={() => setInfoTarget(null)}
+        card={infoTarget}
+        batchName={infoBatchName}
       />
     </div>
   );

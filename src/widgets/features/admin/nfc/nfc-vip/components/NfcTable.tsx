@@ -5,6 +5,7 @@ import { CusTable, type ColumnDef } from "@/components/ui/table/CusTable";
 import { CusPagination } from "@/components/ui/table/CusPagination";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { NfcStatusBadge } from "./NfcStatusBadge";
+import { CusBadge } from "@/components/ui/badge/CusBadge";
 import type { Card } from "../nfc.types";
 
 interface Props {
@@ -16,72 +17,88 @@ interface Props {
   onPageChange: (page: number) => void;
   onEdit: (cards: Card[]) => void;
   onDelete: (cards: Card[]) => void;
+  onInfo: (card: Card) => void;
 }
 
-const COLUMNS: ColumnDef<Card>[] = [
-  {
-    key: "id",
-    header: "ID",
-    render: (r) => (
-      <span
-        className="font-mono text-xs font-semibold"
-        style={{ color: "var(--text-default)" }}
-      >
-        #{r.id}
-      </span>
-    ),
-  },
-  {
-    key: "code",
-    header: "Karta kodi",
-    render: (r) => (
-      <span
-        className="font-mono text-xs"
-        style={{ color: "var(--text-default)" }}
-      >
-        {r.card}
-      </span>
-    ),
-  },
-  {
-    key: "batch",
-    header: "Batch",
-    render: (r) => (
-      <span
-        className="font-mono text-xs"
-        style={{ color: "var(--text-default)" }}
-      >
-        {r.batch}
-      </span>
-    ),
-  },
-  {
-    key: "nfc",
-    header: "nfc kodi",
-    render: (r) => (
-      <span
-        className="font-mono text-xs"
-        style={{ color: "var(--text-default)" }}
-      >
-        {r.nfc}
-      </span>
-    ),
-  },
-  {
-    key: "status",
-    header: "Status",
-    render: (r) => <NfcStatusBadge status={r.status} />,
-  },
-  {
-    key: "imported_at",
-    header: "Yaratilgan",
-    render: (r) => (
-      <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-        {fmtDateTime(r.imported_at)}
-      </span>
-    ),
-  },
-];
+function buildColumns(onInfo: (card: Card) => void): ColumnDef<Card>[] {
+  return [
+    {
+      key: "id",
+      header: "ID",
+      render: (r) => (
+        <button
+          onClick={(e) => { e.stopPropagation(); onInfo(r); }}
+          className="font-mono text-xs font-semibold underline underline-offset-2 transition-opacity hover:opacity-70"
+          style={{ color: "var(--color-blue, #3b82f6)", cursor: "pointer" }}
+        >
+          #{r.id}
+        </button>
+      ),
+    },
+    {
+      key: "type",
+      header: "Тип",
+      render: () => (
+        <CusBadge colorPalette="purple" variant="subtle" size="sm">
+          VIP
+        </CusBadge>
+      ),
+    },
+    {
+      key: "name",
+      header: "Кому выдана",
+      render: (r) => (
+        <span
+          className="text-sm"
+          style={{ color: r.owner ? "var(--text-default)" : "var(--text-muted)" }}
+        >
+          {r.owner ?? "Не указано"}
+        </span>
+      ),
+    },
+    {
+      key: "code",
+      header: "Код карты",
+      render: (r) => (
+        <span className="font-mono text-xs" style={{ color: "var(--text-default)" }}>
+          {r.card}
+        </span>
+      ),
+    },
+    {
+      key: "batch",
+      header: "Batch",
+      render: (r) => (
+        <span className="font-mono text-xs" style={{ color: "var(--text-default)" }}>
+          {r.batch}
+        </span>
+      ),
+    },
+    {
+      key: "nfc",
+      header: "NFC код",
+      render: (r) => (
+        <span className="font-mono text-xs" style={{ color: "var(--text-default)" }}>
+          {r.nfc}
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      header: "Статус",
+      render: (r) => <NfcStatusBadge status={r.status} />,
+    },
+    {
+      key: "imported_at",
+      header: "Создан",
+      render: (r) => (
+        <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+          {fmtDateTime(r.imported_at)}
+        </span>
+      ),
+    },
+  ];
+}
 
 export function NfcTable({
   data,
@@ -92,8 +109,11 @@ export function NfcTable({
   onPageChange,
   onEdit,
   onDelete,
+  onInfo,
 }: Props) {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+  const columns = useMemo(() => buildColumns(onInfo), [onInfo]);
 
   useEffect(() => {
     setSelectedIds([]);
@@ -125,7 +145,7 @@ export function NfcTable({
             className="text-sm font-medium flex-1"
             style={{ color: "var(--text-default)" }}
           >
-            {count} ta tanlandi
+            Выбрано: {count}
           </span>
           <CusButton
             size="xs"
@@ -135,7 +155,7 @@ export function NfcTable({
             isDisabled={count !== 1}
             onClick={() => onEdit(selectedCards)}
           >
-            Tahrirlash
+            Изменить
           </CusButton>
           <CusButton
             size="xs"
@@ -144,7 +164,7 @@ export function NfcTable({
             leftIcon={<LuTrash2 size={12} />}
             onClick={() => onDelete(selectedCards)}
           >
-            O'chirish
+            Удалить
           </CusButton>
           <CusButton
             size="xs"
@@ -173,13 +193,13 @@ export function NfcTable({
           ) : (
             <CusTable<Card>
               data={data}
-              columns={COLUMNS}
+              columns={columns}
               variant="outline"
               interactive
               selectable
               selectedRows={selectedIds}
               onSelectionChange={setSelectedIds}
-              emptyText="Kartalar topilmadi"
+              emptyText="Карты не найдены"
             />
           )}
         </div>

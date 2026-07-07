@@ -47,7 +47,7 @@ export function SendToAccountingDialog({
           <Dialog.ActionTrigger asChild>
             <CusButton variant="outline">Отмена</CusButton>
           </Dialog.ActionTrigger>
-          <CusButton colorPalette="blue" onClick={handleSend} loading={loading}>
+          <CusButton colorPalette="blue" onClick={handleSend} isLoading={loading}>
             <LuSend size={14} /> Отправить
           </CusButton>
         </>

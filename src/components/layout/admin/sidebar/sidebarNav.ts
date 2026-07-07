@@ -12,6 +12,9 @@ import {
   LuFileOutput,
   LuFileInput,
   LuCreditCard,
+  LuList,
+  LuStar,
+  LuBuilding2,
 } from "react-icons/lu";
 import { SiTestcafe } from "react-icons/si";
 import { RoleTypes } from "@/const/constData";
@@ -21,6 +24,7 @@ import { LiaIdCardSolid } from "react-icons/lia";
 
 export interface NavItemDef {
   labelKey: string;
+  label?: string;
   icon: IconType;
   to: string;
   roles?: RoleTypes[];
@@ -29,6 +33,7 @@ export interface NavItemDef {
 
 export interface SubItemDef {
   labelKey: string;
+  label?: string;
   icon: IconType;
   to: string;
   roles?: RoleTypes[];
@@ -36,6 +41,7 @@ export interface SubItemDef {
 
 export interface NavSubMenuDef {
   labelKey: string;
+  label?: string;
   icon: IconType;
   to?: never;
   roles?: RoleTypes[];
@@ -198,8 +204,52 @@ export const navGroups: NavGroupDef[] = [
       {
         labelKey: "nfcCards",
         icon: LuCreditCard,
-        to: "/nfc-cards",
-        roles: [RoleTypes.SUPERADMIN, RoleTypes.HEAD_CASHIER],
+        subItems: [
+          {
+            labelKey: "nfcAll",
+            label: "Все",
+            icon: LuList,
+            to: "/nfc-cards/all",
+            roles: [
+              RoleTypes.SUPERADMIN,
+              RoleTypes.HEAD_CASHIER,
+              RoleTypes.HEAD_ACCOUNTANT,
+            ],
+          },
+          {
+            labelKey: "nfcClassic",
+            label: "Classic",
+            icon: LuCreditCard,
+            to: "/nfc-cards/classic",
+            roles: [
+              RoleTypes.SUPERADMIN,
+              RoleTypes.HEAD_CASHIER,
+              RoleTypes.HEAD_ACCOUNTANT,
+            ],
+          },
+          {
+            labelKey: "nfcVip",
+            label: "VIP",
+            icon: LuStar,
+            to: "/nfc-cards/vip",
+            roles: [
+              RoleTypes.SUPERADMIN,
+              RoleTypes.HEAD_CASHIER,
+              RoleTypes.HEAD_ACCOUNTANT,
+            ],
+          },
+          {
+            labelKey: "nfcOrganization",
+            label: "Organization",
+            icon: LuBuilding2,
+            to: "/nfc-cards/organization",
+            roles: [
+              RoleTypes.SUPERADMIN,
+              RoleTypes.HEAD_CASHIER,
+              RoleTypes.HEAD_ACCOUNTANT,
+            ],
+          },
+        ],
       },
     ],
   },

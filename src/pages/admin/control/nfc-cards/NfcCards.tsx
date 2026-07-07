@@ -1,10 +1,10 @@
-import FeatureNfcCards from "@/widgets/features/admin/nfc-cards/FeatureNfcCards";
+import FeatureNfcAll from "@/widgets/features/admin/nfc/nfc-all/FeatureNfcAll";
 import React from "react";
 
 const NfcCards = () => {
   return (
     <div>
-      <FeatureNfcCards />
+      <FeatureNfcAll />
     </div>
   );
 };

@@ -62,7 +62,10 @@ const Login = lazy(() => import("../pages/Login"));
 const Unauthorized = lazy(() => import("../pages/Unauthorized"));
 const NotFound = lazy(() => import("../pages/NotFound"));
 const DevUI = lazy(() => import("../pages/admin/DevUI"));
-const NfcCards = lazy(() => import("../pages/admin/control/NfcCards"));
+const NfcCards = lazy(() => import("../pages/admin/control/nfc-cards/NfcCards"));
+const NfcClassic = lazy(() => import("../pages/admin/control/nfc-cards/NfcClassic"));
+const NfcVIP = lazy(() => import("../pages/admin/control/nfc-cards/NfcVIP"));
+const NfcOrganization = lazy(() => import("../pages/admin/control/nfc-cards/NfcOrganization"));
 const LockScreen = lazy(() => import("../pages/admin/LockScreen"));
 const RoleKassaMainIncoming = lazy(
   () => import("../pages/admin/main/RoleKassaMainIncoming"),
@@ -153,7 +156,23 @@ export const routes: RouteObject[] = [
 
       {
         path: "/nfc-cards",
+        element: <Navigate to="/nfc-cards/all" replace />,
+      },
+      {
+        path: "/nfc-cards/all",
         element: rg(<NfcCards />, [SUPERADMIN, HEAD_CASHIER]),
+      },
+      {
+        path: "/nfc-cards/classic",
+        element: rg(<NfcClassic />, [SUPERADMIN, HEAD_CASHIER]),
+      },
+      {
+        path: "/nfc-cards/vip",
+        element: rg(<NfcVIP />, [SUPERADMIN, HEAD_CASHIER]),
+      },
+      {
+        path: "/nfc-cards/organization",
+        element: rg(<NfcOrganization />, [SUPERADMIN, HEAD_CASHIER]),
       },
       {
         path: "/rolekassa-main/incoming",

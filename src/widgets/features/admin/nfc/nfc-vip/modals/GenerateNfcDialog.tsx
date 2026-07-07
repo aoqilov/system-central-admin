@@ -1,11 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog } from "@chakra-ui/react";
-import { LuCreditCard, LuFileSpreadsheet, LuUpload, LuX } from "react-icons/lu";
+import { LuStar, LuFileSpreadsheet, LuUpload, LuX } from "react-icons/lu";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusInput } from "@/components/ui/inputs/CusInput";
-import { uploadCards } from "../api/nfcApi";
+import { uploadCards } from "../api/nfcVipApi";
 
 interface Props {
   open: boolean;
@@ -16,7 +16,6 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
   const qc = useQueryClient();
   const [label, setLabel] = useState("");
   const [errors, setErrors] = useState<{ label?: string; file?: string }>({});
-
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -25,8 +24,8 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
     mutationFn: ({ file, batchName }: { file: File; batchName: string }) =>
       uploadCards(file, batchName),
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ["nfc-cards"] });
-      void qc.invalidateQueries({ queryKey: ["nfc-cards-stats"] });
+      void qc.invalidateQueries({ queryKey: ["nfc-vip-cards"] });
+      void qc.invalidateQueries({ queryKey: ["nfc-vip-cards-stats"] });
       reset();
       onClose();
     },
@@ -34,8 +33,8 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
 
   function validate(): boolean {
     const errs: typeof errors = {};
-    if (!label.trim()) errs.label = "Partiya nomi bo'sh bo'lmasin";
-    if (!excelFile) errs.file = "Excel fayl tanlanmagan";
+    if (!label.trim()) errs.label = "Название партии не может быть пустым";
+    if (!excelFile) errs.file = "Файл Excel не выбран";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -67,6 +66,10 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
     if (fileRef.current) fileRef.current.value = "";
   }
 
+  useEffect(() => {
+    if (open) reset();
+  }, [open]);
+
   function handleClose() {
     if (uploadMut.isPending) return;
     reset();
@@ -77,7 +80,7 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
     <CusDialog
       open={open}
       onClose={handleClose}
-      title="Kartalar qo'shish"
+      title="Добавить VIP карты"
       size="sm"
       footer={
         <>
@@ -87,26 +90,25 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
               colorPalette="gray"
               onClick={handleClose}
             >
-              Bekor qilish
+              Отмена
             </CusButton>
           </Dialog.ActionTrigger>
           <CusButton
             colorPalette="blue"
-            leftIcon={<LuCreditCard size={14} />}
+            leftIcon={<LuStar size={14} />}
             isLoading={uploadMut.isPending}
             isDisabled={!label.trim() || !excelFile || uploadMut.isPending}
             onClick={handleSubmit}
           >
-            Yuklash
+            Загрузить
           </CusButton>
         </>
       }
     >
       <div className="space-y-4">
-        {/* Manual form */}
         <CusInput
-          label="Partia Nomi"
-          placeholder="masalan: VIP to'plam..."
+          label="Название партии"
+          placeholder="например: VIP-Platinum..."
           value={label}
           onChange={(e) => {
             setLabel(e.target.value);
@@ -116,7 +118,6 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
           disabled={uploadMut.isPending}
         />
 
-        {/* Excel upload */}
         <div>
           <input
             ref={fileRef}
@@ -181,13 +182,13 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
                   className="text-sm font-medium"
                   style={{ color: "var(--text-default)" }}
                 >
-                  Excel faylni yuklang
+                  Загрузите файл Excel
                 </p>
                 <p
                   className="text-xs mt-0.5"
                   style={{ color: "var(--text-muted)" }}
                 >
-                  .xlsx yoki .xls — bosing yoki sudrab tashlang
+                  .xlsx или .xls — нажмите или перетащите файл
                 </p>
               </div>
               <CusButton
@@ -195,9 +196,8 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
                 variant="outline"
                 colorPalette="gray"
                 leftIcon={<LuFileSpreadsheet size={13} />}
-                onClick={() => fileRef.current?.click()}
               >
-                Fayl tanlash
+                Выбрать файл
               </CusButton>
             </div>
           )}

@@ -42,7 +42,7 @@ function NavItem({ item, onNavClick }: { item: NavItemDef; onNavClick: () => voi
             style={{ color: isActive ? "#ffffff" : "var(--text-muted)" }}
             className={isActive ? "" : "group-hover:text-slate-300"}
           />
-          {t(item.labelKey)}
+          {item.label ?? t(item.labelKey)}
         </>
       )}
     </NavLink>
@@ -70,7 +70,7 @@ function NavSubMenu({ item, onNavClick }: { item: NavSubMenuDef; onNavClick: () 
         style={{ color: isAnyActive ? "var(--text-default)" : "var(--text-4)" }}
       >
         <ParentIcon size={16} style={{ color: isAnyActive ? "#60a5fa" : "var(--text-muted)" }} />
-        <span className="flex-1 text-left">{t(item.labelKey)}</span>
+        <span className="flex-1 text-left">{item.label ?? t(item.labelKey)}</span>
         <LuChevronDown
           size={13}
           className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
@@ -99,7 +99,7 @@ function NavSubMenu({ item, onNavClick }: { item: NavSubMenuDef; onNavClick: () 
                 style={{ color: isActive ? "#ffffff" : "var(--text-4)" }}
               >
                 <SubIcon size={13} style={{ color: isActive ? "#ffffff" : "var(--text-muted)" }} />
-                {t(sub.labelKey)}
+                {sub.label ?? t(sub.labelKey)}
               </NavLink>
             );
           })}
