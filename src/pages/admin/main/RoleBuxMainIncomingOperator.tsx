@@ -1,10 +1,9 @@
-import FeatureRoleOpeMainExport from "@/widgets/features/admin/role-ope-main-export/FeatureRoleOpeMainExport";
-import React from "react";
+import FeatureRoleBuxMainOperator from "@/widgets/features/admin/role-ope-main-export/FeatureRoleOpeMainExport";
 
 const RoleBuxMainIncomingOperator = () => {
   return (
     <div>
-      <FeatureRoleOpeMainExport />1
+      <FeatureRoleBuxMainOperator />
     </div>
   );
 };

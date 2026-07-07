@@ -337,12 +337,16 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
           <Controller
             control={control}
             name="password"
-            rules={{ minLength: { value: 6, message: "Минимум 6 символов" } }}
+            rules={{
+              minLength: { value: 6, message: "Минимум 6 символов" },
+              maxLength: { value: 6, message: "Максимум 6 символов" },
+            }}
             render={({ field, fieldState }) => (
               <CusInput
                 label="Новый пароль (необязательно)"
                 type="password"
-                placeholder="Минимум 6 символов"
+                placeholder="6 символов"
+                maxLength={6}
                 errorText={fieldState.error?.message}
                 {...field}
               />

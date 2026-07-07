@@ -8,18 +8,22 @@ import {
   LuTrendingUp,
   LuUserCheck,
 } from "react-icons/lu";
+import type { ZReportTotals } from "../types";
+
 function StatCard({
   label,
   value,
   sub,
   color,
   icon: Icon,
+  loading,
 }: {
   label: string;
   value: string;
   sub?: string;
   color: string;
   icon: React.ElementType;
+  loading?: boolean;
 }) {
   return (
     <CusCard className="p-3 flex flex-col gap-2 flex-shrink-0" style={{ minWidth: 188 }}>
@@ -35,10 +39,14 @@ function StatCard({
         </div>
       </div>
       <div>
-        <p className="text-base font-bold leading-none" style={{ color: "var(--text-default)" }}>
-          {value}
-        </p>
-        {sub && (
+        {loading ? (
+          <div className="h-5 w-24 rounded animate-pulse" style={{ background: "var(--bg-hover)" }} />
+        ) : (
+          <p className="text-base font-bold leading-none" style={{ color: "var(--text-default)" }}>
+            {value} <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>сум</span>
+          </p>
+        )}
+        {sub && !loading && (
           <p className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>{sub}</p>
         )}
       </div>
@@ -46,18 +54,19 @@ function StatCard({
   );
 }
 
-const fmt = (v: number) =>
-  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)} млн` : v.toLocaleString();
+const fmt = (v: number) => v.toLocaleString("ru-RU");
 
-const NAQD      = 4_200_000;
-const UZCARD    = 3_150_000;
-const HUMO      = 2_800_000;
-const UZUMBANK  = 1_950_000;
-const CLICK     = 2_300_000;
-const PAYME     = 1_750_000;
-const TOTAL     = NAQD + UZCARD + HUMO + UZUMBANK + CLICK + PAYME;
+const pct = (part: number, total: number) =>
+  total > 0 ? `${Math.round((part / total) * 100)}%` : "0%";
 
-export function KassaStatCards() {
+interface Props {
+  totals: ZReportTotals | undefined;
+  isLoading: boolean;
+}
+
+export function KassaStatCards({ totals, isLoading }: Props) {
+  const t = totals;
+
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>
@@ -65,15 +74,15 @@ export function KassaStatCards() {
       </p>
       <div className="overflow-x-auto -mx-4 tablet:-mx-6 px-4 tablet:px-6 pb-1">
         <div className="flex gap-3">
-          <StatCard label="Выручка за сегодня"    value={fmt(TOTAL)}    sub="сум"                                         color="var(--color-blue)"   icon={LuBanknote}   />
-          <StatCard label="Наличные"              value={fmt(NAQD)}     sub={`${Math.round((NAQD     / TOTAL) * 100)}%`}  color="var(--color-green)"  icon={LuWallet}     />
-          <StatCard label="UzCard"                value={fmt(UZCARD)}   sub={`${Math.round((UZCARD   / TOTAL) * 100)}%`}  color="var(--color-blue)"   icon={LuCreditCard} />
-          <StatCard label="Humo"                  value={fmt(HUMO)}     sub={`${Math.round((HUMO     / TOTAL) * 100)}%`}  color="var(--color-purple)" icon={LuCreditCard} />
-          <StatCard label="UzumBank"              value={fmt(UZUMBANK)} sub={`${Math.round((UZUMBANK / TOTAL) * 100)}%`}  color="var(--color-cyan)"   icon={LuSmartphone} />
-          <StatCard label="Click"                 value={fmt(CLICK)}    sub={`${Math.round((CLICK    / TOTAL) * 100)}%`}  color="#f97316"             icon={LuSmartphone} />
-          <StatCard label="Payme"                 value={fmt(PAYME)}    sub={`${Math.round((PAYME    / TOTAL) * 100)}%`}  color="#ef4444"             icon={LuSmartphone} />
-          <StatCard label="Карт продано"          value="54"            sub="сегодня"                                     color="var(--color-yellow)" icon={LuTrendingUp} />
-          <StatCard label="Регистрация карт"      value="31"            sub="сегодня"                                     color="var(--color-cyan)"   icon={LuUserCheck}  />
+          <StatCard loading={isLoading} label="Выручка за сегодня" value={fmt(t?.total_amount ?? 0)}    sub="сум"                                                               color="var(--color-blue)"   icon={LuBanknote}   />
+          <StatCard loading={isLoading} label="Наличные"           value={fmt(t?.cash_amount ?? 0)}     sub={pct(t?.cash_amount ?? 0, t?.total_amount ?? 0)}                    color="var(--color-green)"  icon={LuWallet}     />
+          <StatCard loading={isLoading} label="UzCard"             value={fmt(t?.uzcard_amount ?? 0)}   sub={pct(t?.uzcard_amount ?? 0, t?.total_amount ?? 0)}                  color="var(--color-blue)"   icon={LuCreditCard} />
+          <StatCard loading={isLoading} label="Humo"               value={fmt(t?.humo_amount ?? 0)}     sub={pct(t?.humo_amount ?? 0, t?.total_amount ?? 0)}                    color="#38bdf8"             icon={LuCreditCard} />
+          <StatCard loading={isLoading} label="UzumBank"           value={fmt(t?.uzum_amount ?? 0)}     sub={pct(t?.uzum_amount ?? 0, t?.total_amount ?? 0)}                    color="#ec4899"             icon={LuSmartphone} />
+          <StatCard loading={isLoading} label="Click"              value={fmt(t?.click_amount ?? 0)}    sub={pct(t?.click_amount ?? 0, t?.total_amount ?? 0)}                   color="#1e40af"             icon={LuSmartphone} />
+          <StatCard loading={isLoading} label="Payme"              value={fmt(t?.payme_amount ?? 0)}    sub={pct(t?.payme_amount ?? 0, t?.total_amount ?? 0)}                   color="#f97316"             icon={LuSmartphone} />
+          <StatCard loading={isLoading} label="Карт продано"       value={String(t?.activated_cards_count ?? 0)}  sub="сегодня"                                                color="var(--color-yellow)" icon={LuTrendingUp} />
+          <StatCard loading={isLoading} label="Регистрация карт"   value={String(t?.relationed_cards_count ?? 0)} sub="сегодня"                                                color="var(--color-cyan)"   icon={LuUserCheck}  />
         </div>
       </div>
     </div>

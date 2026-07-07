@@ -4,7 +4,7 @@ import { ExportTable } from "./components/ExportTable";
 import { ExportDateControls } from "./components/ExportDateControls";
 import { useRoleOpeMainExport } from "./hooks/useRoleOpeMainExport";
 
-export default function FeatureRoleOpeMainExport() {
+export default function FeatureRoleBuxMainOperator() {
   const {
     tab,
     setTab,
@@ -28,8 +28,8 @@ export default function FeatureRoleOpeMainExport() {
     <div className="p-4 desktop:p-6 space-y-4 pb-8">
       <div className="flex flex-col gap-3 tablet:flex-row tablet:items-start tablet:justify-between">
         <PageHeader
-          title="Экспорт отчёта"
-          highlight="операторов"
+          title="Входящие отчёты:"
+          highlight="Операторов"
           subtitle={subtitle}
         />
         <ExportDateControls
@@ -46,11 +46,15 @@ export default function FeatureRoleOpeMainExport() {
       </div>
 
       {isLoading && (
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>Загрузка...</p>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Загрузка...
+        </p>
       )}
 
       {isError && (
-        <p className="text-sm" style={{ color: "#ef4444" }}>Ошибка загрузки данных</p>
+        <p className="text-sm" style={{ color: "#ef4444" }}>
+          Ошибка загрузки данных
+        </p>
       )}
 
       {!isLoading && !isError && (

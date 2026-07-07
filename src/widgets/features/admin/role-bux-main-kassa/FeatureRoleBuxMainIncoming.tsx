@@ -22,7 +22,7 @@ function fmtRange(from: string, to: string): string {
   return f === t ? f : `${f} — ${t}`;
 }
 
-export default function FeatureRoleBuxMainIncoming() {
+export default function FeatureRoleBuxMainKassa() {
   const [dateMode, setDateMode] = useState<"kunlik" | "oraliq">("kunlik");
   const [date, setDate] = useState(TODAY);
   const [dateFrom, setDateFrom] = useState(TODAY);
@@ -72,7 +72,8 @@ export default function FeatureRoleBuxMainIncoming() {
       {/* Top bar */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <PageHeader
-          title="Входящие отчёты: Касса"
+          title="Входящие отчёты:"
+          highlight=" Касса"
           subtitle="Просмотр и принятие кассовых Z-отчётов"
         />
         <div className="flex items-center gap-2 flex-wrap">

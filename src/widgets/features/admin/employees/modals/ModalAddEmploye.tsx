@@ -280,11 +280,13 @@ export default function ModalAddEmploye({ open, onClose }: Props) {
             label="Пароль"
             isRequired
             type="password"
-            placeholder="Минимум 6 символов"
+            placeholder="6 символов"
+            maxLength={6}
             errorText={errors.password?.message}
             {...register("password", {
               required: "Обязательное поле",
               minLength: { value: 6, message: "Минимум 6 символов" },
+              maxLength: { value: 6, message: "Максимум 6 символов" },
             })}
           />
         </Section>

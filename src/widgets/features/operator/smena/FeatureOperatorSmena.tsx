@@ -33,7 +33,9 @@ export default function FeatureOperatorSmena() {
   } = useSmena(attractionID);
 
   const date = fmtDate(new Date());
-  const operatorName = me?.fullname ?? "";
+  const operatorName = me?.firstname
+    ? `${me.firstname} ${me.lastname}`
+    : "Noma'lum xodim";
 
   if (isLoading) {
     return (
@@ -41,10 +43,19 @@ export default function FeatureOperatorSmena() {
         <PageHeader title="Smena" subtitle={`${date} · Yuklanmoqda...`} />
         <div
           className="rounded-2xl border px-5 py-10 flex items-center justify-center gap-3"
-          style={{ background: "var(--bg-second)", borderColor: "var(--border-default)" }}
+          style={{
+            background: "var(--bg-second)",
+            borderColor: "var(--border-default)",
+          }}
         >
-          <LuFerrisWheel size={20} className="animate-spin" style={{ color: "var(--text-muted)" }} />
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Yuklanmoqda...</p>
+          <LuFerrisWheel
+            size={20}
+            className="animate-spin"
+            style={{ color: "var(--text-muted)" }}
+          />
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            Yuklanmoqda...
+          </p>
         </div>
       </div>
     );
@@ -52,10 +63,7 @@ export default function FeatureOperatorSmena() {
 
   return (
     <div className="p-4 tablet:p-6 flex flex-col gap-5 pb-6">
-      <PageHeader
-        title="Smena"
-        subtitle={`${date} · Bugungi aylanishlar`}
-      />
+      <PageHeader title="Smena" subtitle={`${date} · Bugungi aylanishlar`} />
 
       {zreport && (
         <SmenaStatsBox
@@ -68,7 +76,10 @@ export default function FeatureOperatorSmena() {
       )}
 
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>
+        <p
+          className="text-sm font-semibold"
+          style={{ color: "var(--text-default)" }}
+        >
           X-otchetlar
         </p>
         {canOpenX && (
@@ -93,6 +104,8 @@ export default function FeatureOperatorSmena() {
       <OpenXReportDialog
         open={openXDialog}
         isPending={openXMut.isPending}
+        operatorName={operatorName}
+        operatorFile={me?.file ?? null}
         onClose={() => setOpenXDialog(false)}
         onConfirm={() => {
           openXMut.mutate(undefined, {

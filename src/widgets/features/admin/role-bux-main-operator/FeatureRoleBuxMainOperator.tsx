@@ -5,7 +5,7 @@ import { IncomingTable } from "./components/IncomingTable";
 import { SendToAccountingDialog } from "./modals/SendToAccountingDialog";
 import { useOpeMainIncoming } from "./hooks/useOpeMainIncoming";
 
-export default function FeatureOpeMainIncoming() {
+export default function FeatureRoleBuxMainOperator() {
   const {
     today,
     rows,
@@ -23,17 +23,23 @@ export default function FeatureOpeMainIncoming() {
     handleSend,
   } = useOpeMainIncoming();
 
-  if (isLoading) return (
-    <div className="p-4 desktop:p-6">
-      <p className="text-sm" style={{ color: "var(--text-muted)" }}>Загрузка...</p>
-    </div>
-  );
+  if (isLoading)
+    return (
+      <div className="p-4 desktop:p-6">
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Загрузка...
+        </p>
+      </div>
+    );
 
-  if (isError) return (
-    <div className="p-4 desktop:p-6">
-      <p className="text-sm" style={{ color: "#ef4444" }}>Ошибка загрузки данных</p>
-    </div>
-  );
+  if (isError)
+    return (
+      <div className="p-4 desktop:p-6">
+        <p className="text-sm" style={{ color: "#ef4444" }}>
+          Ошибка загрузки данных
+        </p>
+      </div>
+    );
 
   return (
     <>
@@ -61,7 +67,11 @@ export default function FeatureOpeMainIncoming() {
           onSend={() => setSendDialog(true)}
         />
 
-        <IncomingTable rows={rows} onConfirm={handleConfirm} onReopen={handleReopen} />
+        <IncomingTable
+          rows={rows}
+          onConfirm={handleConfirm}
+          onReopen={handleReopen}
+        />
       </div>
 
       <SendToAccountingDialog

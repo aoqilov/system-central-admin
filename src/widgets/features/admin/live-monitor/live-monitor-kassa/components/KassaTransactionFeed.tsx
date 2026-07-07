@@ -1,4 +1,5 @@
 import { useState } from "react";
+import dayjs from "dayjs";
 import { LuActivity, LuCircleCheck, LuCircleX, LuClock } from "react-icons/lu";
 import {
   CusCard,
@@ -9,30 +10,32 @@ import {
   type ColumnDef,
 } from "../../../../../../components/ui/table/CusTable";
 import CusSelect from "../../../../../../components/ui/select/CusSelect";
+import { CusPagination } from "../../../../../../components/ui/table/CusPagination";
+import { useCashboxTransactions } from "../hooks/useCashboxTransactions";
+import type { CashboxTransaction, ZReportCashbox } from "../types";
+import { span } from "framer-motion/client";
 
-type PaymentType = "Наличные" | "UzCard" | "Карта";
-type TxStatus = "success" | "pending" | "failed";
-
-interface Transaction {
-  id: number;
-  time: string;
-  kassaName: string;
-  cashier: string;
-  amount: number;
-  paymentType: PaymentType;
-  status: TxStatus;
+function payLabel(tx: CashboxTransaction): string {
+  if (tx.payment_type === "cash") return "Наличные";
+  if (tx.payment_type === "card")
+    return tx.payment_card_type === "humo" ? "Humo" : "UzCard";
+  if (tx.payment_service_type === "uzum") return "UzumBank";
+  if (tx.payment_service_type === "click") return "Click";
+  if (tx.payment_service_type === "payme") return "Payme";
+  return "Онлайн";
 }
 
-const PAYMENT_COLOR: Record<PaymentType, string> = {
+const PAY_COLOR: Record<string, string> = {
   Наличные: "var(--color-green)",
   UzCard: "var(--color-blue)",
-  Карта: "var(--color-purple)",
+  Humo: "#38bdf8",
+  UzumBank: "#ec4899",
+  Click: "#1e40af",
+  Payme: "#f97316",
+  Онлайн: "var(--color-cyan)",
 };
 
-const STATUS_CFG: Record<
-  TxStatus,
-  { label: string; color: string; icon: typeof LuCircleCheck }
-> = {
+const STATUS_CFG = {
   success: {
     label: "Успешно",
     color: "var(--color-green)",
@@ -40,171 +43,42 @@ const STATUS_CFG: Record<
   },
   pending: { label: "Ожидание", color: "var(--color-yellow)", icon: LuClock },
   failed: { label: "Ошибка", color: "var(--color-red)", icon: LuCircleX },
-};
+} as const;
 
-const transactions: Transaction[] = [
+const columns: ColumnDef<CashboxTransaction>[] = [
   {
-    id: 1,
-    time: "17:44",
-    kassaName: "Главная касса",
-    cashier: "Aziz N.",
-    amount: 45_000,
-    paymentType: "Наличные",
-    status: "success",
+    key: "id",
+    header: "#id",
+    render: (tx) => <span>#{tx.id}</span>,
   },
   {
-    id: 2,
-    time: "17:43",
-    kassaName: "Касса #7",
-    cashier: "Sherzod T.",
-    amount: 120_000,
-    paymentType: "UzCard",
-    status: "success",
-  },
-  {
-    id: 3,
-    time: "17:42",
-    kassaName: "Касса #2",
-    cashier: "Dilnoza M.",
-    amount: 60_000,
-    paymentType: "Карта",
-    status: "pending",
-  },
-  {
-    id: 4,
-    time: "17:41",
-    kassaName: "Касса #4",
-    cashier: "Jasur K.",
-    amount: 90_000,
-    paymentType: "Наличные",
-    status: "success",
-  },
-  {
-    id: 5,
-    time: "17:40",
-    kassaName: "Касса #5",
-    cashier: "Feruza O.",
-    amount: 30_000,
-    paymentType: "UzCard",
-    status: "success",
-  },
-  {
-    id: 6,
-    time: "17:39",
-    kassaName: "Главная касса",
-    cashier: "Aziz N.",
-    amount: 75_000,
-    paymentType: "Карта",
-    status: "failed",
-  },
-  {
-    id: 7,
-    time: "17:38",
-    kassaName: "Касса #2",
-    cashier: "Dilnoza M.",
-    amount: 45_000,
-    paymentType: "Наличные",
-    status: "success",
-  },
-  {
-    id: 8,
-    time: "17:37",
-    kassaName: "Касса #7",
-    cashier: "Sherzod T.",
-    amount: 150_000,
-    paymentType: "UzCard",
-    status: "success",
-  },
-  {
-    id: 9,
-    time: "17:36",
-    kassaName: "Касса #4",
-    cashier: "Jasur K.",
-    amount: 60_000,
-    paymentType: "Карта",
-    status: "success",
-  },
-  {
-    id: 10,
-    time: "17:35",
-    kassaName: "Касса #5",
-    cashier: "Feruza O.",
-    amount: 45_000,
-    paymentType: "Наличные",
-    status: "success",
-  },
-  {
-    id: 11,
-    time: "17:34",
-    kassaName: "Главная касса",
-    cashier: "Aziz N.",
-    amount: 90_000,
-    paymentType: "UzCard",
-    status: "success",
-  },
-  {
-    id: 12,
-    time: "17:33",
-    kassaName: "Касса #7",
-    cashier: "Sherzod T.",
-    amount: 30_000,
-    paymentType: "Наличные",
-    status: "pending",
-  },
-  {
-    id: 13,
-    time: "17:32",
-    kassaName: "Касса #2",
-    cashier: "Dilnoza M.",
-    amount: 120_000,
-    paymentType: "Карта",
-    status: "success",
-  },
-  {
-    id: 14,
-    time: "17:31",
-    kassaName: "Касса #4",
-    cashier: "Jasur K.",
-    amount: 45_000,
-    paymentType: "UzCard",
-    status: "success",
-  },
-  {
-    id: 15,
-    time: "17:30",
-    kassaName: "Касса #5",
-    cashier: "Feruza O.",
-    amount: 75_000,
-    paymentType: "Наличные",
-    status: "success",
-  },
-];
-
-const columns: ColumnDef<Transaction>[] = [
-  {
-    key: "time",
+    key: "created_at",
     header: "Время",
     render: (tx) => (
       <span
         className="font-mono text-xs"
         style={{ color: "var(--text-muted)" }}
       >
-        {tx.time}
+        {dayjs(tx.created_at).format("HH:mm:ss")}
       </span>
     ),
   },
   {
-    key: "kassaName",
-    header: "Касса",
+    key: "card",
+    header: "Карта",
     render: (tx) => (
-      <span style={{ color: "var(--text-2)" }}>{tx.kassaName}</span>
+      <span className="text-xs" style={{ color: "var(--text-2)" }}>
+        {tx.card.card}
+      </span>
     ),
   },
   {
-    key: "cashier",
+    key: "operator",
     header: "Кассир",
     render: (tx) => (
-      <span style={{ color: "var(--text-3)" }}>{tx.cashier}</span>
+      <span className="text-xs" style={{ color: "var(--text-3)" }}>
+        {tx.operator.firstname} {tx.operator.lastname}
+      </span>
     ),
   },
   {
@@ -213,35 +87,39 @@ const columns: ColumnDef<Transaction>[] = [
     align: "right",
     render: (tx) => (
       <span style={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-        {tx.amount.toLocaleString()}
+        {tx.amount.toLocaleString("ru-RU")}
       </span>
     ),
   },
   {
-    key: "paymentType",
+    key: "payment_type",
     header: "Оплата",
-    render: (tx) => (
-      <span
-        style={{
-          display: "inline-block",
-          padding: "2px 8px",
-          borderRadius: 4,
-          fontSize: 11,
-          fontWeight: 600,
-          background: `${PAYMENT_COLOR[tx.paymentType]}18`,
-          color: PAYMENT_COLOR[tx.paymentType],
-        }}
-      >
-        {tx.paymentType}
-      </span>
-    ),
+    render: (tx) => {
+      const label = payLabel(tx);
+      const color = PAY_COLOR[label] ?? "var(--text-muted)";
+      return (
+        <span
+          style={{
+            display: "inline-block",
+            padding: "2px 8px",
+            borderRadius: 4,
+            fontSize: 11,
+            fontWeight: 600,
+            background: `${color}18`,
+            color,
+          }}
+        >
+          {label}
+        </span>
+      );
+    },
   },
   {
     key: "status",
     header: "Статус",
     render: (tx) => {
-      const st = STATUS_CFG[tx.status];
-      const StIcon = st.icon;
+      const st = STATUS_CFG[tx.status] ?? STATUS_CFG.pending;
+      const Icon = st.icon;
       return (
         <span
           style={{
@@ -252,7 +130,7 @@ const columns: ColumnDef<Transaction>[] = [
             color: st.color,
           }}
         >
-          <StIcon size={13} />
+          <Icon size={13} />
           {st.label}
         </span>
       );
@@ -260,56 +138,79 @@ const columns: ColumnDef<Transaction>[] = [
   },
 ];
 
-const KASSA_OPTIONS = Array.from(new Set(transactions.map((t) => t.kassaName))).map(
-  (name) => ({ label: name, value: name })
-);
+interface Props {
+  cashboxes: ZReportCashbox[];
+}
 
-export function KassaTransactionFeed() {
-  const [kassaFilter, setKassaFilter] = useState<string>("");
+export function KassaTransactionFeed({ cashboxes }: Props) {
+  const [cashboxID, setCashboxID] = useState<number | null>(
+    cashboxes[0]?.id ?? null,
+  );
+  const [page, setPage] = useState(1);
+  const LIMIT = 20;
 
-  const filtered = kassaFilter
-    ? transactions.filter((t) => t.kassaName === kassaFilter)
-    : transactions;
+  const { transactions, pagination, isLoading } = useCashboxTransactions({
+    cashboxID,
+    page,
+    limit: LIMIT,
+  });
+
+  const kassaOptions = cashboxes.map((c) => ({
+    label: c.name || `Касса #${c.id}`,
+    value: String(c.id),
+  }));
+
+  function handleKassaChange(v: unknown) {
+    setCashboxID(v ? Number(v) : null);
+    setPage(1);
+  }
 
   return (
     <CusCard>
       <CusCardHeader
         icon={LuActivity}
-        title="Живые транзакции"
+        title={`Живые транзакции -- ${dayjs().format("DD.MM")}`}
         iconColor="var(--color-green)"
         action={
           <div className="flex items-center gap-3">
             <div style={{ width: 160 }}>
               <CusSelect
-                options={KASSA_OPTIONS}
-                value={kassaFilter || undefined}
-                onChange={(v) => setKassaFilter(v as string)}
+                options={kassaOptions}
+                value={cashboxID ? String(cashboxID) : undefined}
+                onChange={handleKassaChange}
                 placeholder="Все кассы"
                 size="sm"
-                clearable
               />
             </div>
-            <div className="flex items-center gap-1.5">
-              <span
-                className="w-2 h-2 rounded-full animate-pulse"
-                style={{ background: "var(--color-green)" }}
-              />
-              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                Live
-              </span>
-            </div>
+            <div className="flex items-center gap-1.5"></div>
           </div>
         }
       />
-      <CusTable<Transaction>
-        data={filtered}
+
+      <CusTable<CashboxTransaction>
+        data={transactions}
         maxH="400px"
         stickyHeader
         variant="outline"
         colorHeader="var(--bg-hover)"
         size="sm"
         columns={columns}
+        isLoading={isLoading}
       />
+
+      {pagination && pagination.totalPages > 1 && (
+        <div
+          className="px-4 py-3 border-t"
+          style={{ borderColor: "var(--border-default)" }}
+        >
+          <CusPagination
+            count={pagination.total}
+            pageSize={LIMIT}
+            page={pagination.page}
+            onPageChange={setPage}
+          />
+        </div>
+      )}
     </CusCard>
   );
 }

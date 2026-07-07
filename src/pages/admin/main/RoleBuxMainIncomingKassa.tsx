@@ -1,10 +1,10 @@
-import FeatureRoleBuxMainIncoming from "@/widgets/features/admin/role-bux-main-incoming/FeatureRoleBuxMainIncoming";
+import FeatureRoleBuxMainKassa from "@/widgets/features/admin/role-bux-main-kassa/FeatureRoleBuxMainIncoming";
 import React from "react";
 
 const RoleBuxMainIncomingKassa = () => {
   return (
     <div>
-      <FeatureRoleBuxMainIncoming />
+      <FeatureRoleBuxMainKassa />
     </div>
   );
 };

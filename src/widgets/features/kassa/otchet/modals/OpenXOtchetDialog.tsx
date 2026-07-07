@@ -1,8 +1,9 @@
 import { Dialog } from "@chakra-ui/react";
 import { fmtDate } from "@/utils/dateUtils";
-import { LuPower } from "react-icons/lu";
+import { LuPower, LuUser } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
+import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
 import { useMe } from "@/widgets/api-global/files-route/auth";
 import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
 
@@ -66,28 +67,34 @@ export function OpenXOtchetDialog({
         {/* Kim ochayapti */}
         {me && (
           <div
-            className="flex items-center gap-3 py-3 border-b"
-            style={{ borderColor: "var(--border-default)" }}
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 mb-3"
+            style={{ background: "var(--bg-hover)" }}
           >
-            <img
-              src={
-                me.file
-                  ? getFileUrl(me.file)
-                  : `https://i.pravatar.cc/150?u=${me.id}`
-              }
-              alt={me.fullname}
-              className="w-9 h-9 rounded-xl object-cover shrink-0"
-            />
-            <div>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+            <div
+              className="shrink-0 rounded-lg overflow-hidden flex items-center justify-center"
+              style={{ width: 44, height: 44, background: "var(--bg-input)" }}
+            >
+              {me.file ? (
+                <CusImagePreview
+                  src={getFileUrl(me.file)}
+                  alt={me.fullname}
+                  width={44}
+                  height={44}
+                  objectFit="cover"
+                  borderRadius={8}
+                  preview={false}
+                />
+              ) : (
+                <LuUser size={20} style={{ color: "var(--text-muted)" }} />
+              )}
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
                 Ochayotgan xodim
-              </p>
-              <p
-                className="text-sm font-semibold"
-                style={{ color: "var(--text-default)" }}
-              >
+              </span>
+              <span className="text-sm font-semibold" style={{ color: "var(--text-default)" }}>
                 {me.firstname} {me.lastname}
-              </p>
+              </span>
             </div>
           </div>
         )}
