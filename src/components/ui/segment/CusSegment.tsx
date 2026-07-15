@@ -17,6 +17,7 @@ export interface SegmentItem {
   label: string;
   icon?: ReactNode;
   disabled?: boolean;
+  textTitle?: string;
 }
 
 interface CusSegmentProps {
@@ -87,6 +88,13 @@ export const CusSegment = ({
                 cursor: item.disabled ? "not-allowed" : "pointer",
                 flex: layout === "block" ? 1 : undefined,
                 justifyContent: layout === "block" ? "center" : undefined,
+                alignItems: "center",
+                height: "auto",
+                minHeight: 36,
+                paddingTop: 4,
+                paddingBottom: 4,
+                whiteSpace: "normal",
+                textAlign: "center",
               }}
             >
               <SegmentGroup.ItemText style={{ color: "inherit" }}>
@@ -94,9 +102,14 @@ export const CusSegment = ({
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
                     gap: "6px",
                     flexDirection:
                       iconPosition === "right" ? "row-reverse" : "row",
+                    whiteSpace: "normal",
+                    textAlign: "center",
+                    lineHeight: 1.3,
                   }}
                 >
                   {item.icon && (

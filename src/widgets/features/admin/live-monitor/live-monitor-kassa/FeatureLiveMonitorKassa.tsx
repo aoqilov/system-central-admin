@@ -11,7 +11,7 @@ const FeatureLiveMonitorKassa = () => {
   return (
     <div className="p-4 tablet:p-6 space-y-6">
       <PageHeader
-        title="Live monitor"
+        title="Мониторинг"
         subtitle="Мониторинг транзакций кассы в реальном времени"
         highlight="Касса"
       />

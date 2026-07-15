@@ -6,6 +6,7 @@
   LuTrash2,
   LuPause,
   LuCreditCard,
+  LuPlus,
 } from "react-icons/lu";
 import type { NfcCardType } from "./types";
 import { useRef, useState } from "react";
@@ -23,12 +24,17 @@ import { HidDeviceStatus } from "./components/HidDeviceStatus";
 import { useKassaHome } from "./hooks/useKassaHome";
 import { useHidDevices } from "./hooks/useHidDevices";
 import PageHeader from "@/widgets/shared-ui/PageHeader";
+import { MdOutlineContactPhone } from "react-icons/md";
+import { FaCheck } from "react-icons/fa6";
+import { GoHorizontalRule } from "react-icons/go";
+import { VozvratKartaModal } from "./modals/VozvratKartaModal";
 
 export default function FeatureKassaHome() {
   const scanRef = useRef<ScanInputHandle>(null);
   const { supported, devices, requestAccess } = useHidDevices();
   const [payType, setPayType] = useState<PayType>("naqd");
   const [kartaType, setKartaType] = useState<KartaType>("uzcard");
+  const [vozvratOpen, setVozvratOpen] = useState(false);
   const [provider, setProvider] = useState<"payme" | "click" | "uzum-bank">(
     "payme",
   );
@@ -52,8 +58,15 @@ export default function FeatureKassaHome() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* modals */}
       <ToastList items={toasts} onRemove={removeToast} />
-
+      <VozvratKartaModal
+        open={vozvratOpen}
+        onClose={() => setVozvratOpen(false)}
+      />
+      {/*  */}
+      {/*  */}
+      {/*  */}
       {/* Page header */}
 
       <div
@@ -61,11 +74,12 @@ export default function FeatureKassaHome() {
         style={{ borderColor: "var(--border-default)" }}
       >
         <PageHeader title="Касса будка #3" />
-        <HidDeviceStatus
-          supported={supported}
-          devices={devices}
-          requestAccess={requestAccess}
-        />
+
+        <div>
+          <CusButton colorPalette="red" onClick={() => setVozvratOpen(true)}>
+            Возврат карта
+          </CusButton>
+        </div>
       </div>
 
       {/* 3-column panel */}
@@ -228,16 +242,49 @@ export default function FeatureKassaHome() {
           style={{ borderColor: "var(--border-default)" }}
         >
           <div
-            className="px-4 tablet:px-6 py-3 border-b shrink-0"
+            className="px-4 tablet:px-6 py-4 border-b shrink-0"
             style={{ borderColor: "var(--border-default)" }}
           >
+            <p
+              className="text-sm font-medium py-2"
+              style={{ color: "var(--text-3)" }}
+            >
+              {rightMode === "aktivatsa"
+                ? "Активация / Пополнение"
+                : "Привязка к пользователю"}
+            </p>
             <CusSegment
               layout="block"
               value={rightMode}
               onValueChange={handleModeChange}
+              iconPosition="left"
               items={[
-                { id: "aktivatsa", label: "Активация / Пополнение" },
-                { id: "relation", label: "Привязка к пользователю" },
+                {
+                  id: "aktivatsa",
+                  label: "",
+                  textTitle: "Активация / Пополнение",
+                  icon: (
+                    <>
+                      <FaCheck size={26} />
+                      <GoHorizontalRule
+                        size={26}
+                        style={{ marginLeft: "6px" }}
+                      />
+                      <GoHorizontalRule
+                        size={26}
+                        style={{ marginLeft: "-6px" }}
+                      />
+                      <LuPlus size={26} />
+                    </>
+                  ),
+                },
+
+                {
+                  id: "relation",
+                  label: "",
+                  textTitle: "Привязка к пользователю",
+                  icon: <MdOutlineContactPhone size={26} />,
+                },
               ]}
             />
           </div>
@@ -345,23 +392,46 @@ export default function FeatureKassaHome() {
   );
 }
 
-const CARD_TYPE_META: Record<NfcCardType, { label: string; bg: string; color: string; border: string }> = {
-  classic:      { label: "Классик",     bg: "#14204A", color: "#93b4ff", border: "#2a3f7a" },
-  vip:          { label: "VIP",         bg: "#2F0553", color: "#c084fc", border: "#5b21b6" },
-  organization: { label: "Организация", bg: "#3B1106", color: "#fb923c", border: "#7c2d12" },
+const CARD_TYPE_META: Record<
+  NfcCardType,
+  { label: string; bg: string; color: string; border: string }
+> = {
+  classic: {
+    label: "Классик",
+    bg: "#14204A",
+    color: "#93b4ff",
+    border: "#2a3f7a",
+  },
+  vip: { label: "VIP", bg: "#2F0553", color: "#c084fc", border: "#5b21b6" },
+  organization: {
+    label: "Организация",
+    bg: "#3B1106",
+    color: "#fb923c",
+    border: "#7c2d12",
+  },
 };
 
 function CardTypeBadge({ type }: { type: NfcCardType }) {
   const { label, bg, color, border } = CARD_TYPE_META[type];
   return (
     <div
-      className="flex items-center gap-2 px-3 py-2 rounded-xl"
+      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl"
       style={{ background: bg, border: `1px solid ${border}` }}
     >
-      <LuCreditCard size={14} style={{ color, flexShrink: 0 }} />
-      <span className="text-xs font-semibold uppercase tracking-wider" style={{ color }}>
-        {label}
-      </span>
+      <div
+        className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+        style={{ background: `${color}25` }}
+      >
+        <LuCreditCard size={16} style={{ color }} />
+      </div>
+      <div>
+        <p className="font-bold text-sm leading-none" style={{ color }}>
+          {label}
+        </p>
+        <p className="text-xs mt-0.5" style={{ color: `${color}99` }}>
+          Тип карты
+        </p>
+      </div>
     </div>
   );
 }

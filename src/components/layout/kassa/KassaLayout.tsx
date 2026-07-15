@@ -14,7 +14,7 @@ function PageLoader() {
 
 function KassaLayoutBody() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   return (
     <div

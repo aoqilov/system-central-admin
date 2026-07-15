@@ -31,19 +31,19 @@ interface NavItem {
 export const KASSA_NAV: NavItem[] = [
   {
     to: "/rolekassa",
-    label: "Tolov qilish",
+    label: "Оплата",
     icon: LuCreditCard,
     end: true,
     requiresActive: true,
   },
   {
     to: "/rolekassa/smena",
-    label: "Smena",
+    label: "Смена",
     icon: VscDebugContinueSmall,
     requiresActive: true,
   },
-  { to: "/rolekassa/otchet", label: "Otchet", icon: LuFileText },
-  { to: "/rolekassa/profile", label: "Profil", icon: LuUser },
+  { to: "/rolekassa/otchet", label: "Отчёт", icon: LuFileText },
+  { to: "/rolekassa/profile", label: "Профиль", icon: LuUser },
 ];
 
 // ─── Sidebar content (internal) ───────────────────────────────────────────────
@@ -108,7 +108,7 @@ function SidebarContent({
               className="text-[10px] mt-0.5"
               style={{ color: "var(--text-muted)" }}
             >
-              Kassa Panel
+              Панель кассира
             </p>
           </div>
         )}

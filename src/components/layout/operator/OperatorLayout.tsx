@@ -300,7 +300,7 @@ function OperatorLayoutBody() {
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const { data: me } = useMe();
   const { attraction } = useOperatorAttraction();
   const hasActiveX = useActiveXreport(attraction?.id);

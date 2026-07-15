@@ -89,7 +89,7 @@ export function CusTable<T extends { id: number }>({
   showColumnBorder = false,
   label,
   isLoading = false,
-  emptyText = "Ma'lumot topilmadi",
+  emptyText = "Данные не найдены",
   caption,
   maxH,
   onRowClick,

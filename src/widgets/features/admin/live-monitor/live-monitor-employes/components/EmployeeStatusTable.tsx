@@ -128,7 +128,7 @@ const columns: ColumnDef<Emp>[] = [
     },
   },
   {
-    key: "statsUser",
+    key: "checkIn",
     header: "Приход",
     render: (e) => (
       <span
@@ -140,7 +140,7 @@ const columns: ColumnDef<Emp>[] = [
     ),
   },
   {
-    key: "statsUser",
+    key: "workedMinutes",
     header: "Отработано",
     render: (e) => (
       <span style={{ fontSize: 12, color: "var(--text-3)" }}>
@@ -149,7 +149,7 @@ const columns: ColumnDef<Emp>[] = [
     ),
   },
   {
-    key: "statsUser",
+    key: "efficiency",
     header: "KPI",
     align: "right",
     render: (e) => {
@@ -182,7 +182,7 @@ export function EmployeeStatusTable() {
               style={{ background: "var(--color-green)" }}
             />
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Live
+              Онлайн
             </span>
           </div>
         }

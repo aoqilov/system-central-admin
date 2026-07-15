@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { LuActivity, LuCircleCheck, LuCircleX, LuClock } from "react-icons/lu";
 import {
@@ -143,10 +143,14 @@ interface Props {
 }
 
 export function KassaTransactionFeed({ cashboxes }: Props) {
-  const [cashboxID, setCashboxID] = useState<number | null>(
-    cashboxes[0]?.id ?? null,
-  );
+  const [cashboxID, setCashboxID] = useState<number | null>(null);
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    if (!cashboxID && cashboxes[0]?.id) {
+      setCashboxID(cashboxes[0].id);
+    }
+  }, [cashboxes]);
   const LIMIT = 20;
 
   const { transactions, pagination, isLoading } = useCashboxTransactions({

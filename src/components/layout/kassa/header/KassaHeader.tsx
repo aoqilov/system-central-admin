@@ -48,7 +48,7 @@ export function KassaHeader({ collapsed, onToggleCollapse }: Props) {
   const navigate = useNavigate();
   const { data: me } = useMe();
 
-  const fullName = me ? `${me.firstname} ${me.lastname}` : "Kassir";
+  const fullName = me ? `${me.firstname} ${me.lastname}` : "Кассир";
   const avatarUrl = me?.file ? getFileUrl(me.file) : null;
   const initial = fullName.charAt(0).toUpperCase();
 
@@ -78,7 +78,7 @@ export function KassaHeader({ collapsed, onToggleCollapse }: Props) {
             ParkOps
           </p>
           <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-            Kassa Panel
+            Панель кассира
           </p>
         </div>
       </div>
@@ -102,7 +102,7 @@ export function KassaHeader({ collapsed, onToggleCollapse }: Props) {
             className="text-xs font-mono"
             style={{ color: "var(--text-4)" }}
           >
-            Live
+            Онлайн
           </span>
           <LiveClock />
         </div>
@@ -204,7 +204,7 @@ export function KassaHeader({ collapsed, onToggleCollapse }: Props) {
               ) : (
                 <LuMoon size={14} style={{ color: "var(--text-muted)" }} />
               )}
-              {theme === "dark" ? "Yorug' rejim" : "Qorong'u rejim"}
+              {theme === "dark" ? "Светлая тема" : "Тёмная тема"}
             </button>
             <button
               onClick={handleLogout}
@@ -220,7 +220,7 @@ export function KassaHeader({ collapsed, onToggleCollapse }: Props) {
               }}
             >
               <LuLogOut size={14} />
-              Chiqish
+              Выйти
             </button>
           </div>
         </CusPopover>

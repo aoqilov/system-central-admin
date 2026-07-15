@@ -9,7 +9,7 @@ const FeatureLiveMonitorAttraction = () => {
   return (
     <div className="p-4 tablet:p-6 space-y-6">
       <PageHeader
-        title="Live monitor"
+        title="Мониторинг"
         subtitle="Мониторинг аттракционов в реальном времени"
         highlight="Аттракцион"
       />
