@@ -3,7 +3,7 @@ import { LuPlay, LuUser } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
-import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import { getFileUrl } from "@/api/files/files.api";
 import { fmtDate } from "@/utils/dateUtils";
 
 interface Props {

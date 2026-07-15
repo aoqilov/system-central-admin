@@ -1,7 +1,7 @@
 import { LuPhone, LuLock, LuEye, LuEyeOff } from "react-icons/lu";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusButton } from "@/components/ui/buttons/CusButton";
-import { useLoginForm } from "../hooks/useLoginForm";
+import { useApiLogin } from "../hooks/useApiLogin";
 
 export default function LoginCard() {
   const {
@@ -15,7 +15,7 @@ export default function LoginCard() {
     handlePhoneChange,
     handleSubmit,
     handleKeyDown,
-  } = useLoginForm();
+  } = useApiLogin();
 
   return (
     <div

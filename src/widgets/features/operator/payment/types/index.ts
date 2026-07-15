@@ -72,6 +72,25 @@ export interface PaymentResponse {
 
 // ─── Current Round ────────────────────────────────────────────────────────────
 
+export interface RoundCard {
+  id: number;
+  card: string;
+  nfc: string;
+  type: import("@/types/card.types").CardType;
+  status: "active" | "blocked";
+  balance: number;
+}
+
+export interface RoundTransaction {
+  id: number;
+  transaction_type: "topup" | "payment" | "refund";
+  amount: number;
+  balance_before: number;
+  balance_after: number;
+  card: RoundCard;
+  created_at: string;
+}
+
 export interface AttractionRound {
   id: number;
   report: number;
@@ -83,13 +102,13 @@ export interface AttractionRound {
   offline_count: number;
   online_count: number;
   vip_count: number;
-  guest_count: number;
-  park_staff_count: number;
+  organization_count: number;
   paid_amount: number;
   total_amount: number;
   started_at: string;
   finished_at: string | null;
   created_at: string;
+  transactions: RoundTransaction[];
 }
 
 export interface CurrentRoundResponse {

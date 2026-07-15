@@ -54,6 +54,7 @@ export interface CloseReportPayload {
   status: "open" | "closed" | "stopped" | "confirmed" | "cancelled";
   report_type: ReportType;
   report: number;
+  description?: string;
 }
 
 export interface CloseReportData {

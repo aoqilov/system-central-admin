@@ -1,6 +1,6 @@
 import { LuX } from "react-icons/lu";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
-import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import { getFileUrl } from "@/api/files/files.api";
 import type { AttractionOperatorItem } from "../types";
 
 interface Props {

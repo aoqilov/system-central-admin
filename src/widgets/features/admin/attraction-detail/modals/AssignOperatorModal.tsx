@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { LuCheck, LuSearch, LuUser } from "react-icons/lu";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
-import { fetchEmployees } from "@/widgets/features/admin/employees/api/employeesApi";
-import { assignAttractionOperator } from "../api/apiAttractionDetail";
-import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import { getFileUrl } from "@/api/files/files.api";
 import { EmployeeStatusTypes } from "@/const/constData";
-import type { ApiEmployee } from "@/widgets/features/admin/employees/types";
+import { useAssignAttractionOperator, useAssignableEmployees } from "../hooks/useApiAttractionDetail";
+import type { ApiEmployee } from "@/types/employee.types";
 
 interface Props {
   open: boolean;
@@ -27,32 +25,17 @@ export function AssignOperatorModal({
   assignedIds = [],
   onClose,
 }: Props) {
-  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [selectedEmp, setSelectedEmp] = useState<number | null>(null);
 
-  const mutation = useMutation({
-    mutationFn: () =>
-      assignAttractionOperator(attractionId, { operator: selectedEmp!, type }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["attraction-detail", String(attractionId)],
-      });
-      handleClose();
-    },
-  });
+  const mutation = useAssignAttractionOperator(attractionId);
+  const { data, isLoading } = useAssignableEmployees(open);
 
   function handleClose() {
     onClose();
     setSearch("");
     setSelectedEmp(null);
   }
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["employees-assign"],
-    queryFn: () => fetchEmployees({ limit: 100, roles: 4 }),
-    enabled: open,
-  });
 
   const employees: ApiEmployee[] = data?.employees ?? [];
 
@@ -81,7 +64,7 @@ export function AssignOperatorModal({
           <CusButton
             colorPalette="blue"
             isDisabled={selectedEmp === null || mutation.isPending}
-            onClick={() => mutation.mutate()}
+            onClick={() => mutation.mutate({ operator: selectedEmp!, type }, { onSuccess: handleClose })}
           >
             {mutation.isPending ? "Сохранение..." : "Назначить"}
           </CusButton>

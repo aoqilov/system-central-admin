@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { getStoredToken, getStoredRole } from "@/widgets/features/login/api/authApi";
+import { getStoredToken, getStoredRole } from "@/widgets/features/login/hooks/authApi";
 import { RoleTypes } from "@/const/constData";
 import { isLocked } from "@/utils/pinLock";
 

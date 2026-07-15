@@ -3,7 +3,7 @@ import { LuPlay, LuFerrisWheel } from "react-icons/lu";
 import { fmtDate } from "@/utils/dateUtils";
 import PageHeader from "@/widgets/shared-ui/PageHeader";
 import { CusButton } from "@/components/ui/buttons/CusButton";
-import { useMe } from "@/widgets/api-global/files-route/auth";
+import { useMe } from "@/api/auth/auth.api";
 import { useOperatorAttraction } from "../hooks/useOperatorAttraction";
 import { useSmena } from "./hooks";
 import { SmenaStatsBox } from "./components/SmenaStatsBox";

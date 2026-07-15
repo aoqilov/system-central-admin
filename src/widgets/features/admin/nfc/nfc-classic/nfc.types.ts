@@ -1,99 +1,29 @@
-export interface ApiResponse<T> {
-  statusCode: number;
-  data: T;
-}
-export interface Card {
-  id: number;
-  batch: string;
-  card: string; // card dan map qilinadi
-  nfc: string;
-  status: "active" | "inactive" | "blocked" | "lost" | "frozen";
-  createdAt: string; // imported_at dan map qilinadi
-  imported_at: string;
-  activatedAt: string | null;
-}
-export type CardStatus = Card["status"];
+export type { Card, CardStatus, CardType } from "@/types/card.types";
 
-// ─── Stats ────────────────────────────────────────────────────────────────────
-
-export interface BatchStat {
-  batch: number;
-  batchName: string;
-  total: number;
-  active: number;
-  inactive: number;
-  blocked: number;
-  lost: number;
-  frozen: number;
-  tethered: number;
-}
-
-export interface GetCardsStatsResponse {
-  card_stats: BatchStat[];
-}
-
-// ─── List ─────────────────────────────────────────────────────────────────────
-
-export interface GetCardsQuery {
-  search?: string;
-  statuses?: string;
-  batch?: number;
-  page?: number;
-  limit?: number;
-}
-
-export interface CardsPagination {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
-
-export interface GetCardsResponse {
-  cards: Card[];
-  pagination: CardsPagination;
-}
-
-// ─── Upload ───────────────────────────────────────────────────────────────────
-
-export interface UploadCardsResponse {
-  inserted: number;
-}
-
-// ─── Delete ───────────────────────────────────────────────────────────────────
-
-export interface DeleteCardsPayload {
-  cardIDs: number[];
-}
-
-export interface DeleteCardsResponse {
-  success: true;
-}
-
-// ─── Update ───────────────────────────────────────────────────────────────────
-
-export interface UpdateCardPayload {
-  status: CardStatus;
-}
-
-export interface UpdateCardResponse {
-  card: Card;
-}
-
-// ─── UI constants ─────────────────────────────────────────────────────────────
+export const CARD_TYPE_META: Record<
+  import("@/types/card.types").CardType,
+  { label: string; scheme: "gray" | "green" | "blue" | "red" | "yellow" | "purple" | "orange" }
+> = {
+  classic:      { label: "Классик",     scheme: "blue"   },
+  vip:          { label: "VIP",         scheme: "purple" },
+  organization: { label: "Организация", scheme: "orange" },
+};
 
 export const CARD_STATUS_META: Record<
-  CardStatus,
-  { label: string; scheme: "gray" | "green" | "blue" | "red" }
+  import("@/types/card.types").CardStatus,
+  { label: string; scheme: "gray" | "green" | "blue" | "red" | "yellow" }
 > = {
   active: { label: "Активна", scheme: "green" },
-  inactive: { label: "Не активна", scheme: "gray" },
-  blocked: { label: "Заблокирована", scheme: "red" },
-  lost: { label: "Утеряна", scheme: "red" },
+  inactive: { label: "Не активна", scheme: "red" },
+  blocked: { label: "Заблокирована", scheme: "gray" },
+  lost: { label: "Утеряна", scheme: "yellow" },
   frozen: { label: "Заморожена", scheme: "blue" },
 };
 
-export const CARD_STATUS_TRANSITIONS: Record<CardStatus, CardStatus[]> = {
+export const CARD_STATUS_TRANSITIONS: Record<
+  import("@/types/card.types").CardStatus,
+  import("@/types/card.types").CardStatus[]
+> = {
   inactive: ["active"],
   active: ["blocked", "lost", "frozen"],
   blocked: ["inactive"],

@@ -1,13 +1,12 @@
 import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { LuCircleAlert } from "react-icons/lu";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusTextArea } from "@/components/ui/inputs/CusTextArea";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import CusSelect from "@/components/ui/select/CusSelect";
-import { updateCashbox } from "../api/apiKassa";
+import { useUpdateKassa } from "../hooks/useApiKassa";
 import type { Cashbox, UpdateCashboxPayload } from "../types";
 import { CashboxStatusLabel, CashboxStatusTypes } from "@/const/constData";
 
@@ -25,30 +24,21 @@ interface FormValues {
   description: string;
 }
 
-const STATUS_OPTIONS = Object.values(CashboxStatusTypes).map((v) => ({
-  label: CashboxStatusLabel[v],
-  value: v,
-}));
-
-function getApiError(err: unknown): string {
-  const e = err as { response?: { data?: { message?: string } } };
-  return e?.response?.data?.message ?? "Xatolik yuz berdi. Qayta urinib ko'ring.";
-}
+const STATUS_OPTIONS = Object.values(CashboxStatusTypes)
+  .filter((v) => v !== CashboxStatusTypes.ACTIVE)
+  .map((v) => ({ label: CashboxStatusLabel[v], value: v }));
 
 export function ModalEditKassa({ open, onClose, kassa }: Props) {
-  const qc = useQueryClient();
-
-  const updateMut = useMutation({
-    mutationFn: (payload: UpdateCashboxPayload) =>
-      updateCashbox(kassa!.id, payload),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["cashboxes"] });
-      qc.invalidateQueries({ queryKey: ["cashbox-stats"] });
-    },
-  });
+  const updateMut = useUpdateKassa(kassa?.id ?? 0);
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
-    defaultValues: { name: "", place: "", status: "", device: "", description: "" },
+    defaultValues: {
+      name: "",
+      place: "",
+      status: "",
+      device: "",
+      description: "",
+    },
   });
 
   useEffect(() => {
@@ -72,8 +62,10 @@ export function ModalEditKassa({ open, onClose, kassa }: Props) {
 
     if (data.name.trim() !== kassa!.name) payload.name = data.name.trim();
     if (data.place.trim() !== kassa!.place) payload.place = data.place.trim();
-    if (data.status !== kassa!.status) payload.status = data.status as UpdateCashboxPayload["status"];
-    if (data.device.trim() !== String(kassa!.device ?? "")) payload.device = data.device.trim() || undefined;
+    if (data.status !== kassa!.status)
+      payload.status = data.status as UpdateCashboxPayload["status"];
+    if (data.device.trim() !== String(kassa!.device ?? ""))
+      payload.device = data.device.trim() || undefined;
     const newNote = data.description.trim() || null;
     if (newNote !== (kassa!.description ?? null)) payload.description = newNote;
 
@@ -89,7 +81,7 @@ export function ModalEditKassa({ open, onClose, kassa }: Props) {
     <CusDrawer
       open={open}
       onClose={onClose}
-      title="Kassani tahrirlash"
+      title="Редактировать кассу"
       size="md"
       placement="end"
       footer={
@@ -100,50 +92,35 @@ export function ModalEditKassa({ open, onClose, kassa }: Props) {
             isDisabled={updateMut.isPending}
             onClick={onClose}
           >
-            Bekor qilish
+            Отмена
           </CusButton>
           <CusButton
             size="sm"
             variant="solid"
             colorPalette="orange"
             isLoading={updateMut.isPending}
-            loadingText="Saqlanmoqda..."
+            loadingText="Сохранение..."
             onClick={handleSubmit(onSubmit)}
           >
-            Saqlash
+            Сохранить
           </CusButton>
         </div>
       }
     >
       <div className="flex flex-col gap-5">
-        {updateMut.error && (
-          <div
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg"
-            style={{
-              background: "rgba(239,68,68,0.08)",
-              border: "1px solid rgba(239,68,68,0.25)",
-            }}
-          >
-            <LuCircleAlert size={15} style={{ color: "#ef4444", flexShrink: 0 }} />
-            <span style={{ fontSize: 13, color: "#ef4444" }}>
-              {getApiError(updateMut.error)}
-            </span>
-          </div>
-        )}
-
         <Controller
           control={control}
           name="name"
           rules={{
-            required: "Majburiy maydon",
-            minLength: { value: 2, message: "Minimum 2 ta belgi" },
+            required: "Обязательное поле",
+            minLength: { value: 2, message: "Минимум 2 символа" },
           }}
           render={({ field, fieldState }) => (
             <CusInput
               ref={field.ref}
-              label="Kassa nomi"
+              label="Название кассы"
               isRequired
-              placeholder="Bosh kassa"
+              placeholder="Главная касса"
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
@@ -155,13 +132,13 @@ export function ModalEditKassa({ open, onClose, kassa }: Props) {
         <Controller
           control={control}
           name="place"
-          rules={{ required: "Majburiy maydon" }}
+          rules={{ required: "Обязательное поле" }}
           render={({ field, fieldState }) => (
             <CusInput
               ref={field.ref}
-              label="Joylashuvi"
+              label="Расположение"
               isRequired
-              placeholder="1-qavat, kirish"
+              placeholder="1-й этаж, вход"
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
@@ -187,17 +164,18 @@ export function ModalEditKassa({ open, onClose, kassa }: Props) {
         />
 
         <div>
-          <p style={{ fontSize: 13, fontWeight: 500, color: "var(--text-2)", marginBottom: 6 }}>
-            Status
-          </p>
           <Controller
             control={control}
             name="status"
-            rules={{ required: "Statusni tanlang" }}
+            rules={{ required: "Выберите статус" }}
             render={({ field }) => (
               <CusSelect
-                options={STATUS_OPTIONS}
-                placeholder="Status tanlang"
+                label="Статус"
+                options={STATUS_OPTIONS.map((opt) => ({
+                  label: opt.label,
+                  value: opt.value,
+                }))}
+                placeholder="Выберите статус"
                 value={field.value}
                 onChange={field.onChange}
               />
@@ -211,8 +189,8 @@ export function ModalEditKassa({ open, onClose, kassa }: Props) {
           render={({ field, fieldState }) => (
             <CusTextArea
               ref={field.ref}
-              label="Izoh"
-              placeholder="Qo'shimcha ma'lumot..."
+              label="Примечание"
+              placeholder="Дополнительная информация..."
               rows={3}
               value={field.value}
               onChange={field.onChange}

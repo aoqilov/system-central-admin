@@ -3,7 +3,7 @@ import { KassaRevenueCharts } from "./components/KassaRevenueCharts";
 import { KassaStatCards } from "./components/KassaStatCards";
 import { KassaTransactionFeed } from "./components/KassaTransactionFeed";
 import { KassaCardDailyList } from "./components/KassaCardDaily";
-import { useZReports } from "./hooks/useZReports";
+import { useZReports } from "./hooks/useApiLiveMonitorKassa";
 
 const FeatureLiveMonitorKassa = () => {
   const { totals, cashboxes, isLoading } = useZReports();

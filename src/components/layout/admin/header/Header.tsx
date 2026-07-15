@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+
 import {
   LuBell,
   LuChevronDown,
@@ -17,14 +17,11 @@ import {
 import { CusPopover } from "../../../ui/popover/CusPopover";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
 import { useTheme } from "../../../../context/ThemeContext";
-import {
-  clearAuth,
-  getStoredEmployeeId,
-} from "@/widgets/features/login/api/authApi";
+import { clearAuth } from "@/widgets/features/login/hooks/authApi";
 import { isPinEnabled, lockApp } from "@/utils/pinLock";
 import RoleSwitch from "@/components/shared/RoleSwitch";
-import { fetchEmployee } from "@/widgets/features/admin/employees/api/employeesApi";
-import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import { useMe } from "@/api/auth/auth.api";
+import { getFileUrl } from "@/api/files/files.api";
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -42,13 +39,7 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const employeeId = getStoredEmployeeId();
-  const { data: me } = useQuery({
-    queryKey: ["me", employeeId],
-    queryFn: () => fetchEmployee(employeeId!),
-    enabled: employeeId !== null,
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data: me } = useMe();
 
   const fullName = me ? `${me.lastname} ${me.firstname}` : "—";
   const initial = me?.firstname?.[0]?.toUpperCase() ?? "?";
@@ -88,7 +79,7 @@ export default function Header({ sidebarOpen, onMenuToggle }: HeaderProps) {
 
   return (
     <header
-      className="sticky top-0 z-40 h-14 flex items-center px-4 gap-3"
+      className="sticky top-0 z-40 h-[73px] flex items-center px-4 gap-3"
       style={{
         background: "var(--bg-main)",
         borderBottom: "1px solid var(--border-default)",

@@ -1,5 +1,5 @@
-import type { MeEmployee } from "@/widgets/api-global/files-route/auth";
-import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import type { MeEmployee } from "@/api/auth/auth.api";
+import { getFileUrl } from "@/api/files/files.api";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
 
 interface ProfileCardProps {

@@ -21,6 +21,7 @@ import { CloseXReportDialog } from "../modals/CloseXReportDialog";
 import type { AttractionReport } from "../types";
 import { fmt } from "../types";
 import { fmtDateTime } from "@/utils/dateUtils";
+import { RiOrganizationChart } from "react-icons/ri";
 
 interface Props {
   xreport: AttractionReport;
@@ -30,16 +31,24 @@ interface Props {
   onClose: (id: number) => void;
 }
 
-export function XReportCard({ xreport, index, onStop, onResume, onClose }: Props) {
+export function XReportCard({
+  xreport,
+  index,
+  onStop,
+  onResume,
+  onClose,
+}: Props) {
   const [stopDialog, setStopDialog] = useState(false);
   const [closeDialog, setCloseDialog] = useState(false);
 
-  const isActive  = xreport.status === "open";
-  const isClosed  = xreport.status === "closed";
+  const isActive = xreport.status === "open";
+  const isClosed = xreport.status === "closed";
   const isStopped = xreport.status === "stopped";
   const dim = isClosed;
 
-  const op = `${xreport.operator.firstname} ${xreport.operator.lastname}`;
+  const op = xreport.operator
+    ? `${xreport.operator.firstname} ${xreport.operator.lastname}`
+    : "—";
 
   return (
     <>
@@ -68,7 +77,10 @@ export function XReportCard({ xreport, index, onStop, onResume, onClose }: Props
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-sm" style={{ color: "var(--text-default)" }}>
+              <span
+                className="font-semibold text-sm"
+                style={{ color: "var(--text-default)" }}
+              >
                 X-otchet #{xreport.id}
               </span>
               <CusBadge
@@ -93,16 +105,62 @@ export function XReportCard({ xreport, index, onStop, onResume, onClose }: Props
         </div>
 
         {/* Stat cards */}
-        <div className="overflow-x-auto px-4 pt-4 pb-4" style={{ background: "var(--bg-second)" }}>
+        <div
+          className="overflow-x-auto px-4 pt-4 pb-4"
+          style={{ background: "var(--bg-second)" }}
+        >
           <div className="flex gap-3">
-            <StatCard icon={LuPlay}     label="Round"      value={String(xreport.total_rounds)}     color="#3b82f6" dim={dim} />
-            <StatCard icon={LuUsers}    label="Jami"       value={String(xreport.total_people)}     color="#22c55e" dim={dim} />
-            <StatCard icon={LuWifiOff}  label="Offline"    value={String(xreport.total_offline)}    color="#64748b" dim={dim} />
-            <StatCard icon={LuWifi}     label="Online"     value={String(xreport.total_online)}     color="#06b6d4" dim={dim} />
-            <StatCard icon={LuStar}     label="VIP"        value={String(xreport.total_vip)}        color="#eab308" dim={dim} />
-            <StatCard icon={LuUserPlus} label="Mehmon"     value={String(xreport.total_guest)}      color="#8b5cf6" dim={dim} />
-            <StatCard icon={LuShield}   label="Park xodim" value={String(xreport.total_park_staff)} color="#22c55e" dim={dim} />
-            <StatCard icon={LuBanknote} label="Summa"      value={fmt(xreport.total_amount)} sub="so'm" color="#3b82f6" dim={dim} />
+            <StatCard
+              icon={LuPlay}
+              label="Round"
+              value={String(xreport.total_rounds)}
+              color="#3b82f6"
+              dim={dim}
+            />
+            <StatCard
+              icon={LuUsers}
+              label="Jami"
+              value={String(xreport.total_people)}
+              color="#22c55e"
+              dim={dim}
+            />
+            <StatCard
+              icon={LuWifiOff}
+              label="Offline"
+              value={String(xreport.total_offline)}
+              color="#64748b"
+              dim={dim}
+            />
+            <StatCard
+              icon={LuWifi}
+              label="Online"
+              value={String(xreport.total_online)}
+              color="#06b6d4"
+              dim={dim}
+            />
+            <StatCard
+              icon={LuStar}
+              label="VIP"
+              value={String(xreport.total_vip)}
+              color="#8b5cf6"
+              dim={dim}
+            />
+            <StatCard
+              icon={LuUserPlus}
+              label="Organization"
+              value={String(xreport.total_organization)}
+              color="#eab308"
+              dim={dim}
+            />
+         
+            <StatCard
+              icon={LuBanknote}
+              label="Summa"
+              value={fmt(xreport.total_amount)}
+              sub="so'm"
+              color="#3b82f6"
+              dim={dim}
+            />
           </div>
         </div>
 
@@ -110,18 +168,36 @@ export function XReportCard({ xreport, index, onStop, onResume, onClose }: Props
         {!isClosed && (
           <div
             className="px-4 py-3 flex items-center gap-2 border-t"
-            style={{ borderColor: "var(--border-default)", background: "var(--bg-second)" }}
+            style={{
+              borderColor: "var(--border-default)",
+              background: "var(--bg-second)",
+            }}
           >
             {isStopped ? (
-              <CusButton colorPalette="green" variant="solid" size="xs" onClick={() => onResume(xreport.id)}>
+              <CusButton
+                colorPalette="green"
+                variant="solid"
+                size="xs"
+                onClick={() => onResume(xreport.id)}
+              >
                 <LuPlay size={13} /> Davom ettirish
               </CusButton>
             ) : (
               <>
-                <CusButton colorPalette="orange" variant="solid" size="xs" onClick={() => setStopDialog(true)}>
+                <CusButton
+                  colorPalette="orange"
+                  variant="solid"
+                  size="xs"
+                  onClick={() => setStopDialog(true)}
+                >
                   <LuClock size={13} /> To'xtatish
                 </CusButton>
-                <CusButton colorPalette="red" variant="solid" size="xs" onClick={() => setCloseDialog(true)}>
+                <CusButton
+                  colorPalette="red"
+                  variant="solid"
+                  size="xs"
+                  onClick={() => setCloseDialog(true)}
+                >
                   <LuX size={13} /> Yopish
                 </CusButton>
               </>
@@ -135,14 +211,20 @@ export function XReportCard({ xreport, index, onStop, onResume, onClose }: Props
         xreport={xreport}
         index={index}
         onClose={() => setStopDialog(false)}
-        onConfirm={() => { onStop(xreport.id); setStopDialog(false); }}
+        onConfirm={() => {
+          onStop(xreport.id);
+          setStopDialog(false);
+        }}
       />
       <CloseXReportDialog
         open={closeDialog}
         xreport={xreport}
         index={index}
         onClose={() => setCloseDialog(false)}
-        onConfirm={() => { onClose(xreport.id); setCloseDialog(false); }}
+        onConfirm={() => {
+          onClose(xreport.id);
+          setCloseDialog(false);
+        }}
       />
     </>
   );

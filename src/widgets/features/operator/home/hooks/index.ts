@@ -31,16 +31,14 @@ export function useOperatorHome(attractionID: number | undefined) {
 
   const totals = rounds.reduce(
     (acc, r) => ({
-      people:    acc.people    + r.people_count,
-      offline:   acc.offline   + r.offline_count,
-      online:    acc.online    + r.online_count,
-      vip:       acc.vip       + r.vip_count,
-      guest:     acc.guest     + r.guest_count,
-      parkStaff: acc.parkStaff + r.park_staff_count,
-      paid:      acc.paid      + r.paid_amount,
-      total:     acc.total     + r.total_amount,
+      offline: acc.offline + r.offline_count,
+      online:  acc.online  + r.online_count,
+      vip:     acc.vip     + r.vip_count,
+      guest:   acc.guest   + r.organization_count,
+      people:  acc.people  + r.people_count,
+      total:   acc.total   + r.total_amount,
     }),
-    { people: 0, offline: 0, online: 0, vip: 0, guest: 0, parkStaff: 0, paid: 0, total: 0 },
+    { offline: 0, online: 0, vip: 0, guest: 0, people: 0, total: 0 },
   );
 
   return {

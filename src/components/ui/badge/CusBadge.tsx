@@ -15,11 +15,11 @@ export type BadgeRole   = "SUPER_ADMIN" | "OPERATOR_ATTRACTION" | "CASHIER" | "S
 // ─── Maps ─────────────────────────────────────────────────────────────────────
 
 const STATUS_MAP: Record<BadgeStatus, { label: string; color: ColorPalette }> = {
-  active:   { label: "Faol",               color: "green"  },
-  inactive: { label: "Nofaol",             color: "gray"   },
-  fired:    { label: "Ishdan bo'shatilgan", color: "red"    },
-  vacation: { label: "Ta'tilda",           color: "yellow" },
-  pending:  { label: "Kutilmoqda",         color: "orange" },
+  active:   { label: "Активный",   color: "green"  },
+  inactive: { label: "Неактивный", color: "red"   },
+  fired:    { label: "Уволен",     color: "gray"    },
+  vacation: { label: "В отпуске",  color: "yellow" },
+  pending:  { label: "Ожидание",   color: "orange" },
 };
 
 const ROLE_MAP: Record<BadgeRole, { label: string; color: ColorPalette }> = {

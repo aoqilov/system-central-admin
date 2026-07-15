@@ -13,9 +13,9 @@ import dayjs from "dayjs";
 import { useTheme } from "@/context/ThemeContext";
 import { CusPopover } from "@/components/ui/popover/CusPopover";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
-import { clearAuth } from "@/widgets/features/login/api/authApi";
-import { useMe } from "@/widgets/api-global/files-route/auth";
-import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import { clearAuth } from "@/widgets/features/login/hooks/authApi";
+import { useMe } from "@/api/auth/auth.api";
+import { getFileUrl } from "@/api/files/files.api";
 import RoleSwitch from "@/components/shared/RoleSwitch";
 
 // ─── Live clock ───────────────────────────────────────────────────────────────

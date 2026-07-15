@@ -1,6 +1,7 @@
 // ─── API types ────────────────────────────────────────────────────────────────
 
 export type NfcCardStatus = "active" | "blocked" | "expired";
+export type NfcCardType = "classic" | "vip" | "organization";
 export type TxType = "topup" | "payment" | "refund";
 export type TxPaymentType = "cash" | "card" | "online";
 export type TxCardType = "uzcard" | "humo";
@@ -23,6 +24,7 @@ export interface LastTransaction {
 export interface NfcCard {
   id: number;
   batch: string;
+  type: NfcCardType;
   card: string;
   nfc: string;
   status: NfcCardStatus;

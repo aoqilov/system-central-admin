@@ -1,14 +1,13 @@
 ﻿import {
-  LuQrCode,
   LuCircleCheck,
   LuClock,
   LuHash,
-  LuLayers,
   LuBanknote,
   LuTrash2,
   LuPause,
-  LuCalendar,
+  LuCreditCard,
 } from "react-icons/lu";
+import type { NfcCardType } from "./types";
 import { useRef, useState } from "react";
 import dayjs from "dayjs";
 import { CusButton } from "@/components/ui/buttons/CusButton";
@@ -47,6 +46,7 @@ export default function FeatureKassaHome() {
     handleRestorePending,
     handleRemovePending,
     handleSuccess,
+    handleError,
     handleModeChange,
   } = useKassaHome();
 
@@ -124,6 +124,7 @@ export default function FeatureKassaHome() {
                 </div>
               </div>
             )}
+            {card && <CardTypeBadge type={card.type} />}
 
             <div
               className="rounded-2xl border p-3 flex flex-col gap-2"
@@ -318,12 +319,13 @@ export default function FeatureKassaHome() {
                 kartaType={kartaType}
                 provider={provider}
                 onSuccess={() => {
-                  handleSuccess("Aktivatsa muvaffaqiyatli bajarildi!");
+                  handleSuccess("Активация выполнена успешно!");
                   setPayType("naqd");
                   setKartaType("uzcard");
                   setProvider("payme");
                   scanRef.current?.focus();
                 }}
+                onError={handleError}
               />
             )}
             {rightMode === "relation" && (
@@ -339,6 +341,27 @@ export default function FeatureKassaHome() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+const CARD_TYPE_META: Record<NfcCardType, { label: string; bg: string; color: string; border: string }> = {
+  classic:      { label: "Классик",     bg: "#14204A", color: "#93b4ff", border: "#2a3f7a" },
+  vip:          { label: "VIP",         bg: "#2F0553", color: "#c084fc", border: "#5b21b6" },
+  organization: { label: "Организация", bg: "#3B1106", color: "#fb923c", border: "#7c2d12" },
+};
+
+function CardTypeBadge({ type }: { type: NfcCardType }) {
+  const { label, bg, color, border } = CARD_TYPE_META[type];
+  return (
+    <div
+      className="flex items-center gap-2 px-3 py-2 rounded-xl"
+      style={{ background: bg, border: `1px solid ${border}` }}
+    >
+      <LuCreditCard size={14} style={{ color, flexShrink: 0 }} />
+      <span className="text-xs font-semibold uppercase tracking-wider" style={{ color }}>
+        {label}
+      </span>
     </div>
   );
 }

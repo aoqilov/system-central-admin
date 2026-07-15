@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useKassas, useDeleteKassas } from "../hooks/useApiKassa";
 import {
   LuSearch,
   LuMapPin,
@@ -16,7 +16,6 @@ import {
   CashboxStatusTypes,
 } from "@/const/constData";
 import type { Cashbox, CashboxStatus } from "../types";
-import { fetchCashboxes, deleteCashboxes } from "../api/apiKassa";
 import { CusTable, type ColumnDef } from "@/components/ui/table/CusTable";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { CusInput } from "@/components/ui/inputs/CusInput";
@@ -27,7 +26,7 @@ import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
 import { CusDialogDelete } from "@/components/ui/dialog/CusDialogDelete";
 import { ModalAddKassa } from "../modals/ModalAddKassa";
 import { ModalEditKassa } from "../modals/ModalEditKassa";
-import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import { getFileUrl } from "@/api/files/files.api";
 
 const PAGE_SIZE = 10;
 
@@ -40,7 +39,6 @@ const STATUS_OPTIONS = [
 ];
 
 export function KassaTableCard() {
-  const queryClient = useQueryClient();
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatus] = useState<CashboxStatus | "">("");
@@ -68,31 +66,17 @@ export function KassaTableCard() {
     setSelectedKassas([]);
   }, [debouncedSearch, statusFilter]);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["cashboxes", debouncedSearch, statusFilter, page],
-    queryFn: () =>
-      fetchCashboxes({
-        search: debouncedSearch || undefined,
-        statuses: statusFilter || undefined,
-        page,
-        limit: PAGE_SIZE,
-      }),
-    staleTime: 1000 * 60 * 2,
+  const { data, isLoading } = useKassas({
+    search: debouncedSearch || undefined,
+    statuses: statusFilter || undefined,
+    page,
+    limit: PAGE_SIZE,
   });
 
   const cashboxes = data?.cashboxes ?? [];
   const total = data?.pagination?.total ?? 0;
 
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteCashboxes(selectedRows),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cashboxes"] });
-      queryClient.invalidateQueries({ queryKey: ["cashbox-stats"] });
-      setOpenDelete(false);
-      setSelected([]);
-      setSelectedKassas([]);
-    },
-  });
+  const deleteMutation = useDeleteKassas();
 
   const editKassa = selectedKassas[0] ?? null;
 
@@ -421,7 +405,15 @@ export function KassaTableCard() {
             : "Удалить кассу"
         }
         description="Удалённая касса не восстанавливается. Продолжить?"
-        onConfirm={() => deleteMutation.mutate()}
+        onConfirm={() =>
+          deleteMutation.mutate(selectedRows, {
+            onSuccess: () => {
+              setOpenDelete(false);
+              setSelected([]);
+              setSelectedKassas([]);
+            },
+          })
+        }
         isLoading={deleteMutation.isPending}
       />
     </>

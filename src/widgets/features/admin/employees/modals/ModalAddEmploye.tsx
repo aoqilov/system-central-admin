@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Drawer } from "@chakra-ui/react";
 import { LuCircleAlert } from "react-icons/lu";
@@ -8,12 +8,9 @@ import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import CusSelect from "@/components/ui/select/CusSelect";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchRoles, createEmployee } from "../api/employeesApi";
-import { uploadFile } from "@/widgets/api-global/files-route/filesApi";
 import { CusFileUpload } from "@/components/ui/inputs/CusFileUpload";
-import type { CreateEmployeePayload } from "../types";
-import { formatPhoneNumber } from "@/widgets/features/login/hooks/useLoginForm";
+import { useCreateEmployee, useRoles } from "../hooks/useApiEmployees";
+import { formatPhoneNumber } from "@/widgets/features/login/hooks/useApiLogin";
 
 interface Props {
   open: boolean;
@@ -38,18 +35,8 @@ function getApiError(err: unknown): string {
 }
 
 export default function ModalAddEmploye({ open, onClose }: Props) {
-  const qc = useQueryClient();
-  const [isUploading, setIsUploading] = useState(false);
-
-  const { data: roles = [] } = useQuery({
-    queryKey: ["roles"],
-    queryFn: fetchRoles,
-  });
-
-  const createMut = useMutation({
-    mutationFn: (payload: CreateEmployeePayload) => createEmployee(payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["employees"] }),
-  });
+  const { data: roles = [] } = useRoles();
+  const createMut = useCreateEmployee();
 
   const {
     register,
@@ -80,42 +67,22 @@ export default function ModalAddEmploye({ open, onClose }: Props) {
   }, [open]);
 
   async function onSubmit(data: FormValues) {
-    console.group("🚀 onSubmit — ModalAddEmploye");
-    console.log("Form values:", data);
-    console.log("File field:", data.file ?? "null (no file selected)");
-
-    let fileId: number | null = null;
-    if (data.file) {
-      console.log("⏳ File tanlangan — upload boshlanmoqda...");
-      setIsUploading(true);
-      try {
-        fileId = await uploadFile(data.file);
-        console.log("✅ Upload muvaffaqiyatli! fileId =", fileId);
-      } catch (err) {
-        console.error("❌ Upload xatosi:", err);
-      } finally {
-        setIsUploading(false);
-      }
-    } else {
-      console.log("ℹ️ File yo'q — upload o'tkazib yuborildi");
-    }
-
-    const payload: CreateEmployeePayload = {
-      firstname: data.firstname.trim(),
-      lastname: data.lastname.trim(),
-      date_of_birth: data.date_of_birth,
-      phone_number: data.phone.replace(/\s/g, ""),
-      telegram_username: data.telegram_username.trim(),
-      password: data.password,
-      role: Number(data.role),
-      salary: data.salary ? Number(data.salary) : null,
-      file: fileId,
-    };
-
-    console.log("📦 API payload:", payload);
-    console.groupEnd();
-
-    createMut.mutateAsync(payload, { onSuccess: onClose });
+    createMut.mutate(
+      {
+        fields: {
+          firstname: data.firstname.trim(),
+          lastname: data.lastname.trim(),
+          date_of_birth: data.date_of_birth,
+          phone_number: data.phone.replace(/\s/g, ""),
+          telegram_username: data.telegram_username.trim(),
+          password: data.password,
+          role: Number(data.role),
+          salary: data.salary ? Number(data.salary) : null,
+        },
+        file: data.file,
+      },
+      { onSuccess: onClose },
+    );
   }
 
   const roleOptions = roles.map((r) => ({
@@ -143,7 +110,7 @@ export default function ModalAddEmploye({ open, onClose }: Props) {
             <CusButton
               variant="outline"
               size="sm"
-              isDisabled={isUploading || createMut.isPending}
+              isDisabled={createMut.isPending}
             >
               Отмена
             </CusButton>
@@ -153,9 +120,10 @@ export default function ModalAddEmploye({ open, onClose }: Props) {
             variant="solid"
             colorPalette="blue"
             onClick={handleSubmit(onSubmit)}
-            isDisabled={isUploading || createMut.isPending}
+            isLoading={createMut.isPending}
+            loadingText="Сохранение..."
           >
-            {isUploading ? "Загрузка фото..." : createMut.isPending ? "Сохранение..." : "Сохранить"}
+            Сохранить
           </CusButton>
         </div>
       }

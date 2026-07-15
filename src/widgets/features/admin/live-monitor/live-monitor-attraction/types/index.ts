@@ -71,7 +71,3 @@ export interface AttrZReportsData {
   attractions: AttractionZReport[];
 }
 
-export interface AttrZReportsResponse {
-  statusCode: number;
-  data: AttrZReportsData;
-}

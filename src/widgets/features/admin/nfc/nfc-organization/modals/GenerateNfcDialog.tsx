@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusInput } from "@/components/ui/inputs/CusInput";
-import { uploadCards } from "../api/nfcOrgApi";
+import { uploadCards } from "@/api/cards/cards.api";
 
 interface Props {
   open: boolean;
@@ -15,18 +15,18 @@ interface Props {
 export function GenerateNfcDialog({ open, onClose }: Props) {
   const qc = useQueryClient();
   const [label, setLabel] = useState("");
-  const [amount, setAmount] = useState("");
-  const [errors, setErrors] = useState<{ label?: string; amount?: string; file?: string }>({});
+  const [balance, setBalance] = useState("");
+  const [errors, setErrors] = useState<{ label?: string; file?: string; balance?: string }>({});
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const uploadMut = useMutation({
-    mutationFn: ({ file, batchName, amount }: { file: File; batchName: string; amount: number }) =>
-      uploadCards(file, batchName, amount),
+    mutationFn: ({ file, batchName, bal }: { file: File; batchName: string; bal?: number }) =>
+      uploadCards(file, batchName, "organization", bal),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["nfc-org-cards"] });
-      void qc.invalidateQueries({ queryKey: ["nfc-org-cards-stats"] });
+      void qc.invalidateQueries({ queryKey: ["nfc-cards-stats", "organization"] });
       reset();
       onClose();
     },
@@ -35,17 +35,16 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
   function validate(): boolean {
     const errs: typeof errors = {};
     if (!label.trim()) errs.label = "Название партии не может быть пустым";
-    const parsed = Number(amount.replace(/\s/g, ""));
-    if (!amount.trim() || isNaN(parsed) || parsed <= 0) errs.amount = "Укажите корректную сумму";
     if (!excelFile) errs.file = "Файл Excel не выбран";
+    if (balance && isNaN(Number(balance))) errs.balance = "Введите корректную сумму";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
 
   function handleSubmit() {
     if (!validate() || !excelFile) return;
-    const parsed = Number(amount.replace(/\s/g, ""));
-    uploadMut.mutate({ file: excelFile, batchName: label.trim(), amount: parsed });
+    const bal = balance.trim() ? Number(balance.trim()) : undefined;
+    uploadMut.mutate({ file: excelFile, batchName: label.trim(), bal });
   }
 
   function handleFileSelect(file: File | null) {
@@ -65,7 +64,7 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
 
   function reset() {
     setLabel("");
-    setAmount("");
+    setBalance("");
     setErrors({});
     setExcelFile(null);
     if (fileRef.current) fileRef.current.value = "";
@@ -102,7 +101,7 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
             colorPalette="blue"
             leftIcon={<LuBuilding2 size={14} />}
             isLoading={uploadMut.isPending}
-            isDisabled={!label.trim() || !amount.trim() || !excelFile || uploadMut.isPending}
+            isDisabled={!label.trim() || !excelFile || uploadMut.isPending}
             onClick={handleSubmit}
           >
             Загрузить
@@ -124,17 +123,16 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
         />
 
         <CusInput
-          label="Сумма (сўм)"
-          placeholder="например: 500 000"
-          value={amount}
+          label="Баланс (необязательно)"
+          placeholder="например: 100000"
+          value={balance}
           onChange={(e) => {
-            const raw = e.target.value.replace(/[^\d]/g, "");
-            const formatted = raw ? Number(raw).toLocaleString("ru-RU") : "";
-            setAmount(formatted);
-            if (errors.amount) setErrors((p) => ({ ...p, amount: undefined }));
+            setBalance(e.target.value);
+            if (errors.balance) setErrors((p) => ({ ...p, balance: undefined }));
           }}
-          errorText={errors.amount}
+          errorText={errors.balance}
           disabled={uploadMut.isPending}
+          type="number"
         />
 
         <div>

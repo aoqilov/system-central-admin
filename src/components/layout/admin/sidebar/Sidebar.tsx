@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { LuX, LuChevronDown } from "react-icons/lu";
 import { useTranslation } from "../../../../i18n/languageConfig";
-import { getStoredRole } from "@/widgets/features/login/api/authApi";
+import { getStoredRole } from "@/widgets/features/login/hooks/authApi";
 import { RoleTypes } from "@/const/constData";
 import {
   navGroups,

@@ -19,7 +19,7 @@ export interface AttractionOperatorItem {
   id: number;
   firstname: string;
   lastname: string;
-  file: number;
+  file: number | null;
   type: "main" | "assistant";
 }
 
@@ -29,8 +29,8 @@ export interface Attraction {
   manufacturer: string;
   category: number;
   status: string;
-  dashboard_file: number;
-  main_file: number;
+  dashboard_file: number | null;
+  main_file: number | null;
   files: number[];
   price: number;
   duration: number;
@@ -40,7 +40,7 @@ export interface Attraction {
   max_weight: number;
   description: string;
   operators: AttractionOperatorItem[];
-  device: number;
+  device: number | null;
 }
 
 export interface PaginationSchema {

@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 import { useNfcVip } from "./hooks/useNfcVip";
 import { NfcFilters } from "./components/NfcFilters";
@@ -10,46 +9,20 @@ import { DeleteNfcDialog } from "./modals/DeleteNfcDialog";
 import { GenerateNfcDialog } from "./modals/GenerateNfcDialog";
 import { InfoNfcDialog } from "./modals/InfoNfcDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
-import { getCards, getCardsStats } from "./api/nfcVipApi";
-import type { Card } from "./nfc.types";
+import type { Card } from "@/types/card.types";
 import PageHeader from "@/widgets/shared-ui/PageHeader";
 
 export default function FeatureNfcVip() {
-  const { filters, page, pageSize, setFilters, setPage, setPageSize } =
-    useNfcVip();
+  const {
+    filters, stats, isStatsLoading, batches, cards, total,
+    isLoading, page, pageSize,
+    setFilters, setPage, setPageSize,
+  } = useNfcVip();
 
   const [generateOpen, setGenerateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Card | null>(null);
   const [deleteTargets, setDeleteTargets] = useState<Card[]>([]);
   const [infoTarget, setInfoTarget] = useState<Card | null>(null);
-
-  const { data: statsData } = useQuery({
-    queryKey: ["nfc-vip-cards-stats"],
-    queryFn: getCardsStats,
-  });
-
-  const batches = statsData?.data.card_stats ?? [];
-
-  useEffect(() => {
-    if (batches.length > 0 && filters.batch === null) {
-      setFilters({ batch: batches[0].batch });
-    }
-  }, [batches]);
-
-  const { data: cardsData, isLoading } = useQuery({
-    queryKey: ["nfc-vip-cards", filters, page, pageSize],
-    queryFn: () =>
-      getCards({
-        page,
-        limit: pageSize,
-        search: filters.search || undefined,
-        statuses: filters.status !== "all" ? filters.status : undefined,
-        batch: filters.batch || undefined,
-      }),
-  });
-
-  const cards = cardsData?.data.cards ?? [];
-  const total = cardsData?.data.pagination.total ?? 0;
 
   const handleEditOpen = useCallback(
     (selected: Card[]) => setEditTarget(selected[0] ?? null),
@@ -60,13 +33,8 @@ export default function FeatureNfcVip() {
     [],
   );
 
-  const editBatchName = batches.find(
-    (b) => String(b.batch) === editTarget?.batch,
-  )?.batchName;
-
-  const infoBatchName = batches.find(
-    (b) => String(b.batch) === infoTarget?.batch,
-  )?.batchName;
+  const editBatch = batches.find((b) => String(b.id) === editTarget?.batch);
+  const infoBatch = batches.find((b) => String(b.id) === infoTarget?.batch);
 
   return (
     <div className="p-4 tablet:p-6 space-y-5">
@@ -76,33 +44,38 @@ export default function FeatureNfcVip() {
         subtitle="Управление VIP NFC картами"
       />
 
-      <NfcStatusCards />
+      <NfcStatusCards stats={stats} isLoading={isStatsLoading} />
 
       {batches.length > 0 && (
         <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setFilters({ batch: null })}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+            style={{
+              background: filters.batch === null ? "var(--text-default)" : "var(--bg-second)",
+              color: filters.batch === null ? "var(--bg-main)" : "var(--text-muted)",
+              border: "1px solid var(--border-default)",
+            }}
+          >
+            Все
+          </button>
           {batches.map((b) => (
             <button
-              key={b.batch}
-              onClick={() => setFilters({ batch: b.batch })}
+              key={b.id}
+              onClick={() => setFilters({ batch: b.id })}
               className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
               style={{
-                background:
-                  filters.batch === b.batch
-                    ? "var(--text-default)"
-                    : "var(--bg-second)",
-                color:
-                  filters.batch === b.batch
-                    ? "var(--bg-main)"
-                    : "var(--text-muted)",
+                background: filters.batch === b.id ? "var(--text-default)" : "var(--bg-second)",
+                color: filters.batch === b.id ? "var(--bg-main)" : "var(--text-muted)",
                 border: "1px solid var(--border-default)",
               }}
             >
-              {b.batchName}
+              {b.name}
               <span
                 className="ml-1.5 px-1.5 py-0.5 rounded text-xs font-semibold"
                 style={{
-                  background: filters.batch === b.batch ? "#2563eb" : "#dbeafe",
-                  color: filters.batch === b.batch ? "#fff" : "#1d4ed8",
+                  background: filters.batch === b.id ? "#2563eb" : "#dbeafe",
+                  color: filters.batch === b.id ? "#fff" : "#1d4ed8",
                 }}
               >
                 {b.total}
@@ -144,7 +117,7 @@ export default function FeatureNfcVip() {
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
             {total} карт
             {filters.status !== "all" || filters.search || filters.batch !== null
-              ? " (отфильтровано)"
+              ? " (фильтр применён)"
               : ""}
           </p>
         </div>
@@ -173,7 +146,7 @@ export default function FeatureNfcVip() {
         open={editTarget !== null}
         onClose={() => setEditTarget(null)}
         card={editTarget}
-        batchName={editBatchName}
+        batchName={editBatch?.name}
       />
 
       <DeleteNfcDialog
@@ -186,7 +159,7 @@ export default function FeatureNfcVip() {
         open={infoTarget !== null}
         onClose={() => setInfoTarget(null)}
         card={infoTarget}
-        batchName={infoBatchName}
+        batchName={infoBatch?.name}
       />
     </div>
   );

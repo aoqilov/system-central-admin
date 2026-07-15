@@ -4,7 +4,7 @@ import { LuTriangleAlert } from "react-icons/lu";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
-import { deleteCards } from "../api/nfcApi";
+import { deleteCards } from "@/api/cards/cards.api";
 import type { Card } from "../nfc.types";
 
 interface Props {
@@ -45,7 +45,7 @@ export function DeleteNfcDialog({ open, onClose, cards }: Props) {
     <CusDialog
       open={open}
       onClose={handleClose}
-      title={isBulk ? `${list.length} ta kartani o'chirish` : "Kartani o'chirish"}
+      title={isBulk ? `Удалить ${list.length} карт` : "Удалить карту"}
       size="sm"
       closeOnBackdrop={!deleteMut.isPending}
       footer={
@@ -57,7 +57,7 @@ export function DeleteNfcDialog({ open, onClose, cards }: Props) {
               isDisabled={deleteMut.isPending}
               onClick={handleClose}
             >
-              Bekor qilish
+              Отмена
             </CusButton>
           </Dialog.ActionTrigger>
           <CusButton
@@ -65,7 +65,7 @@ export function DeleteNfcDialog({ open, onClose, cards }: Props) {
             isLoading={deleteMut.isPending}
             onClick={handleConfirm}
           >
-            O'chirish
+            Удалить
           </CusButton>
         </>
       }
@@ -82,16 +82,16 @@ export function DeleteNfcDialog({ open, onClose, cards }: Props) {
             {isBulk ? (
               <>
                 <p className="text-sm font-medium" style={{ color: "var(--text-default)" }}>
-                  {list.length} ta kartani o'chirasizmi?
+                  Удалить {list.length} карт?
                 </p>
                 <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-                  Tanlangan barcha kartalar o'chirib tashlanadi.
+                  Все выбранные карты будут удалены.
                 </p>
               </>
             ) : (
               <>
                 <p className="text-sm font-medium" style={{ color: "var(--text-default)" }}>
-                  Ushbu kartani o'chirasizmi?
+                  Удалить эту карту?
                 </p>
                 <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
                   Kod: <span className="font-mono">{list[0].card}</span>
@@ -99,7 +99,7 @@ export function DeleteNfcDialog({ open, onClose, cards }: Props) {
               </>
             )}
             <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-              Bu amalni ortga qaytarib bo'lmaydi.
+              Это действие необратимо.
             </p>
           </div>
         </div>

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { LuArrowLeft } from "react-icons/lu";
 import { CusButton } from "@/components/ui/buttons/CusButton";
-import { fetchCashbox, deleteOperatorFromCashbox } from "./api/apiKassaDetail";
+import { useCashboxDetail, useRemoveCashierOperator } from "./hooks/useApiKassaDetail";
 import { KassaInfoCard } from "./components/KassaInfoCard";
 import { KassaOperatorSection } from "./components/KassaOperatorSection";
 import { KassaInfoSection } from "./components/KassaInfoSection";
@@ -16,25 +16,10 @@ export default function FeatureKassaDetail() {
 
   const [assignOpen, setAssignOpen] = useState(false);
 
-  const { data: kassa, isLoading, isError } = useQuery({
-    queryKey: ["cashbox-detail", id],
-    queryFn: () => fetchCashbox(Number(id)),
-    enabled: !!id,
-  });
+  const { data: kassa, isLoading, isError } = useCashboxDetail(id);
+  const removeMutation = useRemoveCashierOperator(Number(id));
 
   const [removingIds, setRemovingIds] = useState<number[]>([]);
-
-  const removeMutation = useMutation({
-    mutationFn: (operatorId: number) =>
-      deleteOperatorFromCashbox(Number(id), operatorId),
-    onMutate: (operatorId) =>
-      setRemovingIds((prev) => [...prev, operatorId]),
-    onSettled: (_, __, operatorId) =>
-      setRemovingIds((prev) => prev.filter((x) => x !== operatorId)),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cashbox-detail", id] });
-    },
-  });
 
   if (isLoading) {
     return (
@@ -87,7 +72,13 @@ export default function FeatureKassaDetail() {
         <KassaOperatorSection
           operators={kassa.operators}
           onAssign={() => setAssignOpen(true)}
-          onRemove={(operatorId) => removeMutation.mutate(operatorId)}
+          onRemove={(operatorId) => {
+              setRemovingIds((prev) => [...prev, operatorId]);
+              removeMutation.mutate(operatorId, {
+                onSettled: () =>
+                  setRemovingIds((prev) => prev.filter((x) => x !== operatorId)),
+              });
+            }}
           removingIds={removingIds}
         />
       </div>

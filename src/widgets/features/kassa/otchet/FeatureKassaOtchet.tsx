@@ -63,8 +63,8 @@ export default function FeatureKassaOtchet() {
   });
 
   const stopMut = useMutation({
-    mutationFn: () =>
-      closeReport(cashboxId!, { status: "stopped", report_type: "xreport", report: activeX?.id ?? 0 }),
+    mutationFn: (description?: string) =>
+      closeReport(cashboxId!, { status: "stopped", report_type: "xreport", report: activeX?.id ?? 0, description }),
     onSuccess: () => {
       invalidate();
       setPauseTargetId(null);
@@ -125,7 +125,7 @@ export default function FeatureKassaOtchet() {
         open={!!pauseTargetId}
         isPending={stopMut.isPending}
         onClose={() => setPauseTargetId(null)}
-        onConfirm={() => stopMut.mutate()}
+        onConfirm={(desc) => stopMut.mutate(desc)}
       />
 
       <ZOtchetCloseDrawer

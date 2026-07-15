@@ -35,15 +35,21 @@ const COLUMNS: ColumnDef<Card>[] = [
   {
     key: "type",
     header: "Тип",
-    render: () => (
+    render: (r) => (
       <CusBadge colorPalette="blue" variant="subtle" size="sm">
-        Classic
+        {r.type === "classic"
+          ? "Classic"
+          : r.type === "vip"
+            ? "VIP"
+            : r.type === "organization"
+              ? "Organization"
+              : "Неизвестно"}
       </CusBadge>
     ),
   },
   {
     key: "code",
-    header: "Karta kodi",
+    header: "Код карты",
     render: (r) => (
       <span
         className="font-mono text-xs"
@@ -67,7 +73,7 @@ const COLUMNS: ColumnDef<Card>[] = [
   },
   {
     key: "nfc",
-    header: "nfc kodi",
+    header: "NFC код",
     render: (r) => (
       <span
         className="font-mono text-xs"
@@ -83,8 +89,18 @@ const COLUMNS: ColumnDef<Card>[] = [
     render: (r) => <NfcStatusBadge status={r.status} />,
   },
   {
+    key: "balance",
+    header: "Balans",
+    render: (r) => (
+      <span className="text-xs" style={{ color: "var(--text-default)" }}>
+        {r.balance.toLocaleString("ru-RU")}
+      </span>
+    ),
+  },
+
+  {
     key: "imported_at",
-    header: "Yaratilgan",
+    header: "Создан",
     render: (r) => (
       <span className="text-xs" style={{ color: "var(--text-muted)" }}>
         {fmtDateTime(r.imported_at)}
@@ -135,7 +151,7 @@ export function NfcTable({
             className="text-sm font-medium flex-1"
             style={{ color: "var(--text-default)" }}
           >
-            {count} ta tanlandi
+            {count} выбрано
           </span>
           <CusButton
             size="xs"
@@ -145,7 +161,7 @@ export function NfcTable({
             isDisabled={count !== 1}
             onClick={() => onEdit(selectedCards)}
           >
-            Tahrirlash
+            Редактировать
           </CusButton>
           <CusButton
             size="xs"
@@ -154,7 +170,7 @@ export function NfcTable({
             leftIcon={<LuTrash2 size={12} />}
             onClick={() => onDelete(selectedCards)}
           >
-            O'chirish
+            Удалить
           </CusButton>
           <CusButton
             size="xs"
@@ -189,7 +205,7 @@ export function NfcTable({
               selectable
               selectedRows={selectedIds}
               onSelectionChange={setSelectedIds}
-              emptyText="Kartalar topilmadi"
+              emptyText="Карты не найдены"
             />
           )}
         </div>

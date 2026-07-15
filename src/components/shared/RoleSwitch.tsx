@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { LuLayoutDashboard, LuBanknote, LuUser } from "react-icons/lu";
-import { getStoredRole, getRoleDefaultPath } from "@/widgets/features/login/api/authApi";
+import { getStoredRole, getRoleDefaultPath } from "@/widgets/features/login/hooks/authApi";
 import { RoleTypes } from "@/const/constData";
 
 const ROLE_COOKIE = "parkops_role";

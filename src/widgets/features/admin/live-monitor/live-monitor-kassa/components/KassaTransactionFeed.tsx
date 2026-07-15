@@ -11,7 +11,7 @@ import {
 } from "../../../../../../components/ui/table/CusTable";
 import CusSelect from "../../../../../../components/ui/select/CusSelect";
 import { CusPagination } from "../../../../../../components/ui/table/CusPagination";
-import { useCashboxTransactions } from "../hooks/useCashboxTransactions";
+import { useCashboxTransactions } from "../hooks/useApiLiveMonitorKassa";
 import type { CashboxTransaction, ZReportCashbox } from "../types";
 import { span } from "framer-motion/client";
 

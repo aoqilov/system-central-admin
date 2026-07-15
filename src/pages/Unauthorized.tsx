@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { LuShieldOff } from 'react-icons/lu'
 import { CusButton } from '../components/ui/buttons/CusButton'
-import { clearAuth } from '@/widgets/features/login/api/authApi'
+import { clearAuth } from '@/widgets/features/login/hooks/authApi'
 
 export default function Unauthorized() {
   const navigate = useNavigate()

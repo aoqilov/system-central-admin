@@ -49,8 +49,7 @@ export function reportToPaySummary(
 }
 
 export function fmt(n: number) {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)} mln`;
-  return n.toLocaleString();
+  return n.toLocaleString("ru-RU");
 }
 
 export function buildXHtml(item: CashboxReport, isCopy = false): string {

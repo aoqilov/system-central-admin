@@ -129,8 +129,8 @@ export function InfoNfcDialog({ open, onClose, card, batchName }: Props) {
               icon={<LuZap size={15} />}
               label="Дата активации"
               value={
-                c.activatedAt ? (
-                  fmtDateTime(c.activatedAt)
+                c.activated_at ? (
+                  fmtDateTime(c.activated_at)
                 ) : (
                   <span style={{ color: "var(--text-muted)" }}>Не активирована</span>
                 )

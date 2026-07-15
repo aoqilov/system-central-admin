@@ -15,21 +15,16 @@ import { CusTable, type ColumnDef } from "@/components/ui/table/CusTable";
 import {
   CusBadge,
   type BadgeStatus,
-  type BadgeRole,
 } from "@/components/ui/badge/CusBadge";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import CusSelect from "@/components/ui/select/CusSelect";
 import { CusPagination } from "@/components/ui/table/CusPagination";
 import CusDialogDelete from "@/components/ui/dialog/childs/CusDialogDelete";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  fetchEmployees,
-  fetchRoles,
-  deleteEmployees,
-} from "../api/employeesApi";
+import { useEmployees, useRoles, useDeleteEmployees } from "../hooks/useApiEmployees";
 import type { ApiEmployee } from "../types";
+import { RoleLabel, RoleTypes } from "@/const/constData";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
-import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import { getFileUrl } from "@/api/files/files.api";
 import ModalAddEmploye from "../modals/ModalAddEmploye";
 import ModalEditEmploye from "../modals/ModalEditEmploye";
 
@@ -45,8 +40,6 @@ export default function EmployeeTableCard() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
-
-  const qc = useQueryClient();
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -67,39 +60,21 @@ export default function EmployeeTableCard() {
     return () => clearTimeout(t);
   }, [search]);
 
-  const { data, isPending, isError } = useQuery({
-    queryKey: [
-      "employees",
-      page,
-      PAGE_SIZE,
-      debouncedSearch,
-      roleFilter,
-      statusFilter,
-    ],
-    queryFn: () =>
-      fetchEmployees({
-        page,
-        limit: PAGE_SIZE,
-        search: debouncedSearch || undefined,
-        roles: roleFilter ? Number(roleFilter) : undefined,
-        statuses: statusFilter
-          ? (statusFilter as "active" | "inactive" | "vacation" | "fired")
-          : undefined,
-      }),
+  const { data, isPending, isError } = useEmployees({
+    page,
+    limit: PAGE_SIZE,
+    search: debouncedSearch || undefined,
+    roles: roleFilter ? Number(roleFilter) : undefined,
+    statuses: statusFilter
+      ? (statusFilter as "active" | "inactive" | "vacation" | "fired")
+      : undefined,
   });
 
   const employees = data?.employees ?? [];
   const pagination = data?.pagination;
 
-  const { data: roles = [] } = useQuery({
-    queryKey: ["roles"],
-    queryFn: fetchRoles,
-  });
-
-  const deleteMut = useMutation({
-    mutationFn: (ids: number[]) => deleteEmployees(ids),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["employees"] }),
-  });
+  const { data: roles = [] } = useRoles();
+  const deleteMut = useDeleteEmployees();
 
   const roleMap = useMemo(
     () => new Map(roles.map((r) => [r.id, r.name])),
@@ -109,7 +84,7 @@ export default function EmployeeTableCard() {
   const roleOptions = useMemo(
     () => [
       { label: "Все роли", value: "" },
-      ...roles.map((r) => ({ label: r.name, value: String(r.id) })),
+      ...roles.map((r) => ({ label: RoleLabel[r.name as RoleTypes] ?? r.name, value: String(r.id) })),
     ],
     [roles],
   );
@@ -210,26 +185,9 @@ export default function EmployeeTableCard() {
           return (
             <span style={{ fontSize: 12, color: "var(--text-muted)" }}>—</span>
           );
-        const knownRoles: BadgeRole[] = [
-          "SUPER_ADMIN",
-          "OPERATOR_ATTRACTION",
-          "CASHIER",
-          "SECURITY",
-          "CLEANER",
-        ];
-        if (knownRoles.includes(name as BadgeRole)) {
-          return <CusBadge role={name as BadgeRole} />;
-        }
+        const label = RoleLabel[name as RoleTypes] ?? name;
         return (
-          <span
-            style={{
-              fontSize: 12,
-              color: "var(--text-2)",
-              textTransform: "capitalize",
-            }}
-          >
-            {name}
-          </span>
+          <span style={{ fontSize: 12, color: "var(--text-2)" }}>{label}</span>
         );
       },
     },

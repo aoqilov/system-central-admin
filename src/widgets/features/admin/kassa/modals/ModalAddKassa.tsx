@@ -1,12 +1,11 @@
 import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { LuCircleAlert } from "react-icons/lu";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusTextArea } from "@/components/ui/inputs/CusTextArea";
 import { CusButton } from "@/components/ui/buttons/CusButton";
-import { createCashbox } from "../api/apiKassa";
+import { useCreateKassa } from "../hooks/useApiKassa";
 import type { CreateCashboxPayload } from "../types";
 
 interface Props {
@@ -22,21 +21,11 @@ interface FormValues {
 
 function getApiError(err: unknown): string {
   const e = err as { response?: { data?: { message?: string } } };
-  return (
-    e?.response?.data?.message ?? "Xatolik yuz berdi. Qayta urinib ko'ring."
-  );
+  return e?.response?.data?.message ?? "Произошла ошибка. Попробуйте снова.";
 }
 
 export function ModalAddKassa({ open, onClose }: Props) {
-  const qc = useQueryClient();
-
-  const createMut = useMutation({
-    mutationFn: (payload: CreateCashboxPayload) => createCashbox(payload),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["cashboxes"] });
-      qc.invalidateQueries({ queryKey: ["cashbox-stats"] });
-    },
-  });
+  const createMut = useCreateKassa();
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     defaultValues: { name: "", place: "", description: "" },
@@ -63,7 +52,7 @@ export function ModalAddKassa({ open, onClose }: Props) {
     <CusDrawer
       open={open}
       onClose={onClose}
-      title="Yangi kassa qo'shish"
+      title="Добавить кассу"
       size="md"
       placement="end"
       footer={
@@ -74,17 +63,17 @@ export function ModalAddKassa({ open, onClose }: Props) {
             isDisabled={createMut.isPending}
             onClick={onClose}
           >
-            Bekor qilish
+            Отмена
           </CusButton>
           <CusButton
             size="sm"
             variant="solid"
             colorPalette="blue"
             isLoading={createMut.isPending}
-            loadingText="Saqlanmoqda..."
+            loadingText="Сохранение..."
             onClick={handleSubmit(onSubmit)}
           >
-            Saqlash
+            Сохранить
           </CusButton>
         </div>
       }
@@ -98,10 +87,7 @@ export function ModalAddKassa({ open, onClose }: Props) {
               border: "1px solid rgba(239,68,68,0.25)",
             }}
           >
-            <LuCircleAlert
-              size={15}
-              style={{ color: "#ef4444", flexShrink: 0 }}
-            />
+            <LuCircleAlert size={15} style={{ color: "#ef4444", flexShrink: 0 }} />
             <span style={{ fontSize: 13, color: "#ef4444" }}>
               {getApiError(createMut.error)}
             </span>
@@ -112,15 +98,15 @@ export function ModalAddKassa({ open, onClose }: Props) {
           control={control}
           name="name"
           rules={{
-            required: "Majburiy maydon",
-            minLength: { value: 2, message: "Minimum 2 ta belgi" },
+            required: "Обязательное поле",
+            minLength: { value: 2, message: "Минимум 2 символа" },
           }}
           render={({ field, fieldState }) => (
             <CusInput
               ref={field.ref}
-              label="Kassa nomi"
+              label="Название кассы"
               isRequired
-              placeholder="Bosh kassa"
+              placeholder="Главная касса"
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
@@ -132,13 +118,13 @@ export function ModalAddKassa({ open, onClose }: Props) {
         <Controller
           control={control}
           name="place"
-          rules={{ required: "Majburiy maydon" }}
+          rules={{ required: "Обязательное поле" }}
           render={({ field, fieldState }) => (
             <CusInput
               ref={field.ref}
-              label="Joylashuvi"
+              label="Расположение"
               isRequired
-              placeholder="1-qavat, kirish"
+              placeholder="1-й этаж, вход"
               value={field.value}
               onChange={field.onChange}
               onBlur={field.onBlur}
@@ -153,8 +139,8 @@ export function ModalAddKassa({ open, onClose }: Props) {
           render={({ field, fieldState }) => (
             <CusTextArea
               ref={field.ref}
-              label="Izoh"
-              placeholder="Qo'shimcha ma'lumot..."
+              label="Примечание"
+              placeholder="Дополнительная информация..."
               rows={3}
               value={field.value}
               onChange={field.onChange}

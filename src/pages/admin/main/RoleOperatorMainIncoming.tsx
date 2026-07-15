@@ -1,4 +1,4 @@
-import FeatureOpeMainIncoming from "@/widgets/features/admin/role-ope-main-incoming/FeatureOpeMainIncoming";
+import FeatureOpeMainIncoming from "@/widgets/features/admin/role-operator-main/role-ope-main-incoming/FeatureOpeMainIncoming";
 import React from "react";
 
 const RoleOperatorMainIncoming = () => {

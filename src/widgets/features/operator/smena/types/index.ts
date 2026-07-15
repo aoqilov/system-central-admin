@@ -23,6 +23,7 @@ export interface AttractionReport {
   total_online: number;
   total_vip: number;
   total_guest: number;
+  total_organization: number;
   total_park_staff: number;
   paid_amount: number;
   total_amount: number;

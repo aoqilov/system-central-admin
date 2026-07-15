@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import type { PayType, KartaType } from "../types";
-import { topupCard } from "../api/apiKassaHomePay";
-import { buildActivationHtml, openPrint } from "../forCheckKassa";
+import { useTopupCard } from "../hooks/useTopupCard";
 
 export type { PayType, KartaType };
 
@@ -15,6 +14,7 @@ interface Props {
   kartaType: KartaType;
   provider: "payme" | "click" | "uzum-bank";
   onSuccess: () => void;
+  onError: (message: string) => void;
 }
 
 const KEYS_TOP = [
@@ -74,10 +74,9 @@ function NumKey({
   );
 }
 
-export function AktivatsaPanel({ nfc, isNewCard, payType, kartaType, provider, onSuccess }: Props) {
-  const [summa, setSumma]   = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError]   = useState<string | null>(null);
+export function AktivatsaPanel({ nfc, isNewCard, payType, kartaType, provider, onSuccess, onError }: Props) {
+  const [summa, setSumma] = useState("");
+  const topupMutation = useTopupCard({ isNewCard, cardPrice: CARD_PRICE, onSuccess, onError });
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -92,7 +91,6 @@ export function AktivatsaPanel({ nfc, isNewCard, payType, kartaType, provider, o
   }, []);
 
   function handleKey(key: string) {
-    setError(null);
     if (key === "CLR") { setSumma(""); return; }
     setSumma((prev) => {
       if (key === "⌫") return prev.slice(0, -1);
@@ -107,26 +105,16 @@ export function AktivatsaPanel({ nfc, isNewCard, payType, kartaType, provider, o
     });
   }
 
-  async function handleSubmit() {
+  function handleSubmit() {
     if (!nfc || !summa) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await topupCard({
-        nfc,
-        amount: Number(summa),
-        payment_type: payType === "naqd" ? "cash" : payType === "karta" ? "card" : "online",
-        ...(payType === "karta" && { payment_card_type: kartaType }),
-        ...(payType === "online" && { payment_service_type: provider === "uzum-bank" ? "uzum" : provider }),
-      });
-      openPrint(buildActivationHtml(res.data.transaction, isNewCard ? CARD_PRICE : undefined));
-      setSumma("");
-      onSuccess();
-    } catch {
-      setError("To'lov amalga oshmadi. Qayta urinib ko'ring.");
-    } finally {
-      setLoading(false);
-    }
+    topupMutation.mutate({
+      nfc,
+      amount: Number(summa),
+      payment_type: payType === "naqd" ? "cash" : payType === "karta" ? "card" : "online",
+      ...(payType === "karta" && { payment_card_type: kartaType }),
+      ...(payType === "online" && { payment_service_type: provider === "uzum-bank" ? "uzum" : provider }),
+    });
+    setSumma("");
   }
 
   const topupAmount = Number(summa) || 0;
@@ -141,7 +129,7 @@ export function AktivatsaPanel({ nfc, isNewCard, payType, kartaType, provider, o
           className="flex flex-col px-4 py-3 rounded-2xl gap-1"
           style={{
             background: "var(--bg-second)",
-            border: `1px solid ${error ? "#ef444440" : "var(--border-default)"}`,
+            border: `1px solid ${topupMutation.isError ? "#ef444440" : "var(--border-default)"}`,
             minHeight: 64,
           }}
         >
@@ -190,12 +178,6 @@ export function AktivatsaPanel({ nfc, isNewCard, payType, kartaType, provider, o
           </div>
         </div>
 
-        {error && (
-          <p className="text-xs text-center" style={{ color: "#ef4444" }}>
-            {error}
-          </p>
-        )}
-
         {/* Numpad */}
         <div className="flex flex-col gap-1.5">
           <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
@@ -220,7 +202,7 @@ export function AktivatsaPanel({ nfc, isNewCard, payType, kartaType, provider, o
           variant="solid"
           className="w-full"
           isDisabled={!summa || !nfc}
-          isLoading={loading}
+          isLoading={topupMutation.isPending}
           loadingText="Bajarilmoqda..."
           onClick={handleSubmit}
         >

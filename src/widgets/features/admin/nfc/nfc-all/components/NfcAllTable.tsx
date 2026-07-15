@@ -4,28 +4,31 @@ import { CusTable, type ColumnDef } from "@/components/ui/table/CusTable";
 import { CusPagination } from "@/components/ui/table/CusPagination";
 import { NfcTypeBadge } from "./NfcTypeBadge";
 import { NfcStatusBadge } from "./NfcStatusBadge";
-import type { UnifiedCard } from "../nfc-all.types";
+import type { Card } from "@/types/card.types";
 
 interface Props {
-  data: UnifiedCard[];
+  data: Card[];
   total: number;
   page: number;
   pageSize: number;
   isLoading?: boolean;
   onPageChange: (page: number) => void;
-  onInfo: (card: UnifiedCard) => void;
+  onInfo: (card: Card) => void;
 }
 
-function buildColumns(onInfo: (card: UnifiedCard) => void): ColumnDef<UnifiedCard>[] {
+function buildColumns(onInfo: (card: Card) => void): ColumnDef<Card>[] {
   return [
     {
       key: "id",
       header: "ID",
       render: (r) => (
         <button
-          onClick={(e) => { e.stopPropagation(); onInfo(r); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onInfo(r);
+          }}
           className="font-mono text-xs font-semibold underline underline-offset-2 transition-opacity hover:opacity-70"
-          style={{ color: "var(--color-blue, #3b82f6)", cursor: "pointer" }}
+          style={{ color: "#3b82f6", cursor: "pointer" }}
         >
           #{r.id}
         </button>
@@ -34,7 +37,24 @@ function buildColumns(onInfo: (card: UnifiedCard) => void): ColumnDef<UnifiedCar
     {
       key: "type",
       header: "Тип",
-      render: (r) => <NfcTypeBadge type={r.type} />,
+      render: (r) =>
+        r.type ? (
+          <NfcTypeBadge type={r.type} />
+        ) : (
+          <span className="text-xs" style={{ color: "var(--text-dim)" }}>—</span>
+        ),
+    },
+    {
+      key: "batch",
+      header: "Партия",
+      render: (r) => (
+        <span
+          className="font-mono text-xs"
+          style={{ color: "var(--text-muted)" }}
+        >
+          {r.batch}
+        </span>
+      ),
     },
     {
       key: "owner",
@@ -42,7 +62,7 @@ function buildColumns(onInfo: (card: UnifiedCard) => void): ColumnDef<UnifiedCar
       render: (r) => (
         <span
           className="text-xs"
-          style={{ color: r.owner ? "var(--text-default)" : "var(--text-muted)" }}
+          style={{ color: r.owner ? "var(--text-default)" : "var(--text-dim)" }}
         >
           {r.owner ?? "—"}
         </span>
@@ -52,7 +72,10 @@ function buildColumns(onInfo: (card: UnifiedCard) => void): ColumnDef<UnifiedCar
       key: "card",
       header: "Код карты",
       render: (r) => (
-        <span className="font-mono text-xs" style={{ color: "var(--text-default)" }}>
+        <span
+          className="font-mono text-xs"
+          style={{ color: "var(--text-default)" }}
+        >
           {r.card}
         </span>
       ),
@@ -61,8 +84,23 @@ function buildColumns(onInfo: (card: UnifiedCard) => void): ColumnDef<UnifiedCar
       key: "nfc",
       header: "NFC код",
       render: (r) => (
-        <span className="font-mono text-xs" style={{ color: "var(--text-default)" }}>
+        <span
+          className="font-mono text-xs"
+          style={{ color: "var(--text-default)" }}
+        >
           {r.nfc}
+        </span>
+      ),
+    },
+    {
+      key: "balance",
+      header: "Баланс",
+      render: (r) => (
+        <span
+          className="text-xs font-semibold tabular-nums"
+          style={{ color: "#22c55e" }}
+        >
+          {r.balance.toLocaleString("ru-RU")} сум
         </span>
       ),
     },
@@ -77,6 +115,20 @@ function buildColumns(onInfo: (card: UnifiedCard) => void): ColumnDef<UnifiedCar
       render: (r) => (
         <span className="text-xs" style={{ color: "var(--text-muted)" }}>
           {fmtDateTime(r.imported_at)}
+        </span>
+      ),
+    },
+    {
+      key: "activated_at",
+      header: "Активирован",
+      render: (r) => (
+        <span
+          className="text-xs"
+          style={{
+            color: r.activated_at ? "var(--text-muted)" : "var(--text-dim)",
+          }}
+        >
+          {r.activated_at ? fmtDateTime(r.activated_at) : "—"}
         </span>
       ),
     },
@@ -97,7 +149,7 @@ export function NfcAllTable({
   return (
     <div className="space-y-3">
       <div className="overflow-x-auto">
-        <div style={{ minWidth: 640 }}>
+        <div style={{ minWidth: 900 }}>
           {isLoading ? (
             <div className="space-y-2 py-2">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -109,7 +161,7 @@ export function NfcAllTable({
               ))}
             </div>
           ) : (
-            <CusTable<UnifiedCard>
+            <CusTable<Card>
               data={data}
               columns={columns}
               variant="outline"

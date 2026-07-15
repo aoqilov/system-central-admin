@@ -8,24 +8,19 @@ import {
   EMPTY_QR,
 } from "../types";
 import { useToast } from "./useToast";
-import { checkNfc } from "../api/apiKassaHomePay";
+import { useCheckNfc } from "./useCheckNfc";
 
 export function useKassaHome() {
   const [qrInfo, setQrInfo] = useState<QrInfo>(EMPTY_QR);
   const [card, setCard] = useState<NfcCard | null>(null);
-  const [scanLoading, setScanLoading] = useState(false);
   const [rightMode, setRightMode] = useState<RightMode>("aktivatsa");
   const [kartaType, setKartaType] = useState<KartaType>("uzcard");
   const [panelKey, setPanelKey] = useState(0);
   const [pending, setPending] = useState<PendingItem[]>([]);
   const { toasts, show: showToast, remove } = useToast();
 
-  async function handleScan(rawNfc: string) {
-    const nfc = rawNfc.replace(/^0+/, "");
-    setScanLoading(true);
-    try {
-      const res = await checkNfc(nfc);
-      const c = res.data.card;
+  const checkNfcMutation = useCheckNfc(
+    (c: NfcCard) => {
       setCard(c);
       setQrInfo({
         status: c.status === "active" ? "active" : "no-active",
@@ -35,13 +30,12 @@ export function useKassaHome() {
         amount: String(c.balance),
         importedAt: c.imported_at,
       });
-    } catch {
-      showToast("NFC karta topilmadi", "error", false);
-      setCard(null);
-      setQrInfo(EMPTY_QR);
-    } finally {
-      setScanLoading(false);
-    }
+    },
+    (msg) => showToast(msg, "error", false),
+  );
+
+  function handleScan(rawNfc: string) {
+    checkNfcMutation.mutate(rawNfc);
   }
 
   function handleClear() {
@@ -91,6 +85,10 @@ export function useKassaHome() {
     setPanelKey((k) => k + 1);
   }
 
+  function handleError(message: string) {
+    showToast(message, "error", false);
+  }
+
   function handleModeChange(v: string) {
     setRightMode(v as RightMode);
     setPanelKey((k) => k + 1);
@@ -99,7 +97,7 @@ export function useKassaHome() {
   return {
     qrInfo,
     card,
-    scanLoading,
+    scanLoading: checkNfcMutation.isPending,
     rightMode,
     kartaType,
     setKartaType,
@@ -114,6 +112,7 @@ export function useKassaHome() {
     handleRestorePending,
     handleRemovePending,
     handleSuccess,
+    handleError,
     handleModeChange,
   };
 }

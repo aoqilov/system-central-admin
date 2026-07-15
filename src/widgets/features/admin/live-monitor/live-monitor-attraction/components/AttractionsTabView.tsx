@@ -2,21 +2,28 @@ import { useState } from "react";
 import dayjs from "dayjs";
 import { CusSegment } from "@/components/ui/segment/CusSegment";
 import { fmt, STATUS_CFG, type ZReportStatus, type SortKey } from "../helpers";
-import type { AttractionZReport, AttrZReport } from "../types";
+import type { AttractionZReportGroup } from "@/types/report.types";
 
-function AttrCard({ attr }: { attr: AttractionZReport }) {
-  const zr: AttrZReport | undefined = attr.zreports[0];
-  const statusKey: ZReportStatus = zr?.status ?? "inactive";
+function AttrCard({ attr }: { attr: AttractionZReportGroup }) {
+  const zr = attr.zreports[0];
+  const statusKey = (zr?.status ?? "inactive") as ZReportStatus;
   const cfg = STATUS_CFG[statusKey] ?? STATUS_CFG.inactive;
 
   const stats = [
-    { label: "Раунд",  value: zr?.total_rounds     ?? 0, color: "#60a5fa"             },
-    { label: "Всего",  value: zr?.total_people     ?? 0, color: "var(--text-default)" },
-    { label: "Офлайн", value: zr?.total_offline    ?? 0, color: "#3b82f6"             },
-    { label: "Онлайн", value: zr?.total_online     ?? 0, color: "#8b5cf6"             },
-    { label: "VIP",    value: zr?.total_vip        ?? 0, color: "#eab308"             },
-    { label: "Гость",  value: zr?.total_guest      ?? 0, color: "#06b6d4"             },
-    { label: "Сотр.",  value: zr?.total_park_staff ?? 0, color: "#22c55e"             },
+    { label: "Раунд", value: zr?.total_rounds ?? 0, color: "#60a5fa" },
+    {
+      label: "Всего",
+      value: zr?.total_people ?? 0,
+      color: "var(--text-default)",
+    },
+    { label: "Онлайн", value: zr?.total_online ?? 0, color: "#8b5cf6" },
+    { label: "CLASSIC", value: zr?.total_offline ?? 0, color: "#3b82f6" },
+    { label: "VIP", value: zr?.total_vip ?? 0, color: "#eab308" },
+    {
+      label: "ОRGANIZATION",
+      value: zr?.total_organization ?? 0,
+      color: "#06b6d4",
+    },
   ];
 
   return (
@@ -26,11 +33,21 @@ function AttrCard({ attr }: { attr: AttractionZReport }) {
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm truncate" style={{ color: "var(--text-default)" }}>
+          <p
+            className="font-semibold text-sm truncate"
+            style={{ color: "var(--text-default)" }}
+          >
             {attr.name}
           </p>
-          <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>
-            {zr?.opened_at ? dayjs(zr.opened_at).format("HH:mm") + " – " + (zr.closed_at ? dayjs(zr.closed_at).format("HH:mm") : "...") : "—"}
+          <p
+            className="text-[11px] mt-0.5 truncate"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {zr?.opened_at
+              ? dayjs(zr.opened_at).format("HH:mm") +
+                " – " +
+                (zr.closed_at ? dayjs(zr.closed_at).format("HH:mm") : "...")
+              : "—"}
           </p>
         </div>
         <span
@@ -43,11 +60,17 @@ function AttrCard({ attr }: { attr: AttractionZReport }) {
 
       <div
         className="grid gap-1 py-2.5 border-y"
-        style={{ gridTemplateColumns: "repeat(7, 1fr)", borderColor: "var(--border-default)" }}
+        style={{
+          gridTemplateColumns: "repeat(7, 1fr)",
+          borderColor: "var(--border-default)",
+        }}
       >
         {stats.map((s) => (
           <div key={s.label} className="flex flex-col items-center gap-0.5">
-            <span className="text-[9px] font-medium" style={{ color: "var(--text-muted)" }}>
+            <span
+              className="text-[9px] font-medium"
+              style={{ color: "var(--text-muted)" }}
+            >
               {s.label}
             </span>
             <span
@@ -61,46 +84,64 @@ function AttrCard({ attr }: { attr: AttractionZReport }) {
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-xs" style={{ color: "var(--text-muted)" }}>Итого</span>
+        <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+          Итого
+        </span>
         <div>
           <span className="text-sm font-bold" style={{ color: "#22c55e" }}>
             {fmt(zr?.total_amount ?? 0)}
           </span>
-          <span className="text-[10px] ml-1" style={{ color: "var(--text-muted)" }}>сум</span>
+          <span
+            className="text-[10px] ml-1"
+            style={{ color: "var(--text-muted)" }}
+          >
+            сум
+          </span>
         </div>
       </div>
     </div>
   );
 }
 
-const FILTER_BTNS: { key: ZReportStatus | "all"; label: string; color?: string }[] = [
-  { key: "all",      label: "Все"           },
-  { key: "open",     label: "Активные",     color: "#22c55e" },
-  { key: "stopped",  label: "Остановлен",   color: "#f97316" },
-  { key: "waiting",  label: "Ожидание",     color: "#eab308" },
-  { key: "inactive", label: "Неактивные",   color: "#6b7280" },
+const FILTER_BTNS: {
+  key: ZReportStatus | "all";
+  label: string;
+  color?: string;
+}[] = [
+  { key: "all", label: "Все" },
+  { key: "open", label: "Активные", color: "#22c55e" },
+  { key: "stopped", label: "Остановлен", color: "#f97316" },
+  { key: "waiting", label: "Ожидание", color: "#eab308" },
+  { key: "inactive", label: "Неактивные", color: "#f00000a1" },
 ];
 
-function getAttrStatus(attr: AttractionZReport): ZReportStatus {
-  return attr.zreports[0]?.status ?? "inactive";
+function getAttrStatus(attr: AttractionZReportGroup): ZReportStatus {
+  return (attr.zreports[0]?.status ?? "inactive") as ZReportStatus;
 }
 
 interface Props {
-  attractions: AttractionZReport[] | undefined;
+  attractions: AttractionZReportGroup[] | undefined;
   isLoading: boolean;
 }
 
 export function AttractionsTabView({ attractions = [], isLoading }: Props) {
-  const [sortKey,      setSortKey] = useState<SortKey>("name");
-  const [filterStatus, setFilter]  = useState<ZReportStatus | "all">("all");
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [filterStatus, setFilter] = useState<ZReportStatus | "all">("all");
 
   const filtered = attractions
     .filter((a) => filterStatus === "all" || getAttrStatus(a) === filterStatus)
     .sort((a, b) => {
-      if (sortKey === "name")   return a.name.localeCompare(b.name);
-      if (sortKey === "status") return getAttrStatus(a).localeCompare(getAttrStatus(b));
-      if (sortKey === "rounds") return (b.zreports[0]?.total_rounds ?? 0) - (a.zreports[0]?.total_rounds ?? 0);
-      return (b.zreports[0]?.total_amount ?? 0) - (a.zreports[0]?.total_amount ?? 0);
+      if (sortKey === "name") return a.name.localeCompare(b.name);
+      if (sortKey === "status")
+        return getAttrStatus(a).localeCompare(getAttrStatus(b));
+      if (sortKey === "rounds")
+        return (
+          (b.zreports[0]?.total_rounds ?? 0) -
+          (a.zreports[0]?.total_rounds ?? 0)
+        );
+      return (
+        (b.zreports[0]?.total_amount ?? 0) - (a.zreports[0]?.total_amount ?? 0)
+      );
     });
 
   return (
@@ -119,9 +160,17 @@ export function AttractionsTabView({ attractions = [], isLoading }: Props) {
                 onClick={() => setFilter(f.key)}
                 className="text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all"
                 style={{
-                  background:  isActive ? (f.color ? `${f.color}20` : "var(--bg-hover)") : "transparent",
-                  borderColor: isActive ? (f.color ?? "var(--border-2)")     : "var(--border-default)",
-                  color:       isActive ? (f.color ?? "var(--text-default)") : "var(--text-muted)",
+                  background: isActive
+                    ? f.color
+                      ? `${f.color}20`
+                      : "var(--bg-hover)"
+                    : "transparent",
+                  borderColor: isActive
+                    ? (f.color ?? "var(--border-2)")
+                    : "var(--border-default)",
+                  color: isActive
+                    ? (f.color ?? "var(--text-default)")
+                    : "var(--text-muted)",
                 }}
               >
                 {f.label}
@@ -137,32 +186,48 @@ export function AttractionsTabView({ attractions = [], isLoading }: Props) {
           value={sortKey}
           onValueChange={(v) => setSortKey(v as SortKey)}
           items={[
-            { id: "name",   label: "А–Я"    },
+            { id: "name", label: "А–Я" },
             { id: "rounds", label: "Раунды" },
-            { id: "total",  label: "Сумма"  },
+            { id: "total", label: "Сумма" },
             { id: "status", label: "Статус" },
           ]}
         />
       </div>
 
       {isLoading ? (
-        <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>
+        <div
+          className="grid gap-3"
+          style={{
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+          }}
+        >
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
               className="h-[200px] rounded-2xl animate-pulse"
-              style={{ background: "var(--bg-second)", border: "1px solid var(--border-default)" }}
+              style={{
+                background: "var(--bg-second)",
+                border: "1px solid var(--border-default)",
+              }}
             />
           ))}
         </div>
       ) : filtered.length > 0 ? (
-        <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>
+        <div
+          className="grid gap-3"
+          style={{
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+          }}
+        >
           {filtered.map((a) => (
             <AttrCard key={a.id} attr={a} />
           ))}
         </div>
       ) : (
-        <p className="text-center py-12 text-sm" style={{ color: "var(--text-muted)" }}>
+        <p
+          className="text-center py-12 text-sm"
+          style={{ color: "var(--text-muted)" }}
+        >
           Нет данных для отображения
         </p>
       )}

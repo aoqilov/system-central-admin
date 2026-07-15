@@ -1,20 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Drawer } from "@chakra-ui/react";
 import { LuCircleAlert } from "react-icons/lu";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import CusSelect from "@/components/ui/select/CusSelect";
 import { CusTextArea } from "@/components/ui/inputs/CusTextArea";
 import { CusFileUpload } from "@/components/ui/inputs/CusFileUpload";
-import { uploadAttractionFiles } from "@/widgets/api-global/files-route/filesApi";
-import {
-  createAttraction,
-  fetchAttractionsCategory,
-} from "../api/attractionsApi";
-import type { CreateAttractionPayload } from "../types";
+import { useCreateAttraction } from "../hooks/useApiAttractions";
 
 interface Props {
   open: boolean;
@@ -24,7 +18,6 @@ interface Props {
 interface FormValues {
   name: string;
   manufacturer: string;
-  category: string;
   price: string;
   duration: string;
   seats: string;
@@ -40,7 +33,6 @@ interface FormValues {
 const DEFAULT_VALUES: FormValues = {
   name: "",
   manufacturer: "",
-  category: "",
   price: "",
   duration: "",
   seats: "",
@@ -55,28 +47,11 @@ const DEFAULT_VALUES: FormValues = {
 
 function getApiError(err: unknown): string {
   const e = err as { response?: { data?: { message?: string } } };
-  return (
-    e?.response?.data?.message ?? "Xatolik yuz berdi. Qayta urinib ko'ring."
-  );
+  return e?.response?.data?.message ?? "Произошла ошибка. Попробуйте снова.";
 }
 
 export default function ModalAddAttraction({ open, onClose }: Props) {
-  const qc = useQueryClient();
-  const [isUploading, setIsUploading] = useState(false);
-
-  const { data: categories = [] } = useQuery({
-    queryKey: ["attraction-categories"],
-    queryFn: fetchAttractionsCategory,
-    staleTime: Infinity,
-  });
-
-  const createMut = useMutation({
-    mutationFn: (payload: CreateAttractionPayload) => createAttraction(payload),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["attractions"] });
-      qc.invalidateQueries({ queryKey: ["attraction-stats"] });
-    },
-  });
+  const createMut = useCreateAttraction();
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     defaultValues: DEFAULT_VALUES,
@@ -91,73 +66,43 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
   }, [open]);
 
   async function onSubmit(data: FormValues) {
-    setIsUploading(true);
-
-    const hasFiles = data.main_file || data.dashboard_file || data.files.length > 0;
-    let uploadedIds: { main_file?: number; dashboard_file?: number; files?: number[] } = {};
-
-    if (hasFiles) {
-      try {
-        const result = await uploadAttractionFiles({
-          main_file: data.main_file,
-          dashboard_file: data.dashboard_file,
-          files: data.files,
-        });
-        uploadedIds = {
-          main_file: result.main_file ?? undefined,
-          dashboard_file: result.dashboard_file ?? undefined,
-          files: result.files.length > 0 ? result.files : undefined,
-        };
-      } catch (err) {
-        setIsUploading(false);
-        return;
-      }
-    }
-
-    setIsUploading(false);
-
-    const payload: CreateAttractionPayload = {
-      name: data.name.trim(),
-      manufacturer: data.manufacturer.trim(),
-      category: Number(data.category),
-      price: Number(data.price),
-      duration: Number(data.duration),
-      seats: Number(data.seats),
-      age_limit: Number(data.age_limit),
-      min_height: Number(data.min_height),
-      max_weight: Number(data.max_weight),
-      description: data.description.trim() || undefined,
-      ...uploadedIds,
-    };
-
     try {
-      await createMut.mutateAsync(payload);
+      await createMut.mutateAsync({
+        fields: {
+          name: data.name.trim(),
+          manufacturer: data.manufacturer.trim(),
+          price: Number(data.price),
+          duration: Number(data.duration),
+          seats: Number(data.seats),
+          age_limit: Number(data.age_limit),
+          min_height: Number(data.min_height),
+          max_weight: Number(data.max_weight),
+          description: data.description.trim() || undefined,
+        },
+        main_file: data.main_file,
+        dashboard_file: data.dashboard_file,
+        files: data.files,
+      });
       onClose();
     } catch {
-      // createMut.error state orqali UI da ko'rsatiladi
+      // ошибка отображается через createMut.error
     }
   }
 
-  const categoryOptions = categories.map((c) => ({
-    label: c.name,
-    value: String(c.id),
-  }));
-
-  const isPending = isUploading || createMut.isPending;
-  const loadingText = isUploading ? "Rasmlar yuklanmoqda..." : "Saqlanmoqda...";
+  const isPending = createMut.isPending;
 
   return (
     <CusDrawer
       open={open}
       onClose={onClose}
-      title="Yangi attraksion qo'shish"
+      title="Добавить аттракцион"
       size="xl"
       placement="end"
       footer={
         <div className="flex gap-2 justify-end w-full">
           <Drawer.ActionTrigger asChild>
             <CusButton variant="outline" size="sm" isDisabled={isPending}>
-              Bekor qilish
+              Отмена
             </CusButton>
           </Drawer.ActionTrigger>
           <CusButton
@@ -165,10 +110,10 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
             variant="solid"
             colorPalette="blue"
             isLoading={isPending}
-            loadingText={loadingText}
+            loadingText="Сохранение..."
             onClick={handleSubmit(onSubmit)}
           >
-            Saqlash
+            Сохранить
           </CusButton>
         </div>
       }
@@ -192,20 +137,19 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
           </div>
         )}
 
-        {/* Rasmlar */}
-        <Section title="Rasmlar">
+        <Section title="Фотографии">
           <Row2>
             <Controller
               control={control}
               name="main_file"
               render={({ field, fieldState }) => (
                 <CusFileUpload
-                  label="Asosiy rasm"
-                  sublabel="Sayt va dashboardda ko'rsatiladi"
+                  label="Основное фото"
+                  sublabel="Отображается на сайте и в дашборде"
                   accept={{ "image/*": [".jpg", ".jpeg", ".png", ".webp"] }}
                   maxFiles={1}
                   maxFileSize={10 * 1024 * 1024}
-                  helperText="JPG, PNG, WEBP · Max 5 MB"
+                  helperText="JPG, PNG, WEBP · Max 5 МБ"
                   errorText={fieldState.error?.message}
                   onFileChange={(files) => field.onChange(files[0] ?? null)}
                 />
@@ -216,12 +160,12 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
               name="dashboard_file"
               render={({ field, fieldState }) => (
                 <CusFileUpload
-                  label="Dashboard rasmi"
-                  sublabel="Admin panelda ko'rsatiladi"
+                  label="Фото для карта"
+                  sublabel="Отображается в карта"
                   accept={{ "image/*": [".jpg", ".jpeg", ".png", ".webp"] }}
                   maxFiles={1}
                   maxFileSize={10 * 1024 * 1024}
-                  helperText="JPG, PNG, WEBP · Max 5 MB"
+                  helperText="JPG, PNG, WEBP · Max 5 МБ"
                   errorText={fieldState.error?.message}
                   onFileChange={(files) => field.onChange(files[0] ?? null)}
                 />
@@ -233,12 +177,12 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
             name="files"
             render={({ field, fieldState }) => (
               <CusFileUpload
-                label="Galereya"
-                sublabel="Max 4 ta rasm qo'shishingiz mumkin"
+                label="Галерея"
+                sublabel="Можно добавить до 4 фотографий"
                 accept={{ "image/*": [".jpg", ".jpeg", ".png", ".webp"] }}
                 maxFiles={4}
                 maxFileSize={10 * 1024 * 1024}
-                helperText="JPG, PNG, WEBP · Max 10 MB"
+                helperText="JPG, PNG, WEBP · Max 10 МБ"
                 errorText={fieldState.error?.message}
                 onFileChange={(files) => field.onChange(files)}
               />
@@ -246,20 +190,19 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
           />
         </Section>
 
-        {/* Asosiy ma'lumotlar */}
-        <Section title="Asosiy ma'lumotlar">
+        <Section title="Основная информация">
           <Row2>
             <Controller
               control={control}
               name="name"
               rules={{
-                required: "Majburiy maydon",
-                minLength: { value: 2, message: "Minimum 2 ta belgi" },
+                required: "Обязательное поле",
+                minLength: { value: 2, message: "Минимум 2 символа" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Nomi"
+                  label="Название"
                   isRequired
                   placeholder="Roller Coaster"
                   value={field.value}
@@ -272,11 +215,11 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
             <Controller
               control={control}
               name="manufacturer"
-              rules={{ required: "Majburiy maydon" }}
+              rules={{ required: "Обязательное поле" }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Ishlab chiqaruvchi"
+                  label="Производитель"
                   isRequired
                   placeholder="Intamin"
                   value={field.value}
@@ -287,42 +230,21 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
               )}
             />
           </Row2>
-
-          <Controller
-            control={control}
-            name="category"
-            rules={{ required: "Kategoriyani tanlang" }}
-            render={({ field, fieldState }) => (
-              <div>
-                <Label text="Kategoriya" required />
-                <CusSelect
-                  options={categoryOptions}
-                  placeholder="Kategoriya tanlang"
-                  value={field.value}
-                  onChange={(v) => field.onChange(v)}
-                />
-                {fieldState.error && (
-                  <ErrorText text={fieldState.error.message ?? ""} />
-                )}
-              </div>
-            )}
-          />
         </Section>
 
-        {/* Texnik ma'lumotlar */}
-        <Section title="Texnik ma'lumotlar">
+        <Section title="Технические данные">
           <Row2>
             <Controller
               control={control}
               name="price"
               rules={{
-                required: "Majburiy maydon",
-                min: { value: 1, message: "0 dan katta bo'lishi kerak" },
+                required: "Обязательное поле",
+                min: { value: 1, message: "Должно быть больше 0" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Narxi (UZS)"
+                  label="Цена (UZS)"
                   isRequired
                   placeholder="25000"
                   type="number"
@@ -337,13 +259,13 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
               control={control}
               name="duration"
               rules={{
-                required: "Majburiy maydon",
-                min: { value: 1, message: "0 dan katta bo'lishi kerak" },
+                required: "Обязательное поле",
+                min: { value: 1, message: "Должно быть больше 0" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Davomiyligi (daqiqa)"
+                  label="Длительность (мин)"
                   isRequired
                   placeholder="5"
                   type="number"
@@ -360,13 +282,13 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
               control={control}
               name="seats"
               rules={{
-                required: "Majburiy maydon",
-                min: { value: 1, message: "0 dan katta bo'lishi kerak" },
+                required: "Обязательное поле",
+                min: { value: 1, message: "Должно быть больше 0" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="O'rindiqlar soni"
+                  label="Количество мест"
                   isRequired
                   placeholder="24"
                   type="number"
@@ -380,20 +302,19 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
           </Row2>
         </Section>
 
-        {/* Cheklovlar */}
-        <Section title="Cheklovlar">
+        <Section title="Ограничения">
           <Row2>
             <Controller
               control={control}
               name="age_limit"
               rules={{
-                required: "Majburiy maydon",
-                min: { value: 0, message: "0 yoki undan katta" },
+                required: "Обязательное поле",
+                min: { value: 0, message: "0 или больше" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Minimal yosh"
+                  label="Минимальный возраст"
                   isRequired
                   placeholder="12"
                   type="number"
@@ -408,13 +329,13 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
               control={control}
               name="min_height"
               rules={{
-                required: "Majburiy maydon",
-                min: { value: 1, message: "0 dan katta bo'lishi kerak" },
+                required: "Обязательное поле",
+                min: { value: 1, message: "Должно быть больше 0" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Minimal bo'y (sm)"
+                  label="Минимальный рост (см)"
                   isRequired
                   placeholder="120"
                   type="number"
@@ -431,13 +352,13 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
               control={control}
               name="max_weight"
               rules={{
-                required: "Majburiy maydon",
-                min: { value: 1, message: "0 dan katta bo'lishi kerak" },
+                required: "Обязательное поле",
+                min: { value: 1, message: "Должно быть больше 0" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Maksimal og'irlik (kg)"
+                  label="Максимальный вес (кг)"
                   isRequired
                   placeholder="100"
                   type="number"
@@ -451,16 +372,15 @@ export default function ModalAddAttraction({ open, onClose }: Props) {
           </Row2>
         </Section>
 
-        {/* Qo'shimcha */}
-        <Section title="Qo'shimcha">
+        <Section title="Дополнительно">
           <Controller
             control={control}
             name="description"
             render={({ field, fieldState }) => (
               <CusTextArea
                 ref={field.ref}
-                label="Tavsif"
-                placeholder="Attraksion haqida qisqacha ma'lumot..."
+                label="Описание"
+                placeholder="Краткое описание аттракциона..."
                 rows={3}
                 value={field.value}
                 onChange={field.onChange}

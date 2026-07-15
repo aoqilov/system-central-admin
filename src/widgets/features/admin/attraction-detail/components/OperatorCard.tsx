@@ -1,7 +1,7 @@
 import { LuUserPlus } from "react-icons/lu";
 import { CusCard } from "@/components/shared/card/CusCard";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
-import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import { getFileUrl } from "@/api/files/files.api";
 import { OperatorCardHelper } from "./OperatorCardHelper";
 import type { AttractionOperatorItem } from "../types";
 

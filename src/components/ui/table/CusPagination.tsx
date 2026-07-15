@@ -134,25 +134,25 @@ export function CusPagination({
 
           {/* Page numbers */}
           <Pagination.Items
-            render={(pg) => (
-              <Pagination.Item key={pg.value} value={pg.value} type="page" asChild>
-                <IconButton
-                  aria-label={`${pg.value}-sahifa`}
-                  size={size}
-                  variant="outline"
-                  aria-current={undefined}
-                  style={btnStyle}
-                  _current={{
-                    background: "var(--bg-hover)",
-                    borderColor: "var(--border-2)",
-                    color: "var(--text-default)",
-                    fontWeight: 700,
-                  }}
-                >
-                  {pg.value}
-                </IconButton>
-              </Pagination.Item>
-            )}
+            render={(pg) => {
+              const isActive = pg.value === page;
+              return (
+                <Pagination.Item key={pg.value} value={pg.value} type="page" asChild>
+                  <IconButton
+                    aria-label={`${pg.value}-sahifa`}
+                    size={size}
+                    variant="outline"
+                    style={
+                      isActive
+                        ? { background: "#3b82f6", borderColor: "#3b82f6", color: "#fff", fontWeight: 700, borderWidth: 1, borderStyle: "solid" }
+                        : btnStyle
+                    }
+                  >
+                    {pg.value}
+                  </IconButton>
+                </Pagination.Item>
+              );
+            }}
             ellipsis={
               <span
                 style={{

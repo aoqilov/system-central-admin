@@ -11,7 +11,7 @@ import {
   LuCircleOff,
 } from "react-icons/lu";
 import type { Attraction } from "@/widgets/features/admin/attractions/types";
-import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import { getFileUrl } from "@/api/files/files.api";
 
 const STATUS_MAP: Record<
   string,

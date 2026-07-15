@@ -35,10 +35,29 @@ const COLUMNS: ColumnDef<Card>[] = [
   {
     key: "type",
     header: "Тип",
-    render: () => (
+    render: (r) => (
       <CusBadge colorPalette="orange" variant="subtle" size="sm">
-        Организация
+        {r.type === "classic"
+          ? "Classic"
+          : r.type === "vip"
+            ? "VIP"
+            : r.type === "organization"
+              ? "Organization"
+              : "Неизвестно"}
       </CusBadge>
+    ),
+  },
+
+  {
+    key: "code",
+    header: "Код карты",
+    render: (r) => (
+      <span
+        className="font-mono text-xs"
+        style={{ color: "var(--text-default)" }}
+      >
+        {r.card}
+      </span>
     ),
   },
   {
@@ -49,19 +68,7 @@ const COLUMNS: ColumnDef<Card>[] = [
         className="text-sm"
         style={{ color: r.owner ? "var(--text-default)" : "var(--text-muted)" }}
       >
-        {r.owner ?? "Не указано"}
-      </span>
-    ),
-  },
-  {
-    key: "code",
-    header: "Код карты",
-    render: (r) => (
-      <span
-        className="font-mono text-xs"
-        style={{ color: "var(--text-default)" }}
-      >
-        {r.card}
+        {r.batch ?? "Не указано"}
       </span>
     ),
   },
@@ -81,6 +88,15 @@ const COLUMNS: ColumnDef<Card>[] = [
     key: "status",
     header: "Статус",
     render: (r) => <NfcStatusBadge status={r.status} />,
+  },
+  {
+    key: "balance",
+    header: "Баланс",
+    render: (r) => (
+      <span className="text-xs" style={{ color: "var(--text-default)" }}>
+        {r.balance.toLocaleString("ru-RU")}
+      </span>
+    ),
   },
   {
     key: "imported_at",

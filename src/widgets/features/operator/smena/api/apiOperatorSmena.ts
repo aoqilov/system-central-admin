@@ -6,9 +6,21 @@ import type {
   UpdateReportData,
 } from "../types";
 
+const getDeviceId = (): string => {
+  const key = "dntdiOP";
+  let id = localStorage.getItem(key);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(key, id);
+  }
+  return id;
+};
+
 export const openReport = async (attractionID: number) => {
   const { data } = await api.post<ApiResponse<UpdateReportData>>(
     `/attractions/${attractionID}/reports/open`,
+    undefined,
+    { headers: { "device-id": getDeviceId() } },
   );
   return data;
 };

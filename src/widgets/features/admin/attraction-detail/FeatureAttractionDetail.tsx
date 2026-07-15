@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { LuArrowLeft } from "react-icons/lu";
 import { CusButton } from "@/components/ui/buttons/CusButton";
-import { fetchAttractionDetail, removeAttractionOperator } from "./api/apiAttractionDetail";
+import { useAttractionDetail, useRemoveAttractionOperator } from "./hooks/useApiAttractionDetail";
 import { AttractionCard } from "./components/AttractionCard";
 import { VisitorsChart } from "./components/VisitorsChart";
 import { RevenueChart } from "./components/RevenueChart";
@@ -14,33 +13,15 @@ import { OperatorSection } from "./components/OperatorSection";
 export default function FeatureAttractionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const [assignOpen, setAssignOpen] = useState(false);
   const [assignHelperOpen, setAssignHelperOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [removingHelperIds, setRemovingHelperIds] = useState<number[]>([]);
 
-  const removeMutation = useMutation({
-    mutationFn: (operatorId: number) =>
-      removeAttractionOperator(Number(id), operatorId),
-    onMutate: (operatorId) =>
-      setRemovingHelperIds((prev) => [...prev, operatorId]),
-    onSettled: (_, __, operatorId) => {
-      setRemovingHelperIds((prev) => prev.filter((i) => i !== operatorId));
-      queryClient.invalidateQueries({ queryKey: ["attraction-detail", id] });
-    },
-  });
+  const removeMutation = useRemoveAttractionOperator(Number(id));
 
-  const {
-    data: attraction,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["attraction-detail", id],
-    queryFn: () => fetchAttractionDetail(Number(id)),
-    enabled: !!id,
-  });
+  const { data: attraction, isLoading, isError } = useAttractionDetail(id);
 
   if (isLoading) {
     return (
@@ -112,8 +93,20 @@ export default function FeatureAttractionDetail() {
             helpers={helpers}
             onAssignOperator={() => setAssignOpen(true)}
             onAssignHelper={() => setAssignHelperOpen(true)}
-            onRemoveOperator={(operatorId) => removeMutation.mutate(operatorId)}
-            onRemoveHelper={(operatorId) => removeMutation.mutate(operatorId)}
+            onRemoveOperator={(operatorId) => {
+              setRemovingHelperIds((prev) => [...prev, operatorId]);
+              removeMutation.mutate(operatorId, {
+                onSettled: () =>
+                  setRemovingHelperIds((prev) => prev.filter((i) => i !== operatorId)),
+              });
+            }}
+            onRemoveHelper={(operatorId) => {
+              setRemovingHelperIds((prev) => [...prev, operatorId]);
+              removeMutation.mutate(operatorId, {
+                onSettled: () =>
+                  setRemovingHelperIds((prev) => prev.filter((i) => i !== operatorId)),
+              });
+            }}
             removingIds={removingHelperIds}
           />
         </div>

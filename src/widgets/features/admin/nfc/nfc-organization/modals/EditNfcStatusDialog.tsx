@@ -6,7 +6,7 @@ import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import CusSelect from "@/components/ui/select/CusSelect";
 import { CARD_STATUS_META, type Card, type CardStatus } from "../nfc.types";
-import { updateCard } from "../api/nfcOrgApi";
+import { updateCard } from "@/api/cards/cards.api";
 
 const STATUS_OPTIONS = Object.entries(CARD_STATUS_META).map(([key, meta]) => ({
   value: key,
@@ -113,7 +113,7 @@ export function EditNfcStatusDialog({ open, onClose, card }: Props) {
             <div className="flex justify-between">
               <span style={{ color: "var(--text-muted)" }}>Создан</span>
               <span style={{ color: "var(--text-default)" }}>
-                {fmtDateTime(c.createdAt)}
+                {fmtDateTime(c.imported_at)}
               </span>
             </div>
           </div>

@@ -19,6 +19,9 @@ import {
 import { SiTestcafe } from "react-icons/si";
 import { RoleTypes } from "@/const/constData";
 import { LiaIdCardSolid } from "react-icons/lia";
+import { ImNewspaper } from "react-icons/im";
+import { IoIosImages } from "react-icons/io";
+import { MdOutlineDiscount } from "react-icons/md";
 
 // в”Ђв”Ђв”Ђ Types в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
@@ -75,7 +78,12 @@ export const navGroups: NavGroupDef[] = [
             labelKey: "liveKassa",
             icon: LuBanknote,
             to: "/live-monitor/kassa",
-            roles: [RoleTypes.SUPERADMIN, RoleTypes.HEAD_CASHIER],
+            roles: [
+              RoleTypes.SUPERADMIN,
+              RoleTypes.HEAD_CASHIER,
+              RoleTypes.HEAD_MARKETING,
+              RoleTypes.HEAD_ACCOUNTANT,
+            ],
           },
           {
             labelKey: "liveAttraction",
@@ -85,6 +93,8 @@ export const navGroups: NavGroupDef[] = [
               RoleTypes.SUPERADMIN,
               RoleTypes.HEAD_CASHIER,
               RoleTypes.HEAD_OPERATOR,
+              RoleTypes.HEAD_ACCOUNTANT,
+              RoleTypes.HEAD_MARKETING,
             ],
           },
           {
@@ -95,6 +105,8 @@ export const navGroups: NavGroupDef[] = [
               RoleTypes.SUPERADMIN,
               RoleTypes.HEAD_CASHIER,
               RoleTypes.HEAD_OPERATOR,
+              RoleTypes.HEAD_MARKETING,
+              RoleTypes.HEAD_ACCOUNTANT,
             ],
           },
         ],
@@ -107,19 +119,31 @@ export const navGroups: NavGroupDef[] = [
             labelKey: "reportsKassa",
             icon: LuBanknote,
             to: "/reports/kassa",
-            roles: [RoleTypes.SUPERADMIN, RoleTypes.HEAD_ACCOUNTANT],
+            roles: [
+              RoleTypes.SUPERADMIN,
+              RoleTypes.HEAD_ACCOUNTANT,
+              RoleTypes.HEAD_MARKETING,
+            ],
           },
           {
             labelKey: "reportsAttraction",
             icon: LuFerrisWheel,
             to: "/reports/attraction",
-            roles: [RoleTypes.SUPERADMIN, RoleTypes.HEAD_ACCOUNTANT],
+            roles: [
+              RoleTypes.SUPERADMIN,
+              RoleTypes.HEAD_ACCOUNTANT,
+              RoleTypes.HEAD_MARKETING,
+            ],
           },
           {
             labelKey: "reportsEmployees",
             icon: LuUsers,
             to: "/reports/employees",
-            roles: [RoleTypes.SUPERADMIN, RoleTypes.HEAD_ACCOUNTANT],
+            roles: [
+              RoleTypes.SUPERADMIN,
+              RoleTypes.HEAD_ACCOUNTANT,
+              RoleTypes.HEAD_MARKETING,
+            ],
           },
         ],
       },
@@ -132,19 +156,31 @@ export const navGroups: NavGroupDef[] = [
         labelKey: "employees",
         icon: LuUsers,
         to: "/employees",
-        roles: [RoleTypes.SUPERADMIN],
+        roles: [
+          RoleTypes.SUPERADMIN,
+          RoleTypes.HEAD_MARKETING,
+          RoleTypes.ADMIN,
+        ],
       },
       {
         labelKey: "attractions",
         icon: LuFerrisWheel,
         to: "/attractions",
-        roles: [RoleTypes.SUPERADMIN, RoleTypes.HEAD_OPERATOR],
+        roles: [
+          RoleTypes.SUPERADMIN,
+          RoleTypes.HEAD_OPERATOR,
+          RoleTypes.HEAD_MARKETING,
+        ],
       },
       {
         labelKey: "kassa",
         icon: LuBanknote,
         to: "/kassa",
-        roles: [RoleTypes.SUPERADMIN, RoleTypes.HEAD_CASHIER],
+        roles: [
+          RoleTypes.SUPERADMIN,
+          RoleTypes.HEAD_CASHIER,
+          RoleTypes.HEAD_MARKETING,
+        ],
       },
       {
         labelKey: "kassaZReport",
@@ -200,6 +236,42 @@ export const navGroups: NavGroupDef[] = [
           },
         ],
       },
+      {
+        label: "Маркетинг новости",
+        labelKey: "marketing-news",
+        icon: ImNewspaper,
+        to: "/marketing/news",
+        roles: [
+          RoleTypes.SUPERADMIN,
+          RoleTypes.HEAD_CASHIER,
+          RoleTypes.HEAD_ACCOUNTANT,
+          RoleTypes.HEAD_MARKETING,
+        ],
+      },
+      {
+        label: "Маркетинг память",
+        labelKey: "marketing-memory",
+        icon: IoIosImages,
+        to: "/marketing/memory",
+        roles: [
+          RoleTypes.SUPERADMIN,
+          RoleTypes.HEAD_CASHIER,
+          RoleTypes.HEAD_ACCOUNTANT,
+          RoleTypes.HEAD_MARKETING,
+        ],
+      },
+      {
+        label: "Маркетинг акциия",
+        labelKey: "marketing-aksiya",
+        icon: MdOutlineDiscount,
+        to: "/marketing/aksiya",
+        roles: [
+          RoleTypes.SUPERADMIN,
+          RoleTypes.HEAD_CASHIER,
+          RoleTypes.HEAD_ACCOUNTANT,
+          RoleTypes.HEAD_MARKETING,
+        ],
+      },
 
       {
         labelKey: "nfcCards",
@@ -214,6 +286,7 @@ export const navGroups: NavGroupDef[] = [
               RoleTypes.SUPERADMIN,
               RoleTypes.HEAD_CASHIER,
               RoleTypes.HEAD_ACCOUNTANT,
+              RoleTypes.HEAD_MARKETING,
             ],
           },
           {
@@ -225,6 +298,7 @@ export const navGroups: NavGroupDef[] = [
               RoleTypes.SUPERADMIN,
               RoleTypes.HEAD_CASHIER,
               RoleTypes.HEAD_ACCOUNTANT,
+              RoleTypes.HEAD_MARKETING,
             ],
           },
           {
@@ -236,6 +310,7 @@ export const navGroups: NavGroupDef[] = [
               RoleTypes.SUPERADMIN,
               RoleTypes.HEAD_CASHIER,
               RoleTypes.HEAD_ACCOUNTANT,
+              RoleTypes.HEAD_MARKETING,
             ],
           },
           {
@@ -247,6 +322,7 @@ export const navGroups: NavGroupDef[] = [
               RoleTypes.SUPERADMIN,
               RoleTypes.HEAD_CASHIER,
               RoleTypes.HEAD_ACCOUNTANT,
+              RoleTypes.HEAD_MARKETING,
             ],
           },
         ],

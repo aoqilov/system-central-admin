@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusInput } from "@/components/ui/inputs/CusInput";
-import { uploadCards } from "../api/nfcVipApi";
+import { uploadCards } from "@/api/cards/cards.api";
 
 interface Props {
   open: boolean;
@@ -22,7 +22,7 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
 
   const uploadMut = useMutation({
     mutationFn: ({ file, batchName }: { file: File; batchName: string }) =>
-      uploadCards(file, batchName),
+      uploadCards(file, batchName, "vip"),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["nfc-vip-cards"] });
       void qc.invalidateQueries({ queryKey: ["nfc-vip-cards-stats"] });

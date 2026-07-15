@@ -1,8 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { LuArrowLeft, LuTriangleAlert, LuRefreshCw } from "react-icons/lu";
-import { useQuery } from "@tanstack/react-query";
 import { CusButton } from "@/components/ui/buttons/CusButton";
-import { fetchEmployeeById, fetchRoles } from "./api/employesDetailApi";
+import { useEmployeeDetail, useRoles } from "./hooks/useApiEmployeeDetail";
 import EmployeeHeaderCard from "./components/EmployeeHeaderCard";
 import EmployeeInfoSidebar from "./components/EmployeeInfoSidebar";
 
@@ -10,21 +9,8 @@ export default function FeatureEmployeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const {
-    data: employee,
-    isPending,
-    isError,
-    refetch,
-  } = useQuery({
-    queryKey: ["employee", id],
-    queryFn: () => fetchEmployeeById(Number(id)),
-    enabled: !!id,
-  });
-
-  const { data: roles = [] } = useQuery({
-    queryKey: ["roles"],
-    queryFn: fetchRoles,
-  });
+  const { data: employee, isPending, isError, refetch } = useEmployeeDetail(id);
+  const { data: roles = [] } = useRoles();
 
   const roleName = roles.find((r) => r.id === employee?.role)?.name ?? "";
 

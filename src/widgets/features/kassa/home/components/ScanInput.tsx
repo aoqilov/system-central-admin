@@ -70,7 +70,7 @@ export const ScanInput = forwardRef<ScanInputHandle, ScanInputProps>(
             onKeyDown={handleKeyDown}
             onFocus={() => setActive(true)}
             onBlur={() => setActive(false)}
-            placeholder="Skanerlang yoki qo'lda kiriting..."
+            placeholder="Сканируйте или введите номер карты"
             className="w-full bg-transparent outline-none px-4 py-3 pr-10 text-sm"
             style={{
               color: "var(--text-default)",
@@ -105,9 +105,10 @@ export const ScanInput = forwardRef<ScanInputHandle, ScanInputProps>(
           )}
         </div>
 
-        <p className="text-xs text-center" style={{ color: "var(--text-dim)" }}>
-          Enter bosing yoki scanner avtomatik yuboradi
-        </p>
+        <p
+          className="text-xs text-center"
+          style={{ color: "var(--text-dim)" }}
+        ></p>
 
         <style>{`
         @keyframes scanLine {

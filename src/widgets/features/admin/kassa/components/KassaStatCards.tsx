@@ -1,7 +1,6 @@
 import { type ElementType } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { LuCheck, LuWrench, LuBan, LuLayoutGrid } from "react-icons/lu";
-import { fetchCashboxStats } from "../api/apiKassa";
+import { useKassaStats } from "../hooks/useApiKassa";
 
 function StatCard({
   icon: Icon,
@@ -56,11 +55,7 @@ function StatCard({
 }
 
 export function KassaStatCards() {
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ["cashbox-stats"],
-    queryFn: fetchCashboxStats,
-    staleTime: 1000 * 60 * 5,
-  });
+  const { data: stats, isLoading } = useKassaStats();
 
   return (
     <div className="grid grid-cols-2 desktop:grid-cols-4 gap-3">

@@ -12,7 +12,7 @@ import type { ElementType } from "react";
 import { CusBadge } from "@/components/ui/badge/CusBadge";
 import { CusCard as Card } from "@/components/shared/card/CusCard";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
-import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import { getFileUrl } from "@/api/files/files.api";
 import type { AttractionDetail, AttractionStatus } from "../types";
 
 const STATUS_BADGE: Record<AttractionStatus, "active" | "pending" | "fired"> = {

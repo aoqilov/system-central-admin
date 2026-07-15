@@ -7,6 +7,7 @@ import queryClient from "./api-config/queryClient";
 import "./api-config/interceptors";
 import "./index.css";
 import App from "./App";
+import { AppToaster } from "@/components/sonner-toast/AppToaster";
 
 const APP_VERSION = "version: test 0.1.5";
 
@@ -16,6 +17,7 @@ createRoot(root).render(
     <ThemeProvider>
       <ChakraProvider value={system}>
         <App />
+        <AppToaster />
         <span
           style={{
             position: "fixed",

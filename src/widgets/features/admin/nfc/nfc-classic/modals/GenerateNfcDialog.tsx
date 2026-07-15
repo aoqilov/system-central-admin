@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusInput } from "@/components/ui/inputs/CusInput";
-import { uploadCards } from "../api/nfcApi";
+import { uploadCards } from "@/api/cards/cards.api";
 
 interface Props {
   open: boolean;
@@ -22,8 +22,15 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const uploadMut = useMutation({
-    mutationFn: ({ file, batchName }: { file: File; batchName: string }) =>
-      uploadCards(file, batchName),
+    mutationFn: ({
+      file,
+      batchName,
+      type = "classic",
+    }: {
+      file: File;
+      batchName: string;
+      type: "classic";
+    }) => uploadCards(file, batchName, type),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["nfc-cards"] });
       void qc.invalidateQueries({ queryKey: ["nfc-cards-stats"] });
@@ -34,15 +41,19 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
 
   function validate(): boolean {
     const errs: typeof errors = {};
-    if (!label.trim()) errs.label = "Partiya nomi bo'sh bo'lmasin";
-    if (!excelFile) errs.file = "Excel fayl tanlanmagan";
+    if (!label.trim()) errs.label = "Название партии обязательно";
+    if (!excelFile) errs.file = "Excel файл не выбран";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
 
   function handleSubmit() {
     if (!validate() || !excelFile) return;
-    uploadMut.mutate({ file: excelFile, batchName: label.trim() });
+    uploadMut.mutate({
+      file: excelFile,
+      batchName: label.trim(),
+      type: "classic",
+    });
   }
 
   function handleFileSelect(file: File | null) {
@@ -81,7 +92,7 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
     <CusDialog
       open={open}
       onClose={handleClose}
-      title="Kartalar qo'shish"
+      title="Добавить карты"
       size="sm"
       footer={
         <>
@@ -91,7 +102,7 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
               colorPalette="gray"
               onClick={handleClose}
             >
-              Bekor qilish
+              Отмена
             </CusButton>
           </Dialog.ActionTrigger>
           <CusButton
@@ -101,7 +112,7 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
             isDisabled={!label.trim() || !excelFile || uploadMut.isPending}
             onClick={handleSubmit}
           >
-            Yuklash
+            Загрузить
           </CusButton>
         </>
       }
@@ -109,8 +120,8 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
       <div className="space-y-4">
         {/* Manual form */}
         <CusInput
-          label="Partia Nomi"
-          placeholder="masalan: VIP to'plam..."
+          label="Название партии"
+          placeholder="например: VIP набор..."
           value={label}
           onChange={(e) => {
             setLabel(e.target.value);
@@ -185,13 +196,13 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
                   className="text-sm font-medium"
                   style={{ color: "var(--text-default)" }}
                 >
-                  Excel faylni yuklang
+                  Загрузите Excel файл
                 </p>
                 <p
                   className="text-xs mt-0.5"
                   style={{ color: "var(--text-muted)" }}
                 >
-                  .xlsx yoki .xls — bosing yoki sudrab tashlang
+                  .xlsx или .xls — нажмите или перетащите
                 </p>
               </div>
               <CusButton
@@ -200,7 +211,7 @@ export function GenerateNfcDialog({ open, onClose }: Props) {
                 colorPalette="gray"
                 leftIcon={<LuFileSpreadsheet size={13} />}
               >
-                Fayl tanlash
+                Выбрать файл
               </CusButton>
             </div>
           )}

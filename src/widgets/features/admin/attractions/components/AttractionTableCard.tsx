@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import QRCode from "qrcode";
 import {
   LuSearch,
   LuTrash2,
@@ -7,8 +8,12 @@ import {
   LuPencil,
   LuPlus,
   LuEye,
+  LuQrCode,
 } from "react-icons/lu";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useAttractions,
+  useDeleteAttractions,
+} from "../hooks/useApiAttractions";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusDialogDelete } from "@/components/ui/dialog/CusDialogDelete";
@@ -18,18 +23,65 @@ import { CusInput } from "@/components/ui/inputs/CusInput";
 import CusSelect from "@/components/ui/select/CusSelect";
 import { CusPagination } from "@/components/ui/table/CusPagination";
 import { useTranslation } from "@/i18n/languageConfig";
-import {
-  fetchAttractions,
-  fetchAttractionsCategory,
-  deleteAttractions,
-} from "../api/attractionsApi";
 import ModalAddAttraction from "../modals/ModalAddAttraction";
 import ModalEditAttraction from "../modals/ModalEditAttraction";
-import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import ModalQrCode from "../modals/ModalQrCode";
+import { getFileUrl } from "@/api/files/files.api";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
 import type { Attraction } from "../types";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
+
+function QrCodeCell({
+  attraction,
+  onClick,
+}: {
+  attraction: Attraction;
+  onClick: (a: Attraction) => void;
+}) {
+  const [dataUrl, setDataUrl] = useState("");
+  const [hovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    QRCode.toDataURL(JSON.stringify({ type: "attraction", id: attraction.id }), {
+      width: 40,
+      margin: 1,
+      color: { dark: "#111827", light: "#ffffff" },
+    }).then(setDataUrl);
+  }, [attraction.id]);
+
+  return (
+    <div
+      style={{ position: "relative", width: 40, height: 40, flexShrink: 0, cursor: "pointer" }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={(e) => { e.stopPropagation(); onClick(attraction); }}
+    >
+      {dataUrl && (
+        <img
+          src={dataUrl}
+          alt="qr"
+          style={{ width: 40, height: 40, borderRadius: 4, display: "block" }}
+        />
+      )}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: 4,
+          background: hovered ? "rgba(0,0,0,0.45)" : "transparent",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transition: "background 0.15s",
+          opacity: hovered ? 1 : 0,
+        }}
+      >
+        <LuQrCode size={16} color="white" />
+      </div>
+    </div>
+  );
+}
 
 function ImagePreviewCell({ src, alt }: { src: string; alt: string }) {
   const [hovered, setHovered] = useState(false);
@@ -109,12 +161,10 @@ const STATUS_VALUES = ["active", "inactive", "maintenance", "closed"];
 
 export default function AttractionTableCard() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { t } = useTranslation("attractions.");
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebounced] = useState("");
-  const [categoryFilter, setCategory] = useState<number | "">("");
   const [statusFilter, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
@@ -124,6 +174,8 @@ export default function AttractionTableCard() {
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openQr, setOpenQr] = useState(false);
+  const [qrAttraction, setQrAttraction] = useState<Attraction | null>(null);
 
   // debounce search
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -142,55 +194,22 @@ export default function AttractionTableCard() {
     setPage(1);
     setSelectedRows([]);
     setSelectedAttractions([]);
-  }, [categoryFilter, statusFilter]);
+  }, [statusFilter]);
 
   // --- Queries
-  const { data, isLoading } = useQuery({
-    queryKey: [
-      "attractions",
-      {
-        search: debouncedSearch,
-        categories: categoryFilter,
-        statuses: statusFilter,
-        page,
-      },
-    ],
-    queryFn: () =>
-      fetchAttractions({
-        search: debouncedSearch || undefined,
-        categories: categoryFilter || undefined,
-        statuses: statusFilter || undefined,
-        page,
-        limit: PAGE_SIZE,
-      }),
+  const { data, isLoading } = useAttractions({
+    search: debouncedSearch || undefined,
+    statuses: statusFilter || undefined,
+    page,
+    limit: PAGE_SIZE,
   });
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ["attraction-categories"],
-    queryFn: fetchAttractionsCategory,
-    staleTime: Infinity,
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteAttractions,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["attractions"] });
-      queryClient.invalidateQueries({ queryKey: ["attraction-stats"] });
-      setSelectedRows([]);
-      setSelectedAttractions([]);
-    },
-  });
+  const deleteMutation = useDeleteAttractions();
 
   // --- Derived
   const rows = data?.attractions ?? [];
   const total = data?.pagination?.total ?? 0;
   const editAttraction = selectedAttractions[0];
-  const categoryMap = Object.fromEntries(categories.map((c) => [c.id, c]));
-
-  const CATEGORY_OPTIONS = [
-    { label: t("categories.all"), value: "" },
-    ...categories.map((c) => ({ label: c.name, value: String(c.id) })),
-  ];
 
   const STATUS_OPTIONS = [
     { label: t("statuses.all"), value: "" },
@@ -199,6 +218,17 @@ export default function AttractionTableCard() {
 
   // --- Columns
   const columns: ColumnDef<Attraction>[] = [
+    {
+      key: "qr",
+      header: "QR",
+      sortable: false,
+      render: (row) => (
+        <QrCodeCell
+          attraction={row}
+          onClick={(a) => { setQrAttraction(a); setOpenQr(true); }}
+        />
+      ),
+    },
     {
       key: "name",
       header: t("columns.name"),
@@ -251,21 +281,6 @@ export default function AttractionTableCard() {
           {row.device ?? <span style={{ color: "var(--text-muted)" }}>—</span>}
         </span>
       ),
-    },
-    {
-      key: "category",
-      header: t("columns.category"),
-      sortable: false,
-      render: (row) => {
-        const cat = categoryMap[row.category];
-        return cat ? (
-          <CusBadge colorPalette="blue" variant="surface">
-            {cat.name}
-          </CusBadge>
-        ) : (
-          <span style={{ color: "var(--text-muted)" }}>—</span>
-        );
-      },
     },
     {
       key: "age_limit",
@@ -372,6 +387,18 @@ export default function AttractionTableCard() {
         );
       },
     },
+    {
+      key: "description",
+      header: "Примечание",
+      sortable: false,
+      render: (row) => (
+        <span style={{ fontSize: 12, color: "var(--text-2)" }}>
+          {row.description ?? (
+            <span style={{ color: "var(--text-muted)" }}>—</span>
+          )}
+        </span>
+      ),
+    },
   ];
 
   console.log(selectedRows);
@@ -403,15 +430,6 @@ export default function AttractionTableCard() {
         <div className="flex gap-2">
           <div style={{ width: 180 }}>
             <CusSelect
-              options={CATEGORY_OPTIONS}
-              placeholder={t("columns.category")}
-              size="sm"
-              value={categoryFilter === "" ? "" : String(categoryFilter)}
-              onChange={(v) => setCategory(v ? Number(v) : "")}
-            />
-          </div>
-          <div style={{ width: 180 }}>
-            <CusSelect
               options={STATUS_OPTIONS}
               placeholder={t("columns.status")}
               size="sm"
@@ -430,11 +448,10 @@ export default function AttractionTableCard() {
         <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
           {t("found", { count: total })}
         </span>
-        {(search || categoryFilter || statusFilter) && (
+        {(search || statusFilter) && (
           <button
             onClick={() => {
               setSearch("");
-              setCategory("");
               setStatus("");
             }}
             style={{
@@ -585,6 +602,11 @@ export default function AttractionTableCard() {
         />
       </div>
 
+      <ModalQrCode
+        open={openQr}
+        onClose={() => setOpenQr(false)}
+        attraction={qrAttraction}
+      />
       <ModalAddAttraction open={openAdd} onClose={() => setOpenAdd(false)} />
       <CusDialogDelete
         open={openDelete}
@@ -594,7 +616,11 @@ export default function AttractionTableCard() {
         description="O'chirilgan attraksion tiklanmaydi. Davom etasizmi?"
         onConfirm={() =>
           deleteMutation.mutate(selectedRows, {
-            onSuccess: () => setOpenDelete(false),
+            onSuccess: () => {
+              setOpenDelete(false);
+              setSelectedRows([]);
+              setSelectedAttractions([]);
+            },
           })
         }
       />

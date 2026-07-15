@@ -6,6 +6,7 @@ export interface ApiEmployee {
   date_of_birth: string;
   phone_number: string;
   telegram_username: string | null;
+  file?: string | null;
   role: number;
   salary: number;
   status: string;

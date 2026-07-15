@@ -1,4 +1,4 @@
-import FeatureRoleOpeMainExport from "@/widgets/features/admin/role-ope-main-export/FeatureRoleOpeMainExport";
+import FeatureRoleOpeMainExport from "@/widgets/features/admin/role-operator-main/role-ope-main-export/FeatureRoleOpeMainExport";
 import React from "react";
 
 const RoleOperatorMainExport = () => {

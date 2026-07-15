@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { LuSearch } from "react-icons/lu";
 import CusSelect from "@/components/ui/select/CusSelect";
 import { CusInput } from "@/components/ui/inputs/CusInput";
-import { CARD_STATUS_META, NFC_TYPE_META, type NfcType, type CardStatus } from "../nfc-all.types";
+import { CARD_STATUS_META, NFC_TYPE_META } from "../nfc-all.types";
+import type { CardType, CardStatus } from "@/types/card.types";
 
 const TYPE_OPTIONS = [
   { value: "all", label: "Все типы" },
@@ -28,7 +29,7 @@ const PAGE_SIZE_OPTIONS = [
 
 interface Filters {
   search: string;
-  type: NfcType | "all";
+  type: CardType | "all";
   status: CardStatus | "all";
 }
 
@@ -64,7 +65,7 @@ export function NfcAllFilters({ filters, onChange, pageSize, onPageSizeChange }:
       <div className="w-36">
         <CusSelect
           value={filters.type}
-          onChange={(v) => onChange({ type: v as NfcType | "all" })}
+          onChange={(v) => onChange({ type: v as CardType | "all" })}
           options={TYPE_OPTIONS}
         />
       </div>

@@ -145,23 +145,17 @@ export function SmenaStatsBox({
             icon={LuStar}
             label="VIP"
             value={String(zreport.total_vip)}
-            color="#eab308"
-            dim={dim}
-          />
-          <StatCard
-            icon={LuUserPlus}
-            label="Mehmon"
-            value={String(zreport.total_guest)}
             color="#8b5cf6"
             dim={dim}
           />
           <StatCard
-            icon={LuShield}
-            label="Park xodim"
-            value={String(zreport.total_park_staff)}
-            color="#22c55e"
+            icon={LuUserPlus}
+            label="Organization"
+            value={String(zreport.total_organization)}
+            color="#eab308"
             dim={dim}
           />
+
           <StatCard
             icon={LuBanknote}
             label="Jami summa"

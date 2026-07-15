@@ -1,10 +1,12 @@
 import { useCallback, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getCards, getCardsStats } from "@/api/cards/cards.api";
 import type { CardStatus } from "../nfc.types";
 
 interface Filters {
   status: CardStatus | "all";
   search: string;
-  batch: number | null;
+  batch: number | null; // null = Все
 }
 
 export function useNfcOrg() {
@@ -28,5 +30,38 @@ export function useNfcOrg() {
     setPageState(1);
   }, []);
 
-  return { filters, page, pageSize, setFilters, setPage, setPageSize };
+  const { data: statsData, isLoading: isStatsLoading } = useQuery({
+    queryKey: ["nfc-cards-stats", "organization"],
+    queryFn: () => getCardsStats({ type: "organization" }),
+  });
+
+  const batches = statsData?.batches ?? [];
+
+  const { data: cardsData, isLoading } = useQuery({
+    queryKey: ["nfc-org-cards", filters, page, pageSize],
+    queryFn: () =>
+      getCards({
+        type: "organization",
+        page,
+        limit: pageSize,
+        search: filters.search || undefined,
+        statuses: filters.status !== "all" ? filters.status : undefined,
+        batch: filters.batch ?? undefined,
+      }),
+  });
+
+  return {
+    filters,
+    stats: statsData,
+    isStatsLoading,
+    batches,
+    cards: cardsData?.cards ?? [],
+    total: cardsData?.pagination.total ?? 0,
+    isLoading,
+    page,
+    pageSize,
+    setFilters,
+    setPage,
+    setPageSize,
+  };
 }

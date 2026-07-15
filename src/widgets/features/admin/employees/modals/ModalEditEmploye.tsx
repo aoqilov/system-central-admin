@@ -1,18 +1,18 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { parseDate } from "@internationalized/date";
-import { LuCircleAlert } from "react-icons/lu";
 import { CusCalendar } from "@/components/ui/calendar/CusCalendar";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusFileUpload } from "@/components/ui/inputs/CusFileUpload";
 import CusSelect from "@/components/ui/select/CusSelect";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchRoles, updateEmployee } from "../api/employeesApi";
-import type { ApiEmployee, UpdateEmployeePayload } from "../types";
-import { formatPhoneNumber } from "@/widgets/features/login/hooks/useLoginForm";
-import { uploadFile, getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import { useUpdateEmployee, useRoles } from "../hooks/useApiEmployees";
+import type { ApiEmployee } from "../types";
+import type { UpdateEmployeePayload, EmployeeStatus } from "@/types/employee.types";
+import { formatPhoneNumber } from "@/widgets/features/login/hooks/useApiLogin";
+import { getFileUrl } from "@/api/files/files.api";
+import { RoleLabel, RoleTypes } from "@/const/constData";
 
 interface Props {
   open: boolean;
@@ -29,7 +29,7 @@ interface FormValues {
   password: string;
   role: string;
   salary: string;
-  status: string;
+  status: EmployeeStatus;
   new_file: File | null;
 }
 
@@ -37,11 +37,6 @@ function phoneToDisplay(raw: string): string {
   const digits = raw.replace(/\D/g, "");
   const local = digits.startsWith("998") ? digits.slice(3) : digits;
   return formatPhoneNumber(local.slice(0, 9));
-}
-
-function getApiError(err: unknown): string {
-  const e = err as { response?: { data?: { message?: string } } };
-  return e?.response?.data?.message ?? "Произошла ошибка. Попробуйте снова.";
 }
 
 const STATUS_OPTIONS = [
@@ -52,30 +47,10 @@ const STATUS_OPTIONS = [
 ];
 
 export default function ModalEditEmploye({ open, onClose, employee }: Props) {
-  const qc = useQueryClient();
-  const [isUploading, setIsUploading] = useState(false);
+  const { data: roles = [] } = useRoles();
+  const updateMut = useUpdateEmployee();
 
-  const { data: roles = [] } = useQuery({
-    queryKey: ["roles"],
-    queryFn: fetchRoles,
-  });
-
-  const updateMut = useMutation({
-    mutationFn: ({
-      id,
-      payload,
-    }: {
-      id: number;
-      payload: UpdateEmployeePayload;
-    }) => updateEmployee(id, payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["employees"] }),
-  });
-
-  const {
-    control,
-    handleSubmit,
-    reset,
-  } = useForm<FormValues>({
+  const { control, handleSubmit, reset } = useForm<FormValues>({
     defaultValues: {
       firstname: "",
       lastname: "",
@@ -101,7 +76,7 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
         password: "",
         role: String(employee.role),
         salary: employee.salary ? String(employee.salary) : "",
-        status: employee.status ?? "active",
+        status: (employee.status ?? "active") as EmployeeStatus,
         new_file: null,
       });
       updateMut.reset();
@@ -109,21 +84,10 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, employee.id]);
 
-  async function onSubmit(data: FormValues) {
+  function onSubmit(data: FormValues) {
     const rawPhone = data.phone.replace(/\D/g, "");
     const apiPhone = employee.phone_number.replace(/\D/g, "");
     const payload: UpdateEmployeePayload = {};
-
-    if (data.new_file) {
-      setIsUploading(true);
-      try {
-        payload.file = await uploadFile(data.new_file);
-      } catch {
-        setIsUploading(false);
-        return;
-      }
-      setIsUploading(false);
-    }
 
     if (data.firstname.trim() !== employee.firstname)
       payload.firstname = data.firstname.trim();
@@ -131,7 +95,8 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
       payload.lastname = data.lastname.trim();
     if (data.date_of_birth !== employee.date_of_birth)
       payload.date_of_birth = data.date_of_birth;
-    if (rawPhone !== apiPhone) payload.phone_number = `+${rawPhone.replace(/^\+/, "")}`;
+    if (rawPhone !== apiPhone)
+      payload.phone_number = `+${rawPhone.replace(/^\+/, "")}`;
     if (data.telegram_username.trim() !== (employee.telegram_username ?? ""))
       payload.telegram_username = data.telegram_username.trim();
     if (data.password) payload.password = data.password;
@@ -144,21 +109,24 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
       payload.salary = data.salary ? Number(data.salary) : null;
     if (data.status !== employee.status) payload.status = data.status;
 
-    if (Object.keys(payload).length === 0) {
+    if (Object.keys(payload).length === 0 && !data.new_file) {
       onClose();
       return;
     }
 
-    updateMut.mutate({ id: employee.id, payload }, { onSuccess: onClose });
+    updateMut.mutate(
+      { id: employee.id, payload, new_file: data.new_file },
+      { onSuccess: onClose },
+    );
   }
 
   const roleOptions = roles.map((r) => ({
-    label: r.name,
+    label: RoleLabel[r.name as RoleTypes] ?? r.name,
     value: String(r.id),
   }));
 
-  const isPending = isUploading || updateMut.isPending;
-  const loadingText = isUploading ? "Фото загружается..." : "Сохранение...";
+  const isPending = updateMut.isPending;
+  const loadingText = "Сохранение...";
 
   return (
     <CusDrawer
@@ -198,28 +166,6 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
       }
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        {updateMut.error && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "10px 14px",
-              borderRadius: 8,
-              background: "rgba(239,68,68,0.08)",
-              border: "1px solid rgba(239,68,68,0.25)",
-            }}
-          >
-            <LuCircleAlert
-              size={15}
-              style={{ color: "#ef4444", flexShrink: 0 }}
-            />
-            <span style={{ fontSize: 13, color: "#ef4444" }}>
-              {getApiError(updateMut.error)}
-            </span>
-          </div>
-        )}
-
         <Section title="Фото">
           <Controller
             control={control}
@@ -227,8 +173,14 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
             render={({ field, fieldState }) => (
               <CusFileUpload
                 label="Фото сотрудника"
-                sublabel={employee.file ? "Загрузите новое фото, чтобы заменить текущее" : undefined}
-                currentImageUrl={employee.file ? getFileUrl(employee.file) : undefined}
+                sublabel={
+                  employee.file
+                    ? "Загрузите новое фото, чтобы заменить текущее"
+                    : undefined
+                }
+                currentImageUrl={
+                  employee.file ? getFileUrl(employee.file) : undefined
+                }
                 accept={{ "image/*": [".jpg", ".jpeg", ".png", ".webp"] }}
                 maxFiles={1}
                 maxFileSize={10 * 1024 * 1024}
@@ -245,7 +197,10 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
             <Controller
               control={control}
               name="firstname"
-              rules={{ required: "Обязательное поле", minLength: { value: 2, message: "Минимум 2 символа" } }}
+              rules={{
+                required: "Обязательное поле",
+                minLength: { value: 2, message: "Минимум 2 символа" },
+              }}
               render={({ field, fieldState }) => (
                 <CusInput
                   label="Имя"
@@ -259,7 +214,10 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
             <Controller
               control={control}
               name="lastname"
-              rules={{ required: "Обязательное поле", minLength: { value: 2, message: "Минимум 2 символа" } }}
+              rules={{
+                required: "Обязательное поле",
+                minLength: { value: 2, message: "Минимум 2 символа" },
+              }}
               render={({ field, fieldState }) => (
                 <CusInput
                   label="Фамилия"
@@ -280,13 +238,17 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
                 label="Дата рождения"
                 isRequired
                 errorText={fieldState.error?.message}
-                value={field.value ? [parseDate(field.value.slice(0, 10))] : undefined}
+                value={
+                  field.value
+                    ? [parseDate(field.value.slice(0, 10))]
+                    : undefined
+                }
                 onValueChange={({ value }) => {
                   const v = value[0];
                   field.onChange(
                     v
                       ? `${v.year}-${String(v.month).padStart(2, "0")}-${String(v.day).padStart(2, "0")}`
-                      : ""
+                      : "",
                   );
                 }}
               />
@@ -324,11 +286,7 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
             control={control}
             name="telegram_username"
             render={({ field }) => (
-              <CusInput
-                label="Telegram"
-                placeholder="@username"
-                {...field}
-              />
+              <CusInput label="Telegram" placeholder="@username" {...field} />
             )}
           />
         </Section>
@@ -409,13 +367,7 @@ export default function ModalEditEmploye({ open, onClose, employee }: Props) {
   );
 }
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div>
       <p

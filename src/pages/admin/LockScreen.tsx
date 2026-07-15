@@ -9,9 +9,9 @@ import {
   LuCircleCheck,
 } from "react-icons/lu";
 import { getPin, setPin, unlockApp } from "@/utils/pinLock";
-import { getStoredToken } from "@/widgets/features/login/api/authApi";
-import { loginRequest } from "@/widgets/features/login/api/loginApi";
-import { formatPhoneNumber } from "@/widgets/features/login/hooks/useLoginForm";
+import { getStoredToken } from "@/widgets/features/login/hooks/authApi";
+import { login as loginRequest } from "@/api/auth/auth.api";
+import { formatPhoneNumber } from "@/widgets/features/login/hooks/useApiLogin";
 
 // ─── Step types ───────────────────────────────────────────────────────────────
 type Step = "pin" | "verify" | "new-pin";

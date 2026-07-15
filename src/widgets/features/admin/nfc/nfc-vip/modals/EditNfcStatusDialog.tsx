@@ -7,7 +7,7 @@ import { CusButton } from "@/components/ui/buttons/CusButton";
 import CusSelect from "@/components/ui/select/CusSelect";
 import { NfcStatusBadge } from "../components/NfcStatusBadge";
 import { CARD_STATUS_META, type Card, type CardStatus } from "../nfc.types";
-import { updateCard } from "../api/nfcVipApi";
+import { updateCard } from "@/api/cards/cards.api";
 
 const STATUS_OPTIONS = Object.entries(CARD_STATUS_META).map(([key, meta]) => ({
   value: key,
@@ -170,8 +170,8 @@ export function EditNfcStatusDialog({ open, onClose, card, batchName }: Props) {
               <InfoRow
                 label="Активирован"
                 value={
-                  c.activatedAt ? (
-                    fmtDateTime(c.activatedAt)
+                  c.activated_at ? (
+                    fmtDateTime(c.activated_at)
                   ) : (
                     <span style={{ color: "var(--text-muted)" }}>Не активирована</span>
                   )

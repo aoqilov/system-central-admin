@@ -7,7 +7,19 @@ import { RoleTypes } from "@/const/constData";
 import KassaProfile from "../pages/forKassa/KassaProfile";
 import OperatorSmena from "@/pages/forOperator/OperatorSmena";
 
-const { SUPERADMIN, HEAD_CASHIER, HEAD_OPERATOR, HEAD_ACCOUNTANT } = RoleTypes;
+const {
+  SUPERADMIN,
+  HEAD_CASHIER,
+  HEAD_OPERATOR,
+  HEAD_ACCOUNTANT,
+  HEAD_MARKETING,
+  OWNER,
+  DIRECTOR,
+  ADMIN,
+} = RoleTypes;
+
+// Roles with full admin access
+const FA = [OWNER, DIRECTOR, ADMIN, HEAD_MARKETING] as const;
 
 function rg(element: JSX.Element, roles: RoleTypes[]) {
   return <AuthGuard roles={roles}>{element}</AuthGuard>;
@@ -62,10 +74,16 @@ const Login = lazy(() => import("../pages/Login"));
 const Unauthorized = lazy(() => import("../pages/Unauthorized"));
 const NotFound = lazy(() => import("../pages/NotFound"));
 const DevUI = lazy(() => import("../pages/admin/DevUI"));
-const NfcCards = lazy(() => import("../pages/admin/control/nfc-cards/NfcCards"));
-const NfcClassic = lazy(() => import("../pages/admin/control/nfc-cards/NfcClassic"));
+const NfcCards = lazy(
+  () => import("../pages/admin/control/nfc-cards/NfcCards"),
+);
+const NfcClassic = lazy(
+  () => import("../pages/admin/control/nfc-cards/NfcClassic"),
+);
 const NfcVIP = lazy(() => import("../pages/admin/control/nfc-cards/NfcVIP"));
-const NfcOrganization = lazy(() => import("../pages/admin/control/nfc-cards/NfcOrganization"));
+const NfcOrganization = lazy(
+  () => import("../pages/admin/control/nfc-cards/NfcOrganization"),
+);
 const LockScreen = lazy(() => import("../pages/admin/LockScreen"));
 const RoleKassaMainIncoming = lazy(
   () => import("../pages/admin/main/RoleKassaMainIncoming"),
@@ -85,6 +103,15 @@ const RoleBuxMainIncomingKassa = lazy(
 const RoleBuxMainIncomingOperator = lazy(
   () => import("../pages/admin/main/RoleBuxMainIncomingOperator"),
 );
+const MarketingNews = lazy(
+  () => import("../pages/admin/marketing/MarketingNews"),
+);
+const MarketingMemory = lazy(
+  () => import("../pages/admin/marketing/MarketingMemory"),
+);
+const MarketingAksiya = lazy(
+  () => import("../pages/admin/marketing/MarketingAksiya"),
+);
 
 export const routes: RouteObject[] = [
   {
@@ -92,10 +119,14 @@ export const routes: RouteObject[] = [
     element: (
       <AuthGuard
         roles={[
-          RoleTypes.SUPERADMIN,
-          RoleTypes.HEAD_CASHIER,
-          RoleTypes.HEAD_OPERATOR,
-          RoleTypes.HEAD_ACCOUNTANT,
+          SUPERADMIN,
+          HEAD_CASHIER,
+          HEAD_OPERATOR,
+          HEAD_ACCOUNTANT,
+          HEAD_MARKETING,
+          OWNER,
+          DIRECTOR,
+          ADMIN,
         ]}
       >
         <AppLayout />
@@ -103,9 +134,16 @@ export const routes: RouteObject[] = [
     ),
     children: [
       { path: "/", element: <Dashboard /> },
+      //
+      // live monitor pages
       {
         path: "/live-monitor/kassa",
-        element: rg(<LiveMonitorKassa />, [SUPERADMIN, HEAD_CASHIER]),
+        element: rg(<LiveMonitorKassa />, [
+          SUPERADMIN,
+          HEAD_CASHIER,
+          HEAD_ACCOUNTANT,
+          ...FA,
+        ]),
       },
       {
         path: "/live-monitor/attraction",
@@ -113,6 +151,8 @@ export const routes: RouteObject[] = [
           SUPERADMIN,
           HEAD_CASHIER,
           HEAD_OPERATOR,
+          HEAD_ACCOUNTANT,
+          ...FA,
         ]),
       },
       {
@@ -121,80 +161,124 @@ export const routes: RouteObject[] = [
           SUPERADMIN,
           HEAD_CASHIER,
           HEAD_OPERATOR,
+          HEAD_ACCOUNTANT,
+          ...FA,
         ]),
       },
-      { path: "/employees", element: rg(<Employees />, [SUPERADMIN]) },
-      { path: "/employee/:id", element: rg(<EmployeeDetail />, [SUPERADMIN]) },
+      //
+      // employes pages
+      {
+        path: "/employees",
+        element: rg(<Employees />, [SUPERADMIN, HEAD_ACCOUNTANT, ...FA]),
+      },
+      {
+        path: "/employee/:id",
+        element: rg(<EmployeeDetail />, [SUPERADMIN, ...FA]),
+      },
+      //
+      // attractions pages
       {
         path: "/attractions",
-        element: rg(<Attractions />, [SUPERADMIN, HEAD_OPERATOR]),
+        element: rg(<Attractions />, [SUPERADMIN, HEAD_OPERATOR, ...FA]),
       },
       {
         path: "/attraction/:id",
-        element: rg(<AttractionDetail />, [SUPERADMIN, HEAD_OPERATOR]),
+        element: rg(<AttractionDetail />, [SUPERADMIN, HEAD_OPERATOR, ...FA]),
       },
-      { path: "/kassa", element: rg(<Kassa />, [SUPERADMIN, HEAD_CASHIER]) },
+      //
+      // kassa pages
+      {
+        path: "/kassa",
+        element: rg(<Kassa />, [SUPERADMIN, HEAD_CASHIER, ...FA]),
+      },
       {
         path: "/kassa/:id",
-        element: rg(<KassaDetail />, [SUPERADMIN, HEAD_CASHIER]),
+        element: rg(<KassaDetail />, [SUPERADMIN, HEAD_CASHIER, ...FA]),
       },
+      // reports pages
       { path: "/reports", element: <Navigate to="/reports/kassa" replace /> },
       {
         path: "/reports/kassa",
-        element: rg(<ReportsKassa />, [SUPERADMIN, HEAD_ACCOUNTANT]),
+        element: rg(<ReportsKassa />, [SUPERADMIN, HEAD_ACCOUNTANT, ...FA]),
       },
       {
         path: "/reports/attraction",
-        element: rg(<ReportsAttraction />, [SUPERADMIN, HEAD_ACCOUNTANT]),
+        element: rg(<ReportsAttraction />, [
+          SUPERADMIN,
+          HEAD_ACCOUNTANT,
+          ...FA,
+        ]),
       },
       {
         path: "/reports/employees",
-        element: rg(<ReportsEmployees />, [SUPERADMIN, HEAD_ACCOUNTANT]),
+        element: rg(<ReportsEmployees />, [SUPERADMIN, HEAD_ACCOUNTANT, ...FA]),
       },
+      //
+      // other pages
       { path: "/settings", element: <Settings /> },
       { path: "/support", element: <Support /> },
-
+      //
+      // nfc-cards pages
       {
         path: "/nfc-cards",
         element: <Navigate to="/nfc-cards/all" replace />,
       },
       {
         path: "/nfc-cards/all",
-        element: rg(<NfcCards />, [SUPERADMIN, HEAD_CASHIER]),
+        element: rg(<NfcCards />, [SUPERADMIN, HEAD_CASHIER, ...FA]),
       },
       {
         path: "/nfc-cards/classic",
-        element: rg(<NfcClassic />, [SUPERADMIN, HEAD_CASHIER]),
+        element: rg(<NfcClassic />, [SUPERADMIN, HEAD_CASHIER, ...FA]),
       },
       {
         path: "/nfc-cards/vip",
-        element: rg(<NfcVIP />, [SUPERADMIN, HEAD_CASHIER]),
+        element: rg(<NfcVIP />, [SUPERADMIN, HEAD_CASHIER, ...FA]),
       },
       {
         path: "/nfc-cards/organization",
-        element: rg(<NfcOrganization />, [SUPERADMIN, HEAD_CASHIER]),
+        element: rg(<NfcOrganization />, [SUPERADMIN, HEAD_CASHIER, ...FA]),
       },
+      //
+      // role-kassa head
       {
         path: "/rolekassa-main/incoming",
-        element: rg(<RoleKassaMainIncoming />, [SUPERADMIN, HEAD_CASHIER]),
+        element: rg(<RoleKassaMainIncoming />, [
+          SUPERADMIN,
+          HEAD_CASHIER,
+          ...FA,
+        ]),
       },
       {
         path: "/rolekassa-main/export",
-        element: rg(<RoleKassaMainExport />, [SUPERADMIN, HEAD_CASHIER]),
+        element: rg(<RoleKassaMainExport />, [SUPERADMIN, HEAD_CASHIER, ...FA]),
       },
+      //
+      // role-operator head
       {
         path: "/roleoperator-main/incoming",
-        element: rg(<RoleOperatorMainIncoming />, [SUPERADMIN, HEAD_OPERATOR]),
+        element: rg(<RoleOperatorMainIncoming />, [
+          SUPERADMIN,
+          HEAD_OPERATOR,
+          ...FA,
+        ]),
       },
       {
         path: "/roleoperator-main/export",
-        element: rg(<RoleOperatorMainExport />, [SUPERADMIN, HEAD_OPERATOR]),
+        element: rg(<RoleOperatorMainExport />, [
+          SUPERADMIN,
+          HEAD_OPERATOR,
+          ...FA,
+        ]),
       },
+      //
+      // role-bux head
       {
         path: "/rolebux-main/incoming-kassa",
         element: rg(<RoleBuxMainIncomingKassa />, [
           SUPERADMIN,
           HEAD_ACCOUNTANT,
+          ...FA,
         ]),
       },
       {
@@ -202,17 +286,36 @@ export const routes: RouteObject[] = [
         element: rg(<RoleBuxMainIncomingOperator />, [
           SUPERADMIN,
           HEAD_ACCOUNTANT,
+          ...FA,
         ]),
       },
+      //
+      // marketing pages
+      {
+        path: "/marketing",
+        element: <Navigate to="/marketing/news" replace />,
+      },
+      {
+        path: "/marketing/news",
+        element: rg(<MarketingNews />, [SUPERADMIN, HEAD_MARKETING, ...FA]),
+      },
+      {
+        path: "/marketing/memory",
+        element: rg(<MarketingMemory />, [SUPERADMIN, HEAD_MARKETING, ...FA]),
+      },
+      {
+        path: "/marketing/aksiya",
+        element: rg(<MarketingAksiya />, [SUPERADMIN, HEAD_MARKETING, ...FA]),
+      },
       ...(import.meta.env.DEV
-        ? [{ path: "/test-ui", element: rg(<DevUI />, [SUPERADMIN]) }]
+        ? [{ path: "/test-ui", element: rg(<DevUI />, [SUPERADMIN, ...FA]) }]
         : []),
     ],
   },
   {
     // for operator pages
     element: (
-      <AuthGuard roles={[RoleTypes.OPERATOR, RoleTypes.SUPERADMIN]}>
+      <AuthGuard roles={[RoleTypes.OPERATOR, RoleTypes.SUPERADMIN, ...FA]}>
         <OperatorLayout />
       </AuthGuard>
     ),
@@ -232,6 +335,7 @@ export const routes: RouteObject[] = [
           RoleTypes.CASHIER,
           RoleTypes.SUPERADMIN,
           RoleTypes.HEAD_CASHIER,
+          ...FA,
         ]}
       >
         <KassaLayout />

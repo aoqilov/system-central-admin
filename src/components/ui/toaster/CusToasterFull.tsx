@@ -17,11 +17,18 @@ export function useToasterFull() {
   const counter = useRef(0);
 
   const show = useCallback(
-    (message: string, type: ToasterItem["type"] = "success", autoClose = true) => {
+    (
+      message: string,
+      type: ToasterItem["type"] = "success",
+      autoClose = true,
+    ) => {
       const id = ++counter.current;
       setItems((prev) => [...prev, { id, message, type, autoClose }]);
       if (autoClose) {
-        setTimeout(() => setItems((prev) => prev.filter((t) => t.id !== id)), 1000);
+        setTimeout(
+          () => setItems((prev) => prev.filter((t) => t.id !== id)),
+          1000,
+        );
       }
     },
     [],
@@ -69,7 +76,10 @@ export function CusToasterFull({ items, onRemove }: Props) {
           <button
             onClick={() => onRemove(toast.id)}
             className="absolute top-3.5 right-3.5 flex items-center justify-center w-7 h-7 rounded-lg"
-            style={{ color: "var(--text-muted)", background: "var(--bg-hover)" }}
+            style={{
+              color: "var(--text-muted)",
+              background: "var(--bg-hover)",
+            }}
           >
             <LuX size={14} />
           </button>
@@ -94,7 +104,7 @@ export function CusToasterFull({ items, onRemove }: Props) {
             {toast.message}
           </p>
 
-          {/* autoClose → progress bar | manual → Yopish button */}
+          {/* autoClose → progress bar | manual →  button */}
           {toast.autoClose ? (
             <ProgressBar key={toast.id} accent={accent} duration={1000} />
           ) : (
@@ -107,7 +117,7 @@ export function CusToasterFull({ items, onRemove }: Props) {
                 border: `1px solid ${accent}40`,
               }}
             >
-              Yopish
+              Закрыть
             </button>
           )}
         </div>
@@ -125,7 +135,13 @@ export function CusToasterFull({ items, onRemove }: Props) {
 
 // ─── Progress bar ─────────────────────────────────────────────────────────────
 
-function ProgressBar({ accent, duration }: { accent: string; duration: number }) {
+function ProgressBar({
+  accent,
+  duration,
+}: {
+  accent: string;
+  duration: number;
+}) {
   const [width, setWidth] = useState(100);
   const rafRef = useRef<number>(0);
   const startRef = useRef(Date.now());
@@ -133,7 +149,10 @@ function ProgressBar({ accent, duration }: { accent: string; duration: number })
   useEffect(() => {
     startRef.current = Date.now();
     function tick() {
-      const pct = Math.max(0, 100 - ((Date.now() - startRef.current) / duration) * 100);
+      const pct = Math.max(
+        0,
+        100 - ((Date.now() - startRef.current) / duration) * 100,
+      );
       setWidth(pct);
       if (pct > 0) rafRef.current = requestAnimationFrame(tick);
     }
@@ -142,10 +161,17 @@ function ProgressBar({ accent, duration }: { accent: string; duration: number })
   }, [duration]);
 
   return (
-    <div className="w-full rounded-full overflow-hidden" style={{ height: 3, background: "var(--bg-hover)" }}>
+    <div
+      className="w-full rounded-full overflow-hidden"
+      style={{ height: 3, background: "var(--bg-hover)" }}
+    >
       <div
         className="h-full rounded-full"
-        style={{ width: `${width}%`, background: accent, transition: "width 0.05s linear" }}
+        style={{
+          width: `${width}%`,
+          background: accent,
+          transition: "width 0.05s linear",
+        }}
       />
     </div>
   );

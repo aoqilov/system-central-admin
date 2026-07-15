@@ -18,7 +18,7 @@ interface Props {
 }
 
 const STATUS_OPTIONS = [
-  { value: "all", label: "Barchasi" },
+  { value: "all", label: "Все" },
   ...Object.entries(CARD_STATUS_META).map(([key, meta]) => ({
     value: key,
     label: meta.label,
@@ -26,10 +26,10 @@ const STATUS_OPTIONS = [
 ];
 
 const PAGE_SIZE_OPTIONS = [
-  { value: "10", label: "10 ta" },
-  { value: "20", label: "20 ta" },
-  { value: "50", label: "50 ta" },
-  { value: "100", label: "100 ta" },
+  { value: "10", label: "10 шт" },
+  { value: "20", label: "20 шт" },
+  { value: "50", label: "50 шт" },
+  { value: "100", label: "100 шт" },
 ];
 
 export function NfcFilters({
@@ -53,7 +53,7 @@ export function NfcFilters({
     <div className="flex flex-wrap gap-2 items-end">
       <div className="flex-1 min-w-[100px]">
         <CusInput
-          placeholder="Karta kodi yoki qidirish..."
+          placeholder="Код карты или поиск..."
           leftElement={<LuSearch size={14} />}
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}

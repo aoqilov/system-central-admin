@@ -4,8 +4,8 @@ import { LuPower, LuUser } from "react-icons/lu";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import { CusImagePreview } from "@/components/ui/image/CusImagePreview";
-import { useMe } from "@/widgets/api-global/files-route/auth";
-import { getFileUrl } from "@/widgets/api-global/files-route/filesApi";
+import { useMe } from "@/api/auth/auth.api";
+import { getFileUrl } from "@/api/files/files.api";
 
 interface Props {
   open: boolean;

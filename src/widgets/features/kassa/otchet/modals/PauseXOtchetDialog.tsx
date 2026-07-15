@@ -9,48 +9,50 @@ interface Props {
   open: boolean;
   isPending: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (description: string) => void;
 }
 
 export function PauseXOtchetDialog({ open, isPending, onClose, onConfirm }: Props) {
-  const [reason, setReason] = useState("");
+  const [description, setDescription] = useState("");
 
   function handleClose() {
-    setReason("");
+    setDescription("");
     onClose();
   }
 
   function handleConfirm() {
-    setReason("");
-    onConfirm();
+    onConfirm(description.trim());
+    setDescription("");
   }
 
   return (
     <CusDialog
       open={open}
       onClose={handleClose}
-      title="X-otchetni to'xtatish"
-      description="X-otchetni to'xtatib turmoqchimisiz? To'xtatilgan vaqtda to'lovlar qabul qilinmaydi."
+      title="Приостановить X-отчёт"
+      description="Во время паузы приём платежей будет недоступен."
       size="sm"
       footer={
         <>
           <Dialog.ActionTrigger asChild>
-            <CusButton variant="outline" isDisabled={isPending} onClick={handleClose}>
-              Bekor qilish
+            <CusButton variant="outline" colorPalette="gray" isDisabled={isPending} onClick={handleClose}>
+              Отмена
             </CusButton>
           </Dialog.ActionTrigger>
-          <CusButton colorPalette="orange" isLoading={isPending} onClick={handleConfirm}>
-            <LuClock size={15} /> To'xtatish
+          <CusButton colorPalette="orange" leftIcon={<LuClock size={14} />} isLoading={isPending} onClick={handleConfirm}>
+            Приостановить
           </CusButton>
         </>
       }
     >
-      <div className="flex flex-col gap-3">
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          To'xtatilgan X-otchetni Otchet sahifasidan qayta davom ettirishingiz
-          mumkin. Tolov qilish va Smena bo'limlari o'chiriladi.
-        </p>
-      </div>
+      <CusTextArea
+        label="Причина (необязательно)"
+        placeholder="Укажите причину паузы..."
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        rows={3}
+        disabled={isPending}
+      />
     </CusDialog>
   );
 }

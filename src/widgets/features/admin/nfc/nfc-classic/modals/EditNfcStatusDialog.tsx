@@ -6,7 +6,8 @@ import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import CusSelect from "@/components/ui/select/CusSelect";
 import { CARD_STATUS_META, type Card, type CardStatus } from "../nfc.types";
-import { updateCard } from "../api/nfcApi";
+import { updateCard } from "@/api/cards/cards.api";
+import { NfcStatusBadge } from "../components/NfcStatusBadge";
 
 const STATUS_OPTIONS = Object.entries(CARD_STATUS_META).map(([key, meta]) => ({
   value: key,
@@ -54,7 +55,7 @@ export function EditNfcStatusDialog({ open, onClose, card }: Props) {
     <CusDialog
       open={open}
       onClose={handleClose}
-      title="Status o'zgartirish"
+      title="Изменить статус"
       size="sm"
       closeOnBackdrop={!updateMut.isPending}
       footer={
@@ -66,7 +67,7 @@ export function EditNfcStatusDialog({ open, onClose, card }: Props) {
               isDisabled={updateMut.isPending}
               onClick={handleClose}
             >
-              Bekor qilish
+              Отмена
             </CusButton>
           </Dialog.ActionTrigger>
           <CusButton
@@ -75,7 +76,7 @@ export function EditNfcStatusDialog({ open, onClose, card }: Props) {
             isDisabled={!c || !selectedStatus || updateMut.isPending}
             onClick={handleSave}
           >
-            Saqlash
+            Сохранить
           </CusButton>
         </>
       }
@@ -90,7 +91,7 @@ export function EditNfcStatusDialog({ open, onClose, card }: Props) {
             }}
           >
             <div className="flex justify-between">
-              <span style={{ color: "var(--text-muted)" }}>Karta kodi</span>
+              <span style={{ color: "var(--text-muted)" }}>Код карты</span>
               <span
                 className="font-mono text-xs font-semibold"
                 style={{ color: "var(--text-default)" }}
@@ -98,22 +99,20 @@ export function EditNfcStatusDialog({ open, onClose, card }: Props) {
                 {c.card}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span style={{ color: "var(--text-muted)" }}>Joriy status</span>
-              <span style={{ color: "var(--text-default)" }}>
-                {CARD_STATUS_META[c.status].label}
-              </span>
+            <div className="flex justify-between items-center">
+              <span style={{ color: "var(--text-muted)" }}>Текущий статус</span>
+              <NfcStatusBadge status={c.status} />
             </div>
             <div className="flex justify-between">
-              <span style={{ color: "var(--text-muted)" }}>Yaratilgan</span>
+              <span style={{ color: "var(--text-muted)" }}>Создан</span>
               <span style={{ color: "var(--text-default)" }}>
-                {fmtDateTime(c.createdAt)}
+                {fmtDateTime(c.imported_at)}
               </span>
             </div>
           </div>
 
           <CusSelect
-            label="Yangi status"
+            label="Новый статус"
             value={selectedStatus}
             onChange={(v) => setNextStatus(v as CardStatus)}
             options={STATUS_OPTIONS}

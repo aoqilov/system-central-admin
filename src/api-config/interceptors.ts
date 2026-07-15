@@ -1,7 +1,7 @@
 import type { AxiosError } from "axios";
 import api from "./axiosInstance";
 import queryClient from "./queryClient";
-import { getStoredToken, clearAuth } from "@/widgets/features/login/api/authApi";
+import { getStoredToken, clearAuth } from "@/widgets/features/login/hooks/authApi";
 
 // ─── Request interceptor ──────────────────────────────────────────────────────
 

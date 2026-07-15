@@ -1,7 +1,7 @@
 import { LuBanknote, LuUnplug } from "react-icons/lu";
 import { useTheme } from "@/context/ThemeContext";
 import { useTranslation } from "@/i18n/languageConfig";
-import { useMe } from "@/widgets/api-global/files-route/auth";
+import { useMe } from "@/api/auth/auth.api";
 import { useCashbox } from "../hooks/useCashbox";
 import { KassaProfileCard } from "./components/KassaProfileCard";
 import { KassaCashboxCard } from "./components/KassaCashboxCard";

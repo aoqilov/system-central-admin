@@ -1,6 +1,5 @@
 import { LuUsers, LuUserCheck, LuUserX, LuSunMedium } from "react-icons/lu";
-import { useQuery } from "@tanstack/react-query";
-import { fetchEmployeeStats } from "../api/employeesApi";
+import { useEmployeeStats } from "../hooks/useApiEmployees";
 
 function StatCard({
   label,
@@ -57,10 +56,7 @@ function StatCard({
 }
 
 export default function EmployeeStatCards() {
-  const { data: stats, isPending } = useQuery({
-    queryKey: ["employee-stats"],
-    queryFn: fetchEmployeeStats,
-  });
+  const { data: stats, isPending } = useEmployeeStats();
 
   return (
     <div className="grid grid-cols-2 desktop:grid-cols-4 gap-3">

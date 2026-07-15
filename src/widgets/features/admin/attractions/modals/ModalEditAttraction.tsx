@@ -2,28 +2,21 @@ import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Drawer } from "@chakra-ui/react";
 import { LuCircleAlert } from "react-icons/lu";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CusDrawer } from "@/components/ui/dialog/CusDrawer";
 import { CusInput } from "@/components/ui/inputs/CusInput";
 import { CusButton } from "@/components/ui/buttons/CusButton";
 import CusSelect from "@/components/ui/select/CusSelect";
 import { CusTextArea } from "@/components/ui/inputs/CusTextArea";
 import { CusFileUpload } from "@/components/ui/inputs/CusFileUpload";
-import {
-  uploadAttractionFiles,
-  getFileUrl,
-} from "@/widgets/api-global/files-route/filesApi";
-import {
-  updateAttraction,
-  fetchAttractionsCategory,
-} from "../api/attractionsApi";
-import type { Attraction, UpdateAttractionPayload } from "../types";
+import { getFileUrl } from "@/api/files/files.api";
+import { useUpdateAttraction } from "../hooks/useApiAttractions";
+import type { Attraction } from "../types";
+import type { AttractionStatus } from "@/types/attraction.types";
 
 const STATUS_OPTIONS = [
-  { label: "Faol", value: "active" },
-  { label: "Nofaol", value: "inactive" },
-  { label: "Texnik xizmat", value: "maintenance" },
-  { label: "Yopiq", value: "closed" },
+  { label: "Неактивный", value: "inactive" },
+  { label: "Техобслуживание", value: "maintenance" },
+  { label: "Закрыт", value: "closed" },
 ];
 
 interface Props {
@@ -35,7 +28,6 @@ interface Props {
 interface FormValues {
   name: string;
   manufacturer: string;
-  category: string;
   price: string;
   duration: string;
   seats: string;
@@ -44,7 +36,7 @@ interface FormValues {
   max_weight: string;
   device: string;
   description: string;
-  status: string;
+  status: AttractionStatus;
   new_main_file: File | null;
   new_dashboard_file: File | null;
   new_files: File[];
@@ -54,7 +46,6 @@ function toFormValues(a: Attraction): FormValues {
   return {
     name: a.name,
     manufacturer: a.manufacturer,
-    category: String(a.category),
     price: String(a.price),
     duration: String(a.duration),
     seats: String(a.seats),
@@ -63,7 +54,7 @@ function toFormValues(a: Attraction): FormValues {
     max_weight: String(a.max_weight),
     device: a.device ? String(a.device) : "",
     description: a.description ?? "",
-    status: a.status,
+    status: a.status as AttractionStatus,
     new_main_file: null,
     new_dashboard_file: null,
     new_files: [],
@@ -72,30 +63,15 @@ function toFormValues(a: Attraction): FormValues {
 
 function getApiError(err: unknown): string {
   const e = err as { response?: { data?: { message?: string } } };
-  return e?.response?.data?.message ?? "Xatolik yuz berdi. Qayta urinib ko'ring.";
+  return e?.response?.data?.message ?? "Произошла ошибка. Попробуйте снова.";
 }
 
 export default function ModalEditAttraction({ open, onClose, attraction }: Props) {
-  const qc = useQueryClient();
-  const [isUploading, setIsUploading] = useState(false);
   const [remainingFileIds, setRemainingFileIds] = useState<number[]>(
     attraction.files ?? []
   );
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ["attraction-categories"],
-    queryFn: fetchAttractionsCategory,
-    staleTime: Infinity,
-  });
-
-  const updateMut = useMutation({
-    mutationFn: (payload: UpdateAttractionPayload) =>
-      updateAttraction(attraction.id, payload),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["attractions"] });
-      qc.invalidateQueries({ queryKey: ["attraction-stats"] });
-    },
-  });
+  const updateMut = useUpdateAttraction(attraction.id);
 
   const { control, handleSubmit, reset } = useForm<FormValues>({
     defaultValues: toFormValues(attraction),
@@ -111,84 +87,48 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
   }, [open]);
 
   async function onSubmit(data: FormValues) {
-    setIsUploading(true);
-
-    const hasNewFiles =
-      data.new_main_file || data.new_dashboard_file || data.new_files.length > 0;
-
-    let fileIds: {
-      main_file?: number;
-      dashboard_file?: number;
-      files?: number[];
-    } = {
-      main_file: attraction.main_file || undefined,
-      dashboard_file: attraction.dashboard_file || undefined,
-      files: remainingFileIds.length > 0 ? remainingFileIds : undefined,
-    };
-
-    if (hasNewFiles) {
-      try {
-        const result = await uploadAttractionFiles({
-          main_file: data.new_main_file,
-          dashboard_file: data.new_dashboard_file,
-          files: data.new_files,
-        });
-        if (result.main_file != null) fileIds.main_file = result.main_file;
-        if (result.dashboard_file != null) fileIds.dashboard_file = result.dashboard_file;
-        if (result.files.length > 0)
-          fileIds.files = [...remainingFileIds, ...result.files];
-      } catch {
-        setIsUploading(false);
-        return;
-      }
-    }
-
-    setIsUploading(false);
-
-    const payload: UpdateAttractionPayload = {
-      name: data.name.trim(),
-      manufacturer: data.manufacturer.trim(),
-      category: Number(data.category),
-      price: Number(data.price),
-      duration: Number(data.duration),
-      seats: Number(data.seats),
-      age_limit: Number(data.age_limit),
-      min_height: Number(data.min_height),
-      max_weight: Number(data.max_weight),
-      device: data.device ? Number(data.device) : undefined,
-      description: data.description.trim() || undefined,
-      status: data.status,
-      ...fileIds,
-    };
-
     try {
-      await updateMut.mutateAsync(payload);
+      await updateMut.mutateAsync({
+        fields: {
+          name: data.name.trim(),
+          manufacturer: data.manufacturer.trim(),
+          price: Number(data.price),
+          duration: Number(data.duration),
+          seats: Number(data.seats),
+          age_limit: Number(data.age_limit),
+          min_height: Number(data.min_height),
+          max_weight: Number(data.max_weight),
+          device: data.device ? Number(data.device) : undefined,
+          description: data.description.trim() || undefined,
+          status: data.status,
+        },
+        existingMainFile: attraction.main_file,
+        existingDashboardFile: attraction.dashboard_file,
+        remainingFileIds,
+        new_main_file: data.new_main_file,
+        new_dashboard_file: data.new_dashboard_file,
+        new_files: data.new_files,
+      });
       onClose();
     } catch {
-      // updateMut.error state orqali UI da ko'rsatiladi
+      // ошибка отображается через updateMut.error
     }
   }
 
-  const categoryOptions = categories.map((c) => ({
-    label: c.name,
-    value: String(c.id),
-  }));
-
-  const isPending = isUploading || updateMut.isPending;
-  const loadingText = isUploading ? "Rasmlar yuklanmoqda..." : "Saqlanmoqda...";
+  const isPending = updateMut.isPending;
 
   return (
     <CusDrawer
       open={open}
       onClose={onClose}
-      title="Attraksionni tahrirlash"
+      title="Редактировать аттракцион"
       size="xl"
       placement="end"
       footer={
         <div className="flex gap-2 justify-end w-full">
           <Drawer.ActionTrigger asChild>
             <CusButton variant="outline" size="sm" isDisabled={isPending}>
-              Bekor qilish
+              Отмена
             </CusButton>
           </Drawer.ActionTrigger>
           <CusButton
@@ -196,10 +136,10 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
             variant="solid"
             colorPalette="orange"
             isLoading={isPending}
-            loadingText={loadingText}
+            loadingText="Сохранение..."
             onClick={handleSubmit(onSubmit)}
           >
-            Saqlash
+            Сохранить
           </CusButton>
         </div>
       }
@@ -220,19 +160,18 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
           </div>
         )}
 
-        {/* Rasmlar */}
-        <Section title="Rasmlar">
+        <Section title="Фотографии">
           <Row2>
             <Controller
               control={control}
               name="new_main_file"
               render={({ field, fieldState }) => (
                 <CusFileUpload
-                  label="Asosiy rasm"
+                  label="Основное фото"
                   sublabel={
                     attraction.main_file
-                      ? "Yangi yuklasangiz almashadi"
-                      : "Sayt va dashboardda ko'rsatiladi"
+                      ? "Новое фото заменит текущее"
+                      : "Отображается на сайте и в дашборде"
                   }
                   currentImageUrl={
                     attraction.main_file ? getFileUrl(attraction.main_file) : undefined
@@ -240,7 +179,7 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
                   accept={{ "image/*": [".jpg", ".jpeg", ".png", ".webp"] }}
                   maxFiles={1}
                   maxFileSize={10 * 1024 * 1024}
-                  helperText="JPG, PNG, WEBP · Max 10 MB"
+                  helperText="JPG, PNG, WEBP · Max 10 МБ"
                   errorText={fieldState.error?.message}
                   onFileChange={(files) => field.onChange(files[0] ?? null)}
                 />
@@ -251,11 +190,11 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
               name="new_dashboard_file"
               render={({ field, fieldState }) => (
                 <CusFileUpload
-                  label="Dashboard rasmi"
+                  label="Фото для карта"
                   sublabel={
                     attraction.dashboard_file
-                      ? "Yangi yuklasangiz almashadi"
-                      : "Admin panelda ko'rsatiladi"
+                      ? "Новое фото заменит текущее"
+                      : "Отображается в карта"
                   }
                   currentImageUrl={
                     attraction.dashboard_file
@@ -265,7 +204,7 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
                   accept={{ "image/*": [".jpg", ".jpeg", ".png", ".webp"] }}
                   maxFiles={1}
                   maxFileSize={10 * 1024 * 1024}
-                  helperText="JPG, PNG, WEBP · Max 10 MB"
+                  helperText="JPG, PNG, WEBP · Max 10 МБ"
                   errorText={fieldState.error?.message}
                   onFileChange={(files) => field.onChange(files[0] ?? null)}
                 />
@@ -277,8 +216,8 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
             name="new_files"
             render={({ field, fieldState }) => (
               <CusFileUpload
-                label="Galereya"
-                sublabel="Mavjud rasmlarni X bilan o'chirishingiz yoki yangi qo'shishingiz mumkin"
+                label="Галерея"
+                sublabel="Удалите текущие фото через ✕ или добавьте новые"
                 currentImageUrls={
                   remainingFileIds.length > 0
                     ? remainingFileIds.map((id) => getFileUrl(id))
@@ -290,7 +229,7 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
                 accept={{ "image/*": [".jpg", ".jpeg", ".png", ".webp"] }}
                 maxFiles={4}
                 maxFileSize={10 * 1024 * 1024}
-                helperText="JPG, PNG, WEBP · Max 10 MB"
+                helperText="JPG, PNG, WEBP · Max 10 МБ"
                 errorText={fieldState.error?.message}
                 onFileChange={(files) => field.onChange(files)}
               />
@@ -298,20 +237,19 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
           />
         </Section>
 
-        {/* Asosiy ma'lumotlar */}
-        <Section title="Asosiy ma'lumotlar">
+        <Section title="Основная информация">
           <Row2>
             <Controller
               control={control}
               name="name"
               rules={{
-                required: "Majburiy maydon",
-                minLength: { value: 2, message: "Minimum 2 ta belgi" },
+                required: "Обязательное поле",
+                minLength: { value: 2, message: "Минимум 2 символа" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Nomi"
+                  label="Название"
                   isRequired
                   placeholder="Roller Coaster"
                   value={field.value}
@@ -324,11 +262,11 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
             <Controller
               control={control}
               name="manufacturer"
-              rules={{ required: "Majburiy maydon" }}
+              rules={{ required: "Обязательное поле" }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Ishlab chiqaruvchi"
+                  label="Производитель"
                   isRequired
                   placeholder="Intamin"
                   value={field.value}
@@ -356,43 +294,21 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
               )}
             />
           </Row2>
-          <Row2>
-            <Controller
-              control={control}
-              name="category"
-              rules={{ required: "Kategoriyani tanlang" }}
-              render={({ field, fieldState }) => (
-                <div>
-                  <Label text="Kategoriya" required />
-                  <CusSelect
-                    options={categoryOptions}
-                    placeholder="Kategoriya tanlang"
-                    value={field.value}
-                    onChange={(v) => field.onChange(v)}
-                  />
-                  {fieldState.error && (
-                    <ErrorText text={fieldState.error.message ?? ""} />
-                  )}
-                </div>
-              )}
-            />
-          </Row2>
         </Section>
 
-        {/* Texnik ma'lumotlar */}
-        <Section title="Texnik ma'lumotlar">
+        <Section title="Технические данные">
           <Row2>
             <Controller
               control={control}
               name="price"
               rules={{
-                required: "Majburiy maydon",
-                min: { value: 1, message: "0 dan katta bo'lishi kerak" },
+                required: "Обязательное поле",
+                min: { value: 1, message: "Должно быть больше 0" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Narxi (UZS)"
+                  label="Цена (UZS)"
                   isRequired
                   placeholder="25000"
                   type="number"
@@ -407,13 +323,13 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
               control={control}
               name="duration"
               rules={{
-                required: "Majburiy maydon",
-                min: { value: 1, message: "0 dan katta bo'lishi kerak" },
+                required: "Обязательное поле",
+                min: { value: 1, message: "Должно быть больше 0" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Davomiyligi (daqiqa)"
+                  label="Длительность (мин)"
                   isRequired
                   placeholder="5"
                   type="number"
@@ -430,13 +346,13 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
               control={control}
               name="seats"
               rules={{
-                required: "Majburiy maydon",
-                min: { value: 1, message: "0 dan katta bo'lishi kerak" },
+                required: "Обязательное поле",
+                min: { value: 1, message: "Должно быть больше 0" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="O'rindiqlar soni"
+                  label="Количество мест"
                   isRequired
                   placeholder="24"
                   type="number"
@@ -450,20 +366,19 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
           </Row2>
         </Section>
 
-        {/* Cheklovlar */}
-        <Section title="Cheklovlar">
+        <Section title="Ограничения">
           <Row2>
             <Controller
               control={control}
               name="age_limit"
               rules={{
-                required: "Majburiy maydon",
-                min: { value: 0, message: "0 yoki undan katta" },
+                required: "Обязательное поле",
+                min: { value: 0, message: "0 или больше" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Minimal yosh"
+                  label="Минимальный возраст"
                   isRequired
                   placeholder="12"
                   type="number"
@@ -478,13 +393,13 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
               control={control}
               name="min_height"
               rules={{
-                required: "Majburiy maydon",
-                min: { value: 1, message: "0 dan katta bo'lishi kerak" },
+                required: "Обязательное поле",
+                min: { value: 1, message: "Должно быть больше 0" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Minimal bo'y (sm)"
+                  label="Минимальный рост (см)"
                   isRequired
                   placeholder="120"
                   type="number"
@@ -501,13 +416,13 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
               control={control}
               name="max_weight"
               rules={{
-                required: "Majburiy maydon",
-                min: { value: 1, message: "0 dan katta bo'lishi kerak" },
+                required: "Обязательное поле",
+                min: { value: 1, message: "Должно быть больше 0" },
               }}
               render={({ field, fieldState }) => (
                 <CusInput
                   ref={field.ref}
-                  label="Maksimal og'irlik (kg)"
+                  label="Максимальный вес (кг)"
                   isRequired
                   placeholder="100"
                   type="number"
@@ -521,18 +436,17 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
           </Row2>
         </Section>
 
-        {/* Qo'shimcha */}
-        <Section title="Qo'shimcha">
+        <Section title="Дополнительно">
           <Controller
             control={control}
             name="status"
-            rules={{ required: "Statusni tanlang" }}
+            rules={{ required: "Выберите статус" }}
             render={({ field, fieldState }) => (
               <div>
-                <Label text="Status" required />
+                <Label text="Статус" required />
                 <CusSelect
                   options={STATUS_OPTIONS}
-                  placeholder="Status tanlang"
+                  placeholder="Выберите статус"
                   value={field.value}
                   onChange={(v) => field.onChange(v)}
                 />
@@ -548,8 +462,8 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
             render={({ field, fieldState }) => (
               <CusTextArea
                 ref={field.ref}
-                label="Tavsif"
-                placeholder="Attraksion haqida qisqacha ma'lumot..."
+                label="Описание"
+                placeholder="Краткое описание аттракциона..."
                 rows={3}
                 value={field.value}
                 onChange={field.onChange}
@@ -565,7 +479,6 @@ export default function ModalEditAttraction({ open, onClose, attraction }: Props
 }
 
 // ─── Helper components ────────────────────────────────────────────────────────
-
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (

@@ -9,7 +9,7 @@ export interface AttractionRound {
   offline_count: number;
   online_count: number;
   vip_count: number;
-  guest_count: number;
+  organization_count: number;
   park_staff_count: number;
   paid_amount: number;
   total_amount: number;

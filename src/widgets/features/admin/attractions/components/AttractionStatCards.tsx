@@ -1,7 +1,6 @@
 import type { ElementType } from "react";
 import { LuLayoutGrid, LuCircleCheck, LuCircleOff, LuWrench, LuBan } from "react-icons/lu";
-import { useQuery } from "@tanstack/react-query";
-import { fetchAttractionStats } from "../api/attractionsApi";
+import { useAttractionStats } from "../hooks/useApiAttractions";
 import { useTranslation } from "@/i18n/languageConfig";
 
 function StatCard({
@@ -42,10 +41,7 @@ function StatCard({
 
 export default function AttractionStatCards() {
   const { t } = useTranslation("attractions.");
-  const { data, isLoading } = useQuery({
-    queryKey: ["attraction-stats"],
-    queryFn: fetchAttractionStats,
-  });
+  const { data, isLoading } = useAttractionStats();
 
   return (
     <div className="grid grid-cols-2 desktop:grid-cols-5 gap-3">

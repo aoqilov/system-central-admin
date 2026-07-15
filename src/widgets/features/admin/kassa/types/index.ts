@@ -19,7 +19,7 @@ export interface Cashbox {
   place: string;
   status: CashboxStatus;
   description: string | null;
-  device: string | number;
+  device: string | number | null;
   operators: CashboxOperator[];
 }
 

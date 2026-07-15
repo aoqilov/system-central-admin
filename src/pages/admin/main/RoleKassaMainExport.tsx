@@ -1,12 +1,12 @@
-import FeatureRoleKassaMainExport from '@/widgets/features/admin/role-kassa-main-export/FeatureRoleKassaMainExport'
-import React from 'react'
+import FeatureRoleKassaMainExport from "@/widgets/features/admin/role-kassa-main/role-kassa-main-export/FeatureRoleKassaMainExport";
+import React from "react";
 
 const RoleKassaMainExport = () => {
   return (
     <div>
       <FeatureRoleKassaMainExport />
     </div>
-  )
-}
+  );
+};
 
-export default RoleKassaMainExport
+export default RoleKassaMainExport;

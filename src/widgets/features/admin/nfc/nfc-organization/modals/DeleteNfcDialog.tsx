@@ -4,7 +4,7 @@ import { LuTriangleAlert } from "react-icons/lu";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CusDialog } from "@/components/ui/dialog/CusDialog";
 import { CusButton } from "@/components/ui/buttons/CusButton";
-import { deleteCards } from "../api/nfcOrgApi";
+import { deleteCards } from "@/api/cards/cards.api";
 import type { Card } from "../nfc.types";
 
 interface Props {
